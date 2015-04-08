@@ -3,6 +3,9 @@ import x10.util.ArrayList;
 
 public class Run {
   public val id: Long;
+  public var placeId: Long;
+  public var startAt: Long;
+  public var finishAt: Long;
   public val beta: Double;
   public val h: Double;
   val seed: Long;
@@ -34,8 +37,11 @@ public class Run {
     return cmd;
   }
 
-  def storeResult( _result: Double ) {
+  def storeResult( _result: Double, _placeId: Long, _startAt: Long, _finishAt: Long ) {
     result = _result;
+    placeId = _placeId;
+    startAt = _startAt;
+    finishAt = _finishAt;
     finished = true;
   }
 
@@ -45,7 +51,8 @@ public class Run {
 
   def toString(): String {
     val str = "{ id: " + id + ", beta: " + beta + ", h: " + h + ", seed: " + seed +
-              ", result: " + result + " }";
+              ", result: " + result +
+              ", placeId: " + placeId + ", startAt: " + startAt + ", finishAt: " + finishAt + " }";
     return str;
   }
 }

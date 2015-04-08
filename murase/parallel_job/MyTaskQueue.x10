@@ -11,12 +11,14 @@ import x10.glb.GLBResult;
 import x10.compiler.Native;
 import x10.util.HashMap;
 import x10.io.File;
+import x10.util.Timer;
 import x10.interop.Java;
 import org.json.simple.*;
 
 class MyTaskQueue implements TaskQueue[MyTaskQueue, Long] {
   val tb = new ArrayListTaskBag[Task]();
   val refTables: GlobalRef[Tables];
+  val timer: Timer = new Timer();
 
   public def this( _refTables: GlobalRef[Tables] ) {
     refTables = _refTables;
@@ -45,7 +47,10 @@ class MyTaskQueue implements TaskQueue[MyTaskQueue, Long] {
       val task = tb.bag().removeLast();
       val runId = task.runId;
       Console.OUT.println("running at " + here + " processing " + runId);
+      val startAt = timer.milliTime();
+      val runPlace = here;
       val localResult = task.run();
+      val finishAt = timer.milliTime();
 
       val appendTask = ( added: ArrayList[Task], toAdd: ArrayList[Task] ) => {
         for( task in toAdd ) {
@@ -57,7 +62,7 @@ class MyTaskQueue implements TaskQueue[MyTaskQueue, Long] {
         val localTasks = new ArrayList[Task]();
         val run = refTables().runsTable.get( runId );
         atomic {
-          run.storeResult( localResult );
+          run.storeResult( localResult, here.id, startAt, finishAt );
           val boxIds = run.getParentBoxIds();
           Console.OUT.println("  parentBoxIds : " + boxIds );
           for( boxId in boxIds ) {
