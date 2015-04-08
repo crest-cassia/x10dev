@@ -39,6 +39,7 @@ class MyTaskQueue implements TaskQueue[MyTaskQueue, Long] {
   }
 
   public def process(var n:Long, context: Context[MyTaskQueue,Long]):Boolean {
+    context.yield();
 
     for( var i:Long = 0; tb.bag().size() > 0 && i < n; i++) {
       val task = tb.bag().removeLast();
