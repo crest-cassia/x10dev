@@ -55,4 +55,11 @@ public class Run {
               ", placeId: " + placeId + ", startAt: " + startAt + ", finishAt: " + finishAt + " }";
     return str;
   }
+
+  def toJson(): String {
+    val str = "{ \"id\": " + id + ", \"beta\": " + beta + ", \"h\": " + h + ", \"seed\": " + seed +
+              ", \"result\": " + result +
+              ", \"placeId\": " + placeId + ", \"startAt\": " + startAt + ", \"finishAt\": " + finishAt + " }";
+    return str;
+  }
 }

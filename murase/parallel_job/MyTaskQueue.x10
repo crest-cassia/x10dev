@@ -48,7 +48,7 @@ class MyTaskQueue implements TaskQueue[MyTaskQueue, Long] {
       val runId = task.runId;
       Console.OUT.println("running at " + here + " processing " + runId);
       val startAt = timer.milliTime();
-      val runPlace = here;
+      val runPlace = here.id;
       val localResult = task.run();
       val finishAt = timer.milliTime();
 
@@ -62,7 +62,7 @@ class MyTaskQueue implements TaskQueue[MyTaskQueue, Long] {
         val localTasks = new ArrayList[Task]();
         val run = refTables().runsTable.get( runId );
         atomic {
-          run.storeResult( localResult, here.id, startAt, finishAt );
+          run.storeResult( localResult, runPlace, startAt, finishAt );
           val boxIds = run.getParentBoxIds();
           Console.OUT.println("  parentBoxIds : " + boxIds );
           for( boxId in boxIds ) {

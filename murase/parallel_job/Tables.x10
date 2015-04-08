@@ -19,6 +19,16 @@ public class Tables {
     }
   }
 
+  def runsJson(): String {
+    var json:String = "[\n";
+    for( entry in runsTable.entries() ) {
+      val run = entry.getValue();
+      json += run.toJson() + ",\n";
+    }
+    val s = json.substring( 0n, json.length()-2n ) + "\n]";
+    return s;
+  }
+
   private def isFinished( box: Box ): Boolean {
     var b: Boolean = true;
     for( runId in box.runIds ) {
@@ -39,7 +49,7 @@ public class Tables {
     results.sort();
     val resultDiff = results.getLast() - results.getFirst();
     Console.OUT.println( "  resultDiff : " + resultDiff );
-    return ( resultDiff > 0.1 );
+    return ( resultDiff > 0.2 );
   }
 
   private def createRuns( box: Box ): ArrayList[Task] {

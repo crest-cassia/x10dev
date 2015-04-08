@@ -19,7 +19,8 @@ class Main {
     Console.OUT.println("r : " + r);
 
     at( refTables ) {
-      refTables().printRunsTable();
+      // refTables().printRunsTable();
+      Console.OUT.println( refTables().runsJson() );
     }
   }
 
