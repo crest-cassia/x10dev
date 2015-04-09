@@ -12,7 +12,7 @@ class Run
     @@max_finish_at = max_finish_at
   end
 
-  def show
+  def draw_timeline
     x0 = $app.width / @@num_places * @place
     x1 = $app.width / @@num_places * (@place+1)
 

@@ -18,7 +18,7 @@ class ShowTimeline < Processing::App
 
   def draw
     background(0)
-    @runs.each {|run| run.show }
+    @runs.each {|run| run.draw_timeline }
   end
 end
 
