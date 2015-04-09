@@ -30,7 +30,7 @@ class Run
     $app.rect( x0, y0, x1-x0, y1-y0, 10 )
   end
 
-  def draw_scatter_plot( range = { beta: [0.1,0.5], h:[-1.0, -0.6] }, t = 0 )
+  def draw_scatter_plot( range = { beta: [0.1,0.5], h:[-1.0, -0.6] }, t = 0, result_range = [0.0, 1.0] )
     x,y = range.map do |key, (min,max)|
       (@parameters[key] - min).to_f / (max - min)
     end
@@ -38,14 +38,19 @@ class Run
     y *= $app.height
 
     if t > @start_at and t < @finish_at
-      $app.fill(255,0,0)
+      $app.fill(255,255,0)
       $app.ellipse( x, y, 40, 40 )
     elsif t >= @finish_at
-      $app.fill(0,255,0)
+      pp @results, result_range
+      r = (@results[:order_parameter] - result_range[0]).to_f / ( result_range[1] - result_range[0] )
+      from = $app.color( 0, 0, 255 )
+      to = $app.color( 255, 0, 0 )
+      c = $app.lerp_color( from, to, r )
+      $app.fill( c )
       $app.ellipse( x, y, 20, 20 )
     else
       $app.fill(64)
-      $app.ellipse( x, y, 20, 20 )
+      # $app.ellipse( x, y, 20, 20 )
       # do nothing
     end
   end

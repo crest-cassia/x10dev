@@ -22,13 +22,15 @@ class ShowResults < Processing::App
       time = ($app.frame_count.to_f / 100) * ( max_finish_at - min_start_at ) + min_start_at
       return time
     }
-    $app.frame_rate(10)
+
+    @result_range = runs.map {|run| run["result"] }.minmax
+    $app.frame_rate(5)
   end
 
   def draw
     background(0)
     t = @time_increment.call()
-    @runs.each {|run| run.draw_scatter_plot( @range, t ) }
+    @runs.each {|run| run.draw_scatter_plot( @range, t, @result_range ) }
   end
 end
 
