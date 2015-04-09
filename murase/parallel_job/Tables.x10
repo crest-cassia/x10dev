@@ -49,7 +49,10 @@ public class Tables {
     results.sort();
     val resultDiff = results.getLast() - results.getFirst();
     Console.OUT.println( "  resultDiff : " + resultDiff );
-    return ( resultDiff > 0.2 );
+    return ( box.betaMax - box.betaMin > 0.005 &&
+             box.hMax - box.hMin > 0.005 &&
+             resultDiff > 0.1 );
+    // return ( resultDiff > 0.2 );
   }
 
   private def createRuns( box: Box ): ArrayList[Task] {

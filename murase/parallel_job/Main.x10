@@ -26,7 +26,7 @@ class Main {
 
   def makeBox( refTables: GlobalRef[Tables] ) {
     at( refTables ) {
-      val box = refTables().createBox( 0.1, 0.2, -1.0, -0.6 );
+      val box = refTables().createBox( 0.3, 0.5, -1.0, 1.0 );
     }
   }
 
