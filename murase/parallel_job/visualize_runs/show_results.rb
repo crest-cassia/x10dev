@@ -31,6 +31,7 @@ class ShowResults < Processing::App
     background(0)
     t = @time_increment.call()
     @runs.each {|run| run.draw_scatter_plot( @range, t, @result_range ) }
+    $app.save_frame( File.join( Dir.pwd, "figs/frame-####.tif") )
   end
 end
 

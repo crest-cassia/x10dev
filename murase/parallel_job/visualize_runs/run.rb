@@ -41,7 +41,6 @@ class Run
       $app.fill(255,255,0)
       $app.ellipse( x, y, 40, 40 )
     elsif t >= @finish_at
-      pp @results, result_range
       r = (@results[:order_parameter] - result_range[0]).to_f / ( result_range[1] - result_range[0] )
       from = $app.color( 0, 0, 255 )
       to = $app.color( 255, 0, 0 )
