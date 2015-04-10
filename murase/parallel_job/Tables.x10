@@ -4,12 +4,15 @@ import x10.util.HashMap;
 
 public class Tables {
   public val runsTable: HashMap[Long,Run];
+  public val psTable: HashMap[Long,ParameterSet];
   public val boxesTable: HashMap[Long,Box];
   var maxRunId: Long = 0;
+  var maxPSId: Long = 0;
   var maxBoxId: Long = 0;
 
   def this() {
     runsTable = new HashMap[Long, Run]();
+    psTable = new HashMap[Long, ParameterSet]();
     boxesTable = new HashMap[Long, Box]();
   }
 
@@ -30,11 +33,12 @@ public class Tables {
   }
 
   private def isFinished( box: Box ): Boolean {
-    var b: Boolean = true;
-    for( runId in box.runIds ) {
-      b = b && runsTable.get( runId ).finished;
+    for( psId in box.psIds ) {
+      if( allRunsFinished( psId ) == false ) {
+        return false;
+      }
     }
-    return b;
+    return true;
   }
 
   def boxNeedsToBeDivided( boxId: Long ): Boolean {
@@ -42,8 +46,9 @@ public class Tables {
     if( isFinished( box ) == false ) { return false; }
   
     val results = new ArrayList[Double]();
-    for( runId in box.runIds ) {
-      val result = runsTable.get( runId ).result;
+    for( psId in box.psIds ) {
+      val ps = psTable.get( psId );
+      val result = averagedResult( ps );
       results.add( result );
     }
     results.sort();
@@ -55,42 +60,79 @@ public class Tables {
     // return ( resultDiff > 0.2 );
   }
 
-  private def createRuns( box: Box ): ArrayList[Task] {
+  private def averagedResult( ps: ParameterSet ): Double {
+    var sum: Double = 0.0;
+    for( runId in ps.runIds ) {
+      val run = runsTable.get( runId );
+      sum += run.result;
+    }
+    return sum / ps.runIds.size();
+  }
+
+  private def createRuns( ps: ParameterSet, numRuns: Long ): ArrayList[Task] {
+    // TODO: implement numRuns
     val newTasks = new ArrayList[Task]();
-    val addRun = (beta:Double, h:Double) => {
-      val idx = findRun( beta, h );
-      val run: Run;
+    val run = new Run( maxRunId, ps );
+    maxRunId += 1;
+    runsTable.put( run.id, run );
+    newTasks.add( run.generateTask() );
+    return newTasks;
+  }
+
+  private def createParameterSets( box: Box ): ArrayList[Task] {
+    val newTasks = new ArrayList[Task]();
+    val addPS = (beta:Double, h:Double) => {
+      val idx = findPS( beta, h );
+      val ps: ParameterSet;
       if( idx >= 0 ) {
-        run = runsTable.get(idx);
+        ps = psTable.get(idx);
       }
       else {
-        run = new Run( maxRunId, beta, h );
-        maxRunId += 1;
-        runsTable.put( run.id, run );
-        newTasks.add( run.generateTask() );
+        ps = new ParameterSet( maxPSId, beta, h );
+        maxPSId += 1;
+        psTable.put( ps.id, ps );
+        val a = createRuns( ps, 1 );
+        for( task in a ) { newTasks.add( task ); }
       }
-      if( run.finished == false ) {
-        run.pushParentBoxId( box.id );
+      Console.OUT.println("PS: " + ps);
+      Console.OUT.println("run: " + ps.runIds);
+      if( allRunsFinished( ps.id ) == false ) {
+        Console.OUT.println("  pushing box to PS : " + box.id );
+        ps.pushParentBoxId( box.id );
       }
-      box.appendRun( run );
+      box.appendParameterSet( ps );
     };
     atomic {
-      addRun( box.betaMin, box.hMin );
-      addRun( box.betaMin, box.hMax );
-      addRun( box.betaMax, box.hMin );
-      addRun( box.betaMax, box.hMax );
+      addPS( box.betaMin, box.hMin );
+      addPS( box.betaMin, box.hMax );
+      addPS( box.betaMax, box.hMin );
+      addPS( box.betaMax, box.hMax );
     }
     return newTasks;
   }
 
-  def findRun( beta: Double, h:Double ): Long {
-    for( entry in runsTable.entries() ) {
-      val r = entry.getValue();
-      if( r.beta == beta && r.h == h ) {
+  def findPS( beta: Double, h:Double ): Long {
+    for( entry in psTable.entries() ) {
+      val ps = entry.getValue();
+      if( ps.beta == beta && ps.h == h ) {
         return entry.getKey();
       }
     }
     return -1;
+  }
+
+  def allRunsFinished( psId: Long ): Boolean {
+    val ps = psTable.get( psId );
+    for( runId in ps.runIds ) {
+      if( runsTable.get( runId ).finished == false ) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  def getBoxIds( psId: Long ): ArrayList[Long] {
+    return psTable.get(psId).getParentBoxIds();
   }
 
   def createBox( betaMin: Double, betaMax: Double, hMin: Double, hMax: Double ): ArrayList[Task] {
@@ -101,7 +143,7 @@ public class Tables {
       maxBoxId += 1;
       // TODO: check whether the new box is finished or not
       boxesTable.put( box.id, box );
-      newTasks = createRuns( box );
+      newTasks = createParameterSets( box );
     }
     return newTasks;
   }

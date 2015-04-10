@@ -3,7 +3,7 @@ import x10.util.HashMap;
 import x10.util.ArrayList;
 
 public class Box {
-  public val runIds: ArrayList[Long] = new ArrayList[Long]();
+  public val psIds: ArrayList[Long] = new ArrayList[Long]();
   public val id: Long;
   public val betaMin: Double;
   public val betaMax: Double;
@@ -18,8 +18,8 @@ public class Box {
     hMax = _hMax;
   }
 
-  def appendRun( run: Run ) {
-    runIds.add( run.id );
+  def appendParameterSet( ps: ParameterSet ) {
+    psIds.add( ps.id );
   }
 
   def toString(): String {
@@ -28,7 +28,7 @@ public class Box {
                " betaMax: " + betaMax + "," +
                " hMin: " + hMin + "," +
                " hMax: " + hMax + "," +
-               " runIds: " + runIds + " }";
+               " psIds: " + psIds + " }";
     return str;
   }
 }
