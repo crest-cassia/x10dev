@@ -53,32 +53,19 @@ public class Tables {
 
   private def createParameterSets( box: Box ): ArrayList[Task] {
     val newTasks = new ArrayList[Task]();
-    val addPS = (beta:Double, h:Double) => {
-      val idx = findPS( beta, h );
-      val ps: ParameterSet;
-      if( idx >= 0 ) {
-        ps = psTable.get(idx);
-      }
-      else {
-        ps = new ParameterSet( maxPSId, beta, h );
-        maxPSId += 1;
-        psTable.put( ps.id, ps );
+    val newPSs = box.createParameterSets( this );
+    for( ps in newPSs ) {
+      val numRunsToAdd = 1 - ps.runIds.size();
+      for( i in 1..numRunsToAdd ) {
         val newRuns = ps.createRuns( this, 1 );
-        for( run in newRuns ) { newTasks.add( run.generateTask() ); }
+        for( run in newRuns ) {
+          newTasks.add( run.generateTask() );
+        }
       }
-      Console.OUT.println("PS: " + ps);
-      Console.OUT.println("run: " + ps.runIds);
       if( ps.isFinished( this ) == false ) {
-        Console.OUT.println("  pushing box to PS : " + box.id );
         ps.pushParentBoxId( box.id );
       }
       box.appendParameterSet( ps );
-    };
-    atomic {
-      addPS( box.betaMin, box.hMin );
-      addPS( box.betaMin, box.hMax );
-      addPS( box.betaMax, box.hMin );
-      addPS( box.betaMax, box.hMax );
     }
     return newTasks;
   }

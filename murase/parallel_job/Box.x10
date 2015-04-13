@@ -49,4 +49,19 @@ public class Box {
     }
     return a;
   }
+
+  def createParameterSets( table: Tables ): ArrayList[ParameterSet] {
+    val newPS = new ArrayList[ParameterSet]();
+
+    val addPS = (beta:Double, h:Double) => {
+      val ps = ParameterSet.findOrCreateParameterSet( table, beta, h );
+      newPS.add( ps );
+    };
+
+    addPS( betaMin, hMin );
+    addPS( betaMin, hMax );
+    addPS( betaMax, hMin );
+    addPS( betaMax, hMax );
+    return newPS;
+  }
 }

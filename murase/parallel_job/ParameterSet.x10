@@ -71,4 +71,25 @@ public class ParameterSet {
     }
     return sum / runs.size();
   }
+
+  static def find( table: Tables, beta: Double, h: Double ): ParameterSet {
+    for( entry in table.psTable.entries() ) {
+      val ps = entry.getValue();
+      if( ps.beta == beta && ps.h == h ) {
+        return ps;
+      }
+    }
+    return null;
+  }
+
+  static def findOrCreateParameterSet( table: Tables, beta: Double, h: Double ): ParameterSet {
+    var ps: ParameterSet = find( table, beta, h );
+    if( ps == null ) {
+      ps = new ParameterSet( table.maxPSId, beta, h );
+      table.maxPSId += 1;
+      table.psTable.put( ps.id, ps );
+    }
+    return ps;
+  }
 }
+
