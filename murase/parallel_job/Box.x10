@@ -31,4 +31,22 @@ public class Box {
                " psIds: " + psIds + " }";
     return str;
   }
+
+  def isFinished( table: Tables ): Boolean {
+    for( ps in parameterSets( table ) ) {
+      if( ps.isFinished( table ) == false ) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  def parameterSets( table: Tables ): ArrayList[ParameterSet] {
+    val a = new ArrayList[ParameterSet]();
+    for( psId in psIds ) {
+      val ps = table.psTable( psId );
+      a.add( ps );
+    }
+    return a;
+  }
 }

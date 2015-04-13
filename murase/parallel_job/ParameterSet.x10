@@ -31,4 +31,23 @@ public class ParameterSet {
     val str = "{ \"id\": " + id + ", \"beta\": " + beta + ", \"h\": " + h + " }";
     return str;
   }
+
+  def runs( table: Tables ): ArrayList[Run] {
+    val a = new ArrayList[Run]();
+    for( runId in runIds ) {
+      val run = table.runsTable.get( runId );
+      a.add( run );
+    }
+    return a;
+  }
+
+  def isFinished( table: Tables ): Boolean {
+    for( run in runs( table ) ) {
+      if( run.finished == false ) {
+        return false;
+      }
+    }
+    return true;
+  }
+
 }

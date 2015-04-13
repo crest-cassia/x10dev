@@ -32,18 +32,10 @@ public class Tables {
     return s;
   }
 
-  private def isFinished( box: Box ): Boolean {
-    for( psId in box.psIds ) {
-      if( allRunsFinished( psId ) == false ) {
-        return false;
-      }
-    }
-    return true;
-  }
 
   def boxNeedsToBeDivided( boxId: Long ): Boolean {
     val box = boxesTable.get( boxId );
-    if( isFinished( box ) == false ) { return false; }
+    if( box.isFinished( this ) == false ) { return false; }
   
     val results = new ArrayList[Double]();
     for( psId in box.psIds ) {
@@ -97,7 +89,7 @@ public class Tables {
       }
       Console.OUT.println("PS: " + ps);
       Console.OUT.println("run: " + ps.runIds);
-      if( allRunsFinished( ps.id ) == false ) {
+      if( ps.isFinished( this ) == false ) {
         Console.OUT.println("  pushing box to PS : " + box.id );
         ps.pushParentBoxId( box.id );
       }
@@ -120,16 +112,6 @@ public class Tables {
       }
     }
     return -1;
-  }
-
-  def allRunsFinished( psId: Long ): Boolean {
-    val ps = psTable.get( psId );
-    for( runId in ps.runIds ) {
-      if( runsTable.get( runId ).finished == false ) {
-        return false;
-      }
-    }
-    return true;
   }
 
   def getBoxIds( psId: Long ): ArrayList[Long] {
