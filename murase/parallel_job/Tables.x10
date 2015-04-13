@@ -32,7 +32,6 @@ public class Tables {
     return s;
   }
 
-
   def boxNeedsToBeDivided( boxId: Long ): Boolean {
     val box = boxesTable.get( boxId );
     if( box.isFinished( this ) == false ) { return false; }
@@ -40,7 +39,7 @@ public class Tables {
     val results = new ArrayList[Double]();
     for( psId in box.psIds ) {
       val ps = psTable.get( psId );
-      val result = averagedResult( ps );
+      val result = ps.averagedResult( this );
       results.add( result );
     }
     results.sort();
@@ -50,15 +49,6 @@ public class Tables {
              box.hMax - box.hMin > 0.005 &&
              resultDiff > 0.1 );
     // return ( resultDiff > 0.2 );
-  }
-
-  private def averagedResult( ps: ParameterSet ): Double {
-    var sum: Double = 0.0;
-    for( runId in ps.runIds ) {
-      val run = runsTable.get( runId );
-      sum += run.result;
-    }
-    return sum / ps.runIds.size();
   }
 
   private def createRuns( ps: ParameterSet, numRuns: Long ): ArrayList[Task] {

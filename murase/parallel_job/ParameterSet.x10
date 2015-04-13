@@ -50,4 +50,12 @@ public class ParameterSet {
     return true;
   }
 
+  def averagedResult( table: Tables ): Double {
+    var sum: Double = 0.0;
+    val runs = runs( table );
+    for( run in runs ) {
+      sum += run.result;
+    }
+    return sum / runs.size();
+  }
 }
