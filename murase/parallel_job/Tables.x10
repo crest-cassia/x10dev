@@ -51,17 +51,6 @@ public class Tables {
     // return ( resultDiff > 0.2 );
   }
 
-  private def createRuns( ps: ParameterSet, numRuns: Long ): ArrayList[Task] {
-    // TODO: implement numRuns
-    val newTasks = new ArrayList[Task]();
-    val run = new Run( maxRunId, ps );
-    maxRunId += 1;
-    runsTable.put( run.id, run );
-    ps.runIds.add( run.id );
-    newTasks.add( run.generateTask() );
-    return newTasks;
-  }
-
   private def createParameterSets( box: Box ): ArrayList[Task] {
     val newTasks = new ArrayList[Task]();
     val addPS = (beta:Double, h:Double) => {
@@ -74,8 +63,8 @@ public class Tables {
         ps = new ParameterSet( maxPSId, beta, h );
         maxPSId += 1;
         psTable.put( ps.id, ps );
-        val a = createRuns( ps, 1 );
-        for( task in a ) { newTasks.add( task ); }
+        val newRuns = ps.createRuns( this, 1 );
+        for( run in newRuns ) { newTasks.add( run.generateTask() ); }
       }
       Console.OUT.println("PS: " + ps);
       Console.OUT.println("run: " + ps.runIds);

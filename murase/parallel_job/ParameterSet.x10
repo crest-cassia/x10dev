@@ -1,5 +1,6 @@
 import x10.io.Console;
 import x10.util.ArrayList;
+import x10.util.Pair;
 
 public class ParameterSet {
   public val id: Long;
@@ -38,6 +39,18 @@ public class ParameterSet {
       val run = table.runsTable.get( runId );
       a.add( run );
     }
+    return a;
+  }
+
+  def createRuns( table: Tables, numRuns: Long ): ArrayList[Run] {
+    val a = new ArrayList[Run]();
+    // TODO: implement numRuns
+    val run = new Run( table.maxRunId, this );
+    table.maxRunId += 1;
+    table.runsTable.put( run.id, run );
+    runIds.add( run.id );
+    a.add( run );
+
     return a;
   }
 
