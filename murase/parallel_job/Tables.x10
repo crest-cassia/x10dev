@@ -75,6 +75,7 @@ public class Tables {
     val run = new Run( maxRunId, ps );
     maxRunId += 1;
     runsTable.put( run.id, run );
+    ps.runIds.add( run.id );
     newTasks.add( run.generateTask() );
     return newTasks;
   }
