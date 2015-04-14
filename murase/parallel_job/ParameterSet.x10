@@ -72,10 +72,15 @@ public class ParameterSet {
     return sum / runs.size();
   }
 
+  static val tolerance: Double = 0.0000001;
+
   static def find( table: Tables, beta: Double, h: Double ): ParameterSet {
     for( entry in table.psTable.entries() ) {
       val ps = entry.getValue();
-      if( ps.beta == beta && ps.h == h ) {
+      val d_beta = ps.beta - beta;
+      val d_h = ps.h - h;
+      if( d_beta > - tolerance && d_beta < tolerance &&
+          d_h > -tolerance && d_h < tolerance ) {
         return ps;
       }
     }
