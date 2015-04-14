@@ -15,10 +15,6 @@ public class ParameterSet {
     h = _h;
   }
 
-  def pushParentBoxId(box_id: Long): void {
-    parentBoxIds.add( box_id );
-  }
-
   def getParentBoxIds(): ArrayList[Long] {
     return parentBoxIds;
   }
@@ -90,6 +86,10 @@ public class ParameterSet {
       table.psTable.put( ps.id, ps );
     }
     return ps;
+  }
+
+  def appendBox( box: Box ): void {
+    parentBoxIds.add( box.id );
   }
 }
 

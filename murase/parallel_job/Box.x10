@@ -9,6 +9,7 @@ public class Box {
   public val betaMax: Double;
   public val hMin: Double;
   public val hMax: Double;
+  public var divided: Boolean;
 
   def this(_id: Long, _betaMin:Double, _betaMax:Double, _hMin:Double, _hMax:Double) {
     id = _id;
@@ -16,6 +17,7 @@ public class Box {
     betaMax = _betaMax;
     hMin = _hMin;
     hMax = _hMax;
+    divided = false;
   }
 
   def toString(): String {
@@ -51,8 +53,9 @@ public class Box {
 
     val addPS = (beta:Double, h:Double) => {
       val ps = ParameterSet.findOrCreateParameterSet( table, beta, h );
-      newPS.add( ps );
       psIds.add( ps.id );
+      ps.appendBox( this );
+      newPS.add( ps );
     };
 
     addPS( betaMin, hMin );
@@ -62,3 +65,4 @@ public class Box {
     return newPS;
   }
 }
+

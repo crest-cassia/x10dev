@@ -34,7 +34,7 @@ public class Tables {
 
   def boxNeedsToBeDivided( boxId: Long ): Boolean {
     val box = boxesTable.get( boxId );
-    if( box.isFinished( this ) == false ) { return false; }
+    if( box.divided == true || box.isFinished( this ) == false ) { return false; }
   
     val results = new ArrayList[Double]();
     for( psId in box.psIds ) {
@@ -44,10 +44,11 @@ public class Tables {
     }
     results.sort();
     val resultDiff = results.getLast() - results.getFirst();
-    Console.OUT.println( "  resultDiff : " + resultDiff );
-    return ( box.betaMax - box.betaMin > 0.005 &&
-             box.hMax - box.hMin > 0.005 &&
-             resultDiff > 0.1 );
+    Console.OUT.println( "  resultDiff of Box(" + boxId + ") : " + resultDiff );
+    // return false;
+    return ( box.betaMax - box.betaMin > 0.05 &&
+             box.hMax - box.hMin > 0.1 &&
+             resultDiff > 1.0 );
     // return ( resultDiff > 0.2 );
   }
 
@@ -59,9 +60,6 @@ public class Tables {
       val newRuns = ps.createRuns( this, numRunsToAdd );
       for( run in newRuns ) {
         newTasks.add( run.generateTask() );
-      }
-      if( ps.isFinished( this ) == false ) {
-        ps.pushParentBoxId( box.id );
       }
     }
     return newTasks;
@@ -117,6 +115,7 @@ public class Tables {
     addNewTasks( t2 );
     addNewTasks( t3 );
     addNewTasks( t4 );
+    box.divided = true;
 
     Console.OUT.println( "newTasks : " + newTasks );
 
