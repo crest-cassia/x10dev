@@ -65,20 +65,6 @@ public class Tables {
     return newTasks;
   }
 
-  def findPS( beta: Double, h:Double ): Long {
-    for( entry in psTable.entries() ) {
-      val ps = entry.getValue();
-      if( ps.beta == beta && ps.h == h ) {
-        return entry.getKey();
-      }
-    }
-    return -1;
-  }
-
-  def getBoxIds( psId: Long ): ArrayList[Long] {
-    return psTable.get(psId).getParentBoxIds();
-  }
-
   def createBox( betaMin: Double, betaMax: Double, hMin: Double, hMax: Double ): ArrayList[Task] {
     val newTasks: ArrayList[Task];
     val box:Box;
