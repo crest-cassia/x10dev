@@ -29,6 +29,10 @@ public class ParameterSet {
     return str;
   }
 
+  def numRuns(): Long {
+    return runIds.size();
+  }
+
   def runs( table: Tables ): ArrayList[Run] {
     val a = new ArrayList[Run]();
     for( runId in runIds ) {
@@ -40,13 +44,13 @@ public class ParameterSet {
 
   def createRuns( table: Tables, numRuns: Long ): ArrayList[Run] {
     val a = new ArrayList[Run]();
-    // TODO: implement numRuns
-    val run = new Run( table.maxRunId, this );
-    table.maxRunId += 1;
-    table.runsTable.put( run.id, run );
-    runIds.add( run.id );
-    a.add( run );
-
+    for( i in 1..numRuns ) {
+      val run = new Run( table.maxRunId, this );
+      table.maxRunId += 1;
+      table.runsTable.put( run.id, run );
+      runIds.add( run.id );
+      a.add( run );
+    }
     return a;
   }
 

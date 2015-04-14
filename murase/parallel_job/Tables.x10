@@ -56,7 +56,7 @@ public class Tables {
     val newTasks = new ArrayList[Task]();
     val newPSs = box.createParameterSets( this );
     for( ps in newPSs ) {
-      val numRunsToAdd = 1 - ps.runIds.size();
+      val numRunsToAdd = 1 - ps.numRuns();
       val newRuns = ps.createRuns( this, numRunsToAdd );
       for( run in newRuns ) {
         newTasks.add( run.generateTask() );
