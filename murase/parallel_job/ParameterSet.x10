@@ -42,6 +42,15 @@ public class ParameterSet {
     return a;
   }
 
+  def boxes( table: Tables ): ArrayList[Box] {
+    val a = new ArrayList[Box]();
+    for( boxId in parentBoxIds ) {
+      val box = table.boxesTable.get( boxId );
+      a.add( box );
+    }
+    return a;
+  }
+
   def createRuns( table: Tables, numRuns: Long ): ArrayList[Run] {
     val a = new ArrayList[Run]();
     for( i in 1..numRuns ) {

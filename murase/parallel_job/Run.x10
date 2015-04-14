@@ -30,8 +30,8 @@ public class Run {
     return cmd;
   }
 
-  def getParentPSId(): Long {
-    return parentPSId;
+  def parameterSet( table: Tables ): ParameterSet {
+    return table.psTable.get( parentPSId );
   }
 
   def storeResult( _result: Double, _placeId: Long, _startAt: Long, _finishAt: Long ) {

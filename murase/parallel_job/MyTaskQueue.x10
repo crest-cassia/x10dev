@@ -63,14 +63,12 @@ class MyTaskQueue implements TaskQueue[MyTaskQueue, Long] {
         val run = refTables().runsTable.get( runId );
         atomic {
           run.storeResult( localResult, runPlace, startAt, finishAt );
-          val psId = run.getParentPSId();
-          Console.OUT.println("  parentPSId : " + psId );
-          val boxIds = refTables().getBoxIds( psId );
-          Console.OUT.println("  boxIds : " + boxIds );
-          for( boxId in boxIds ) {
-            if( refTables().boxNeedsToBeDivided( boxId ) ) {
+          val boxes = run.parameterSet( refTables() ).boxes( refTables() );
+          Console.OUT.println("  boxes : " + boxes );
+          for( box in boxes ) {
+            if( refTables().boxNeedsToBeDivided( box.id ) ) {
               Console.OUT.println(" dividing box... ");
-              val newTasks = refTables().divideBox( boxId );
+              val newTasks = refTables().divideBox( box.id );
               appendTask( localTasks, newTasks );
             }
           }
