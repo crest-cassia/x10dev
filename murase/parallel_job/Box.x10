@@ -18,10 +18,6 @@ public class Box {
     hMax = _hMax;
   }
 
-  def appendParameterSet( ps: ParameterSet ) {
-    psIds.add( ps.id );
-  }
-
   def toString(): String {
     val str = "{ id: " + id + "," +
                " betaMin: " + betaMin + "," +
@@ -56,6 +52,7 @@ public class Box {
     val addPS = (beta:Double, h:Double) => {
       val ps = ParameterSet.findOrCreateParameterSet( table, beta, h );
       newPS.add( ps );
+      psIds.add( ps.id );
     };
 
     addPS( betaMin, hMin );

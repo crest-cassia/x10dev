@@ -56,16 +56,13 @@ public class Tables {
     val newPSs = box.createParameterSets( this );
     for( ps in newPSs ) {
       val numRunsToAdd = 1 - ps.runIds.size();
-      for( i in 1..numRunsToAdd ) {
-        val newRuns = ps.createRuns( this, 1 );
-        for( run in newRuns ) {
-          newTasks.add( run.generateTask() );
-        }
+      val newRuns = ps.createRuns( this, numRunsToAdd );
+      for( run in newRuns ) {
+        newTasks.add( run.generateTask() );
       }
       if( ps.isFinished( this ) == false ) {
         ps.pushParentBoxId( box.id );
       }
-      box.appendParameterSet( ps );
     }
     return newTasks;
   }
