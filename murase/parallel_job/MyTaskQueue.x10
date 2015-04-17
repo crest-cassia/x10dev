@@ -59,21 +59,14 @@ class MyTaskQueue implements TaskQueue[MyTaskQueue, Long] {
       };
 
       val newTasks = at( refTables ) {
-        val localTasks = new ArrayList[Task]();
+        val localNewTasks: ArrayList[Task];
         val run = refTables().runsTable.get( runId );
         atomic {
           run.storeResult( localResult, runPlace, startAt, finishAt );
-          val boxes = run.parameterSet( refTables() ).boxes( refTables() );
-          Console.OUT.println("  boxes : " + boxes );
-          for( box in boxes ) {
-            if( refTables().boxNeedsToBeDivided( box.id ) ) {
-              Console.OUT.println(" dividing box... ");
-              val newTasks = refTables().divideBox( box.id );
-              appendTask( localTasks, newTasks );
-            }
-          }
+          val gs = new GridSearcher();
+          localNewTasks = gs.generateTasks( refTables(), run );
         }
-        return localTasks;
+        return localNewTasks;
       };
 
       appendTask( tb.bag(), newTasks );

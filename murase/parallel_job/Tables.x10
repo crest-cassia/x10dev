@@ -32,26 +32,6 @@ public class Tables {
     return s;
   }
 
-  def boxNeedsToBeDivided( boxId: Long ): Boolean {
-    val box = boxesTable.get( boxId );
-    if( box.divided == true || box.isFinished( this ) == false ) { return false; }
-  
-    val results = new ArrayList[Double]();
-    for( psId in box.psIds ) {
-      val ps = psTable.get( psId );
-      val result = ps.averagedResult( this );
-      results.add( result );
-    }
-    results.sort();
-    val resultDiff = results.getLast() - results.getFirst();
-    Console.OUT.println( "  resultDiff of Box(" + boxId + ") : " + resultDiff );
-    // return false;
-    return ( box.betaMax - box.betaMin > 0.05 &&
-             box.hMax - box.hMin > 0.1 &&
-             resultDiff > 1.0 );
-    // return ( resultDiff > 0.2 );
-  }
-
   private def createParameterSets( box: Box ): ArrayList[Task] {
     val newTasks = new ArrayList[Task]();
     val newPSs = box.createParameterSets( this );
@@ -78,34 +58,5 @@ public class Tables {
     return newTasks;
   }
 
-  def divideBox( boxId: Long ): ArrayList[Task] {
-    Console.OUT.println("  dividing : " + boxId );
-    val box = boxesTable.get( boxId );
-    val betaMin = box.betaMin;
-    val betaMax = box.betaMax;
-    val betaHalf = (betaMin + betaMax) / 2.0;
-    val hMin = box.hMin;
-    val hMax = box.hMax;
-    val hHalf = (hMin + hMax) / 2.0;
-    val newTasks = new ArrayList[Task]();
-    val addNewTasks = ( tasks: ArrayList[Task] ): void => {
-      for( task in tasks ) {
-        newTasks.add( task );
-      }
-    };
-    val t1 = createBox( betaMin, betaHalf, hMin, hHalf );
-    val t2 = createBox( betaMin, betaHalf, hHalf, hMax );
-    val t3 = createBox( betaHalf, betaMax, hMin, hHalf );
-    val t4 = createBox( betaHalf, betaMax, hHalf, hMax );
-    addNewTasks( t1 );
-    addNewTasks( t2 );
-    addNewTasks( t3 );
-    addNewTasks( t4 );
-    box.divided = true;
-
-    Console.OUT.println( "newTasks : " + newTasks );
-
-    return newTasks;
-  }
 }
 
