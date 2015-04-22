@@ -18,10 +18,12 @@ import org.json.simple.*;
 class MyTaskQueue implements TaskQueue[MyTaskQueue, Long] {
   val tb = new ArrayListTaskBag[Task]();
   val refTables: GlobalRef[Tables];
+  val refSearcher: GlobalRef[GridSearcher];
   val timer: Timer = new Timer();
 
-  public def this( _refTables: GlobalRef[Tables] ) {
+  public def this( _refTables: GlobalRef[Tables], _refSearcher: GlobalRef[GridSearcher] ) {
     refTables = _refTables;
+    refSearcher = _refSearcher;
   }
   
   public def init(): void {
@@ -63,8 +65,7 @@ class MyTaskQueue implements TaskQueue[MyTaskQueue, Long] {
         val run = refTables().runsTable.get( runId );
         atomic {
           run.storeResult( localResult, runPlace, startAt, finishAt );
-          val gs = new GridSearcher();
-          localNewTasks = gs.generateTasks( refTables(), run );
+          localNewTasks = refSearcher().generateTasks( refTables(), run );
         }
         return localNewTasks;
       };

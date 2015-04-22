@@ -5,6 +5,10 @@ public class GridSearcher {
   def this() {
   }
 
+  def makeBox( table: Tables, betaMin: Double, betaMax: Double, hMin: Double, hMax: Double ): void {
+    table.createBox( betaMin, betaMax, hMin, hMax );
+  }
+
   def generateTasks( table: Tables, finishedRun: Run ): ArrayList[Task] {
     val newTasks: ArrayList[Task] = new ArrayList[Task]();
     val appendTask = ( toAdd: ArrayList[Task] ) => {
