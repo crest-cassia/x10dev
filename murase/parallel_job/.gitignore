@@ -1,3 +1,5 @@
 build/*
 memo.md
 task_list.txt
+.ruby-version
+visualize_runs/figs
