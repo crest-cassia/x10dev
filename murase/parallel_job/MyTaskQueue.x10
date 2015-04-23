@@ -18,17 +18,17 @@ import org.json.simple.*;
 
 class MyTaskQueue implements TaskQueue[MyTaskQueue, Long] {
   val tb = new ArrayListTaskBag[Task]();
-  val rcpTableSearcher: GlobalRef[Cell[Pair[Tables,GridSearcher]]];
+  val refTableSearcher: GlobalRef[ PairTablesSearcher ];
   val timer: Timer = new Timer();
 
-  public def this( _rcpTableSearcher: GlobalRef[Cell[Pair[Tables,GridSearcher]]] ) {
-    rcpTableSearcher = _rcpTableSearcher;
+  public def this( _refTableSearcher: GlobalRef[ PairTablesSearcher ] ) {
+    refTableSearcher = _refTableSearcher;
   }
 
   public def init(): void {
-    val tasks = at( rcpTableSearcher ) {
+    val tasks = at( refTableSearcher ) {
       val a: ArrayList[Task] = new ArrayList[Task]();
-      for( entry in rcpTableSearcher()().first.runsTable.entries() ) {
+      for( entry in refTableSearcher().tables.runsTable.entries() ) {
         val run = entry.getValue();
         val task = run.generateTask();
         a.add( task );
@@ -59,12 +59,12 @@ class MyTaskQueue implements TaskQueue[MyTaskQueue, Long] {
         }
       };
 
-      val newTasks = at( rcpTableSearcher ) {
+      val newTasks = at( refTableSearcher ) {
         val localNewTasks: ArrayList[Task];
-        val run = rcpTableSearcher()().first.runsTable.get( runId );
+        val run = refTableSearcher().tables.runsTable.get( runId );
         atomic {
           run.storeResult( localResult, runPlace, startAt, finishAt );
-          localNewTasks = rcpTableSearcher()().second.generateTasks( rcpTableSearcher()().first, run );
+          localNewTasks = refTableSearcher().searcher.generateTasks( refTableSearcher().tables, run );
         }
         return localNewTasks;
       };
