@@ -4,15 +4,13 @@ import x10.util.Pair;
 
 public class ParameterSet {
   public val id: Long;
-  public val beta: Double;
-  public val h: Double;
+  public val params: InputParameters;
   val parentBoxIds: ArrayList[Long] = new ArrayList[Long]();
   public val runIds: ArrayList[Long] = new ArrayList[Long]();
 
-  def this( _id:Long, _beta: Double, _h:Double ) {
+  def this( _id:Long, _params: InputParameters ) {
     id = _id;
-    beta = _beta;
-    h = _h;
+    params = _params;
   }
 
   def getParentBoxIds(): ArrayList[Long] {
@@ -20,12 +18,12 @@ public class ParameterSet {
   }
 
   def toString(): String {
-    val str = "{ id: " + id + ", beta: " + beta + ", h: " + h + " }";
+    val str = "{ id: " + id + ", params: " + params + " }";
     return str;
   }
 
   def toJson(): String {
-    val str = "{ \"id\": " + id + ", \"beta\": " + beta + ", \"h\": " + h + " }";
+    val str = "{ \"id\": " + id + ", \"params\": " + params + " }";
     return str;
   }
 
@@ -79,23 +77,20 @@ public class ParameterSet {
 
   static val tolerance: Double = 0.0000001;
 
-  static def find( table: Tables, beta: Double, h: Double ): ParameterSet {
+  static def find( table: Tables, p: InputParameters ): ParameterSet {
     for( entry in table.psTable.entries() ) {
       val ps = entry.getValue();
-      val d_beta = ps.beta - beta;
-      val d_h = ps.h - h;
-      if( d_beta > - tolerance && d_beta < tolerance &&
-          d_h > -tolerance && d_h < tolerance ) {
+      if( ps.params == p ) {
         return ps;
       }
     }
     return null;
   }
 
-  static def findOrCreateParameterSet( table: Tables, beta: Double, h: Double ): ParameterSet {
-    var ps: ParameterSet = find( table, beta, h );
+  static def findOrCreateParameterSet( table: Tables, p: InputParameters ): ParameterSet {
+    var ps: ParameterSet = find( table, p );
     if( ps == null ) {
-      ps = new ParameterSet( table.maxPSId, beta, h );
+      ps = new ParameterSet( table.maxPSId, p );
       table.maxPSId += 1;
       table.psTable.put( ps.id, ps );
     }

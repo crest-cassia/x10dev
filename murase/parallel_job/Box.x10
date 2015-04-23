@@ -50,16 +50,16 @@ public class Box {
   def createParameterSets( table: Tables ): ArrayList[ParameterSet] {
     val newPS = new ArrayList[ParameterSet]();
 
-    val addPS = (beta:Double, h:Double) => {
-      val ps = ParameterSet.findOrCreateParameterSet( table, beta, h );
+    val addPS = ( params: InputParameters ) => {
+      val ps = ParameterSet.findOrCreateParameterSet( table, params );
       psIds.add( ps.id );
       newPS.add( ps );
     };
 
-    addPS( betaMin, hMin );
-    addPS( betaMin, hMax );
-    addPS( betaMax, hMin );
-    addPS( betaMax, hMax );
+    addPS( InputParameters( betaMin, hMin ) );
+    addPS( InputParameters( betaMin, hMax ) );
+    addPS( InputParameters( betaMax, hMin ) );
+    addPS( InputParameters( betaMax, hMax ) );
     return newPS;
   }
 

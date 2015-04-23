@@ -16,7 +16,7 @@ public class Run {
     id = _id;
     parentPSId = _ps.id;
     seed = 12345; // TODO: IMPLEMENT ME
-    cmd = generateCommand( _ps.beta, _ps.h );
+    cmd = generateCommand( _ps.params );
     finished = false;
   }
 
@@ -25,8 +25,9 @@ public class Run {
     return task;
   }
 
-  private def generateCommand( beta: Double, h: Double ): String {
-    val cmd = "../../build/ising2d.out 99 100 " + beta + " " + h + " 10000 10000 " + seed;
+  private def generateCommand( input: InputParameters ): String {
+    val cmd = "../../build/ising2d.out 99 100 " +
+              input.beta + " " + input.h + " 10000 10000 " + seed;
     return cmd;
   }
 
