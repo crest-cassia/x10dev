@@ -1,6 +1,7 @@
 import x10.io.Console;
 import x10.io.File;
 import x10.interop.Java;
+import x10.compiler.Native;
 import org.json.simple.*;
 
 struct Task( runId: Long, cmd: String) {
@@ -8,13 +9,16 @@ struct Task( runId: Long, cmd: String) {
   public def run(): Double {
     val scriptPath = ShellScriptGenerator.generateScript( runId, cmd );
     Console.OUT.println( "  running : " + runId );
-    val rc = MySystem.system( "bash " + scriptPath );
+    val rc = system( "bash " + scriptPath );
     Console.OUT.println( "  finished : " + scriptPath + " => " + rc );
 
     val result = parseOutputJson();
     return result;
   }
   
+  @Native("java", "JRuntime.exec(#1)")
+  native private def system(cmd:String):Int;
+
   private def parseOutputJson(): Double {
     val jsonPath = runId + "/_output.json";
     Console.OUT.println( "  parsing : " + jsonPath );
