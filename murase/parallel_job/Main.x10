@@ -12,14 +12,15 @@ class Main {
     val refTableSearcher = new GlobalRef[PairTablesSearcher](
       new PairTablesSearcher( new Tables(), new GridSearcher() )
     );
-    at( refTableSearcher ) {
-      refTableSearcher().searcher.makeInitialBox( refTableSearcher().tables, 0.2, 0.3, -1.0, 1.0 );
-    }
+    val newTasks = at( refTableSearcher ) {
+      val tasks = refTableSearcher().searcher.makeInitialBox( refTableSearcher().tables, 0.2, 0.3, -1.0, 1.0 );
+      return tasks;
+    };
     val init = () => { return new MyTaskQueue( refTableSearcher ); };
     val glb = new GLB[MyTaskQueue, Long](init, GLBParameters.Default, true);
 
     Console.OUT.println("Starting ... ");
-    val start = () => { glb.taskQueue().init(); };
+    val start = () => { glb.taskQueue().addInitialTasks( newTasks ); };
     val r = glb.run(start);
     Console.OUT.println("r : " + r);
 

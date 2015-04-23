@@ -8,13 +8,10 @@ public class GridSearcher {
     boxes = new ArrayList[Box]();
   }
 
-  public def makeInitialBox( table: Tables, betaMin: Double, betaMax: Double, hMin: Double, hMax: Double ): void {
+  public def makeInitialBox( table: Tables, betaMin: Double, betaMax: Double, hMin: Double, hMax: Double ): ArrayList[Task] {
     val box = Box.create( betaMin, betaMax, hMin, hMax );
     boxes.add( box );
-    val newPSs = box.createParameterSets( table );
-    for( ps in newPSs ) {
-      val newRuns = ps.createRunsUpTo( table, 1 );
-    }
+    return box.createSubTasks( table, 1 );
   }
 
   public def generateTasks( table: Tables, finishedRun: Run ): ArrayList[Task] {

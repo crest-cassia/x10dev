@@ -25,17 +25,7 @@ class MyTaskQueue implements TaskQueue[MyTaskQueue, Long] {
     refTableSearcher = _refTableSearcher;
   }
 
-  public def init(): void {
-    val tasks = at( refTableSearcher ) {
-      val a: ArrayList[Task] = new ArrayList[Task]();
-      for( entry in refTableSearcher().tables.runsTable.entries() ) {
-        val run = entry.getValue();
-        val task = run.generateTask();
-        a.add( task );
-      }
-      return a;
-    };
-
+  public def addInitialTasks( tasks: ArrayList[Task] ): void {
     for( task in tasks ) {
       tb.bag().add( task );
     }
