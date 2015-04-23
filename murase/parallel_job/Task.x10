@@ -6,7 +6,7 @@ import org.json.simple.*;
 
 struct Task( runId: Long, cmd: String) {
 
-  public def run(): Double {
+  public def run(): OutputParameters {
     val scriptPath = ShellScriptGenerator.generateScript( runId, cmd );
     Console.OUT.println( "  running : " + runId );
     val rc = system( "bash " + scriptPath );
@@ -19,18 +19,9 @@ struct Task( runId: Long, cmd: String) {
   @Native("java", "JRuntime.exec(#1)")
   native private def system(cmd:String):Int;
 
-  private def parseOutputJson(): Double {
+  private def parseOutputJson(): OutputParameters {
     val jsonPath = runId + "/_output.json";
-    Console.OUT.println( "  parsing : " + jsonPath );
-    val input = new File(jsonPath);
-    var json:String = "";
-    for( line in input.lines() ) {
-      json += line;
-    }
-    val o = JSONValue.parse(json) as JSONObject;
-    val order_parameter = o.get("order_parameter") as Double;
-    Console.OUT.println(order_parameter);
-    return order_parameter;
+    return OutputParameters.parseFromJson( jsonPath );
   }
 
   public def toString(): String {

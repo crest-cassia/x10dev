@@ -72,7 +72,7 @@ public class ParameterSet {
     var sum: Double = 0.0;
     val runs = runs( table );
     for( run in runs ) {
-      sum += run.result;
+      sum += run.result.orderParameter;
     }
     return sum / runs.size();
   }

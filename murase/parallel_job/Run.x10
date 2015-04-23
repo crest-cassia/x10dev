@@ -8,7 +8,7 @@ public class Run {
   public var finishAt: Long;
   val cmd: String;
   val seed: Long;
-  public var result: Double;
+  public var result: OutputParameters;
   public var finished: Boolean;
   val parentPSId: Long;
 
@@ -34,7 +34,7 @@ public class Run {
     return table.psTable.get( parentPSId );
   }
 
-  def storeResult( _result: Double, _placeId: Long, _startAt: Long, _finishAt: Long ) {
+  def storeResult( _result: OutputParameters, _placeId: Long, _startAt: Long, _finishAt: Long ) {
     result = _result;
     placeId = _placeId;
     startAt = _startAt;
