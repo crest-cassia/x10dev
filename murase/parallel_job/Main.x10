@@ -9,12 +9,14 @@ import x10.util.ArrayList;
 class Main {
 
   def run(): void {
-    val refTables: GlobalRef[ Tables ] = new GlobalRef[ Tables ]( new Tables() );
-    val refSearcher: GlobalRef[ GridSearcher ] = new GlobalRef[ GridSearcher ]( new GridSearcher() );
-    at( refSearcher ) {
-      refSearcher().makeBox( refTables(), 0.2, 0.3, -1.0, 1.0 );
+    val refTableSearcher =
+      new GlobalRef[Cell[Pair[Tables,GridSearcher]]](
+        new Pair[Tables,GridSearcher]( new Tables(), new GridSearcher() )
+      );
+    at( refTableSearcher ) {
+      refTableSearcher()().second.makeBox( refTableSearcher()().first, 0.2, 0.3, -1.0, 1.0 );
     }
-    val init = () => { return new MyTaskQueue( refTables, refSearcher ); };
+    val init = () => { return new MyTaskQueue( refTableSearcher ); };
     val glb = new GLB[MyTaskQueue, Long](init, GLBParameters.Default, true);
 
     Console.OUT.println("Starting ... ");
@@ -22,8 +24,8 @@ class Main {
     val r = glb.run(start);
     Console.OUT.println("r : " + r);
 
-    at( refTables ) {
-      Console.OUT.println( refTables().runsJson() );
+    at( refTableSearcher ) {
+      Console.OUT.println( refTableSearcher()().first.runsJson() );
     }
   }
 

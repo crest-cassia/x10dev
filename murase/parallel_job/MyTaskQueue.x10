@@ -12,24 +12,23 @@ import x10.compiler.Native;
 import x10.util.HashMap;
 import x10.io.File;
 import x10.util.Timer;
+import x10.util.Pair;
 import x10.interop.Java;
 import org.json.simple.*;
 
 class MyTaskQueue implements TaskQueue[MyTaskQueue, Long] {
   val tb = new ArrayListTaskBag[Task]();
-  val refTables: GlobalRef[Tables];
-  val refSearcher: GlobalRef[GridSearcher];
+  val rcpTableSearcher: GlobalRef[Cell[Pair[Tables,GridSearcher]]];
   val timer: Timer = new Timer();
 
-  public def this( _refTables: GlobalRef[Tables], _refSearcher: GlobalRef[GridSearcher] ) {
-    refTables = _refTables;
-    refSearcher = _refSearcher;
+  public def this( _rcpTableSearcher: GlobalRef[Cell[Pair[Tables,GridSearcher]]] ) {
+    rcpTableSearcher = _rcpTableSearcher;
   }
-  
+
   public def init(): void {
-    val tasks = at( refTables ) {
+    val tasks = at( rcpTableSearcher ) {
       val a: ArrayList[Task] = new ArrayList[Task]();
-      for( entry in refTables().runsTable.entries() ) {
+      for( entry in rcpTableSearcher()().first.runsTable.entries() ) {
         val run = entry.getValue();
         val task = run.generateTask();
         a.add( task );
@@ -60,12 +59,12 @@ class MyTaskQueue implements TaskQueue[MyTaskQueue, Long] {
         }
       };
 
-      val newTasks = at( refTables ) {
+      val newTasks = at( rcpTableSearcher ) {
         val localNewTasks: ArrayList[Task];
-        val run = refTables().runsTable.get( runId );
+        val run = rcpTableSearcher()().first.runsTable.get( runId );
         atomic {
           run.storeResult( localResult, runPlace, startAt, finishAt );
-          localNewTasks = refSearcher().generateTasks( refTables(), run );
+          localNewTasks = rcpTableSearcher()().second.generateTasks( rcpTableSearcher()().first, run );
         }
         return localNewTasks;
       };
