@@ -16,7 +16,7 @@ import x10.util.Pair;
 import x10.interop.Java;
 import org.json.simple.*;
 
-class MyTaskQueue implements TaskQueue[MyTaskQueue, Long] {
+class JobQueue implements TaskQueue[JobQueue, Long] {
   val tb = new ArrayListTaskBag[Task]();
   val refTableSearcher: GlobalRef[ PairTablesSearcher ];
   val timer: Timer = new Timer();
@@ -31,7 +31,7 @@ class MyTaskQueue implements TaskQueue[MyTaskQueue, Long] {
     }
   }
 
-  public def process(var n:Long, context: Context[MyTaskQueue,Long]):Boolean {
+  public def process(var n:Long, context: Context[JobQueue,Long]):Boolean {
     context.yield();
 
     for( var i:Long = 0; tb.bag().size() > 0 && i < n; i++) {
@@ -70,21 +70,21 @@ class MyTaskQueue implements TaskQueue[MyTaskQueue, Long] {
   }
 
   public def merge( var _tb: TaskBag): void { 
-    Console.OUT.println("MyTaskQueue#merge at " + here );
+    Console.OUT.println("JobQueue#merge at " + here );
     tb.merge( _tb as ArrayListTaskBag[Task]);
   }
   
   public def split(): TaskBag {
-    Console.OUT.println("MyTaskQueue#split at " + here);
+    Console.OUT.println("JobQueue#split at " + here);
     return tb.split();
   }
 
   public def printLog(): void {
-    Console.OUT.println("MyTaskQueue#printLog at " + here);
+    Console.OUT.println("JobQueue#printLog at " + here);
   }
 
   public def getResult(): MyResult {
-    Console.OUT.println("MyTaskQueue#getResult at " + here);
+    Console.OUT.println("JobQueue#getResult at " + here);
     return new MyResult(0);
   }
 

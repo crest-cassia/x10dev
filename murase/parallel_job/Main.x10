@@ -16,8 +16,8 @@ class Main {
       val tasks = refTableSearcher().searcher.makeInitialBox( refTableSearcher().tables, 0.2, 0.3, -1.0, 1.0 );
       return tasks;
     };
-    val init = () => { return new MyTaskQueue( refTableSearcher ); };
-    val glb = new GLB[MyTaskQueue, Long](init, GLBParameters.Default, true);
+    val init = () => { return new JobQueue( refTableSearcher ); };
+    val glb = new GLB[JobQueue, Long](init, GLBParameters.Default, true);
 
     Console.OUT.println("Starting ... ");
     val start = () => { glb.taskQueue().addInitialTasks( newTasks ); };
