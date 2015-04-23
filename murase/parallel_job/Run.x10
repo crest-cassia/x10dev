@@ -26,8 +26,8 @@ public class Run {
   }
 
   private def generateCommand( input: InputParameters ): String {
-    val cmd = "../../build/ising2d.out 99 100 " +
-              input.beta + " " + input.h + " 10000 10000 " + seed;
+    val cmd = Simulator.command( input, seed );
+    Console.OUT.println( cmd );
     return cmd;
   }
 
