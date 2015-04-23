@@ -3,17 +3,9 @@ import x10.io.File;
 import x10.interop.Java;
 import org.json.simple.*;
 
-public class Task {
+struct Task( runId: Long, cmd: String) {
 
-  public val runId: Long;
-  public val cmd: String;
-
-  def this( _runId: Long, _cmd: String ) {
-    runId = _runId;
-    cmd = _cmd;
-  }
-
-  def run(): Double {
+  public def run(): Double {
     val scriptPath = ShellScriptGenerator.generateScript( runId, cmd );
     Console.OUT.println( "  running : " + runId );
     val rc = MySystem.system( "bash " + scriptPath );
@@ -23,7 +15,7 @@ public class Task {
     return result;
   }
   
-  def parseOutputJson(): Double {
+  private def parseOutputJson(): Double {
     val jsonPath = runId + "/_output.json";
     Console.OUT.println( "  parsing : " + jsonPath );
     val input = new File(jsonPath);
@@ -37,7 +29,7 @@ public class Task {
     return order_parameter;
   }
 
-  def toString(): String {
+  public def toString(): String {
     return "{ runId : " + runId + ", cmd : " + cmd + " }";
   }
 }
