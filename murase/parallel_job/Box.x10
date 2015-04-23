@@ -4,15 +4,13 @@ import x10.util.ArrayList;
 
 public class Box {
   public val psIds: ArrayList[Long] = new ArrayList[Long]();
-  public val id: Long;
   public val betaMin: Double;
   public val betaMax: Double;
   public val hMin: Double;
   public val hMax: Double;
   public var divided: Boolean;
 
-  def this(_id: Long, _betaMin:Double, _betaMax:Double, _hMin:Double, _hMax:Double) {
-    id = _id;
+  def this(_betaMin:Double, _betaMax:Double, _hMin:Double, _hMax:Double) {
     betaMin = _betaMin;
     betaMax = _betaMax;
     hMin = _hMin;
@@ -21,12 +19,13 @@ public class Box {
   }
 
   def toString(): String {
-    val str = "{ id: " + id + "," +
+    val str = "{ " +
                " betaMin: " + betaMin + "," +
                " betaMax: " + betaMax + "," +
                " hMin: " + hMin + "," +
                " hMax: " + hMax + "," +
-               " psIds: " + psIds + " }";
+               " psIds: " + psIds +
+               " }";
     return str;
   }
 
@@ -54,7 +53,6 @@ public class Box {
     val addPS = (beta:Double, h:Double) => {
       val ps = ParameterSet.findOrCreateParameterSet( table, beta, h );
       psIds.add( ps.id );
-      ps.appendBox( this );
       newPS.add( ps );
     };
 
@@ -63,6 +61,22 @@ public class Box {
     addPS( betaMax, hMin );
     addPS( betaMax, hMax );
     return newPS;
+  }
+
+  def createSubTasks( table: Tables, targetNumRuns: Long ): ArrayList[Task] {
+    val newTasks = new ArrayList[Task]();
+    val newPSs = createParameterSets( table );
+    for( ps in newPSs ) {
+      val newRuns = ps.createRunsUpTo( table, targetNumRuns );
+      for( run in newRuns ) {
+        newTasks.add( run.generateTask() );
+      }
+    }
+    return newTasks;
+  }
+
+  static def create( betaMin: Double, betaMax: Double, hMin: Double, hMax: Double ): Box {
+    return new Box( betaMin, betaMax, hMin, hMax );
   }
 }
 

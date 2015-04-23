@@ -42,15 +42,6 @@ public class ParameterSet {
     return a;
   }
 
-  def boxes( table: Tables ): ArrayList[Box] {
-    val a = new ArrayList[Box]();
-    for( boxId in parentBoxIds ) {
-      val box = table.boxesTable.get( boxId );
-      a.add( box );
-    }
-    return a;
-  }
-
   def createRuns( table: Tables, numRuns: Long ): ArrayList[Run] {
     val a = new ArrayList[Run]();
     for( i in 1..numRuns ) {
@@ -61,6 +52,11 @@ public class ParameterSet {
       a.add( run );
     }
     return a;
+  }
+
+  def createRunsUpTo( table: Tables, targetNumRuns: Long ): ArrayList[Run] {
+    val n = ( numRuns() < targetNumRuns ) ? ( targetNumRuns - numRuns() ) : 0;
+    return createRuns( table, n );
   }
 
   def isFinished( table: Tables ): Boolean {
@@ -104,10 +100,6 @@ public class ParameterSet {
       table.psTable.put( ps.id, ps );
     }
     return ps;
-  }
-
-  def appendBox( box: Box ): void {
-    parentBoxIds.add( box.id );
   }
 }
 

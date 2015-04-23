@@ -2,14 +2,22 @@ import x10.util.ArrayList;
 
 public class GridSearcher {
 
+  val boxes: ArrayList[Box];
+
   def this() {
+    boxes = new ArrayList[Box]();
   }
 
-  def makeBox( table: Tables, betaMin: Double, betaMax: Double, hMin: Double, hMax: Double ): void {
-    table.createBox( betaMin, betaMax, hMin, hMax );
+  public def makeInitialBox( table: Tables, betaMin: Double, betaMax: Double, hMin: Double, hMax: Double ): void {
+    val box = Box.create( betaMin, betaMax, hMin, hMax );
+    boxes.add( box );
+    val newPSs = box.createParameterSets( table );
+    for( ps in newPSs ) {
+      val newRuns = ps.createRunsUpTo( table, 1 );
+    }
   }
 
-  def generateTasks( table: Tables, finishedRun: Run ): ArrayList[Task] {
+  public def generateTasks( table: Tables, finishedRun: Run ): ArrayList[Task] {
     val newTasks: ArrayList[Task] = new ArrayList[Task]();
     val appendTask = ( toAdd: ArrayList[Task] ) => {
       for( task in toAdd ) {
@@ -18,15 +26,26 @@ public class GridSearcher {
     };
 
     val ps = finishedRun.parameterSet( table );
-    val boxes = ps.boxes( table );
+    val boxes = findBoxesFromPS( ps );
+    // val boxes = ps.boxes( table );
     for( box in boxes ) {
       if( needsToDivide( table, box ) ) {
-        Console.OUT.println("  dividing box " + box.id );
+        Console.OUT.println("  dividing box " + box );
         val tasks = divideBox( table, box );
         appendTask( tasks );
       }
     }
     return newTasks;
+  }
+
+  private def findBoxesFromPS( ps: ParameterSet ): ArrayList[Box] {
+    val ret = new ArrayList[Box]();
+    for( box in boxes ) {
+      if( box.psIds.contains( ps.id ) ) {
+        ret.add( box );
+      }
+    }
+    return ret;
   }
 
   private def needsToDivide( table: Tables, box: Box ): Boolean {
@@ -39,14 +58,14 @@ public class GridSearcher {
     }
     results.sort();
     val resultDiff = results.getLast() - results.getFirst();
-    Console.OUT.println( "  resultDiff of Box(" + box.id + ") : " + resultDiff );
+    Console.OUT.println( "  resultDiff of Box(" + box + ") : " + resultDiff );
     return ( box.betaMax - box.betaMin > 0.05 &&
              box.hMax - box.hMin > 0.1 &&
              resultDiff > 1.0 );
   } 
 
-  def divideBox( table: Tables, box: Box ): ArrayList[Task] {
-    Console.OUT.println("  dividing : " + box.id );
+  private def divideBox( table: Tables, box: Box ): ArrayList[Task] {
+    Console.OUT.println("  dividing : " + box );
     val betaMin = box.betaMin;
     val betaMax = box.betaMax;
     val betaHalf = (betaMin + betaMax) / 2.0;
@@ -59,14 +78,15 @@ public class GridSearcher {
         newTasks.add( task );
       }
     };
-    val t1 = table.createBox( betaMin, betaHalf, hMin, hHalf );
-    val t2 = table.createBox( betaMin, betaHalf, hHalf, hMax );
-    val t3 = table.createBox( betaHalf, betaMax, hMin, hHalf );
-    val t4 = table.createBox( betaHalf, betaMax, hHalf, hMax );
-    addNewTasks( t1 );
-    addNewTasks( t2 );
-    addNewTasks( t3 );
-    addNewTasks( t4 );
+
+    val b1 = Box.create( betaMin, betaHalf, hMin, hHalf );
+    val b2 = Box.create( betaMin, betaHalf, hHalf, hMax );
+    val b3 = Box.create( betaHalf, betaMax, hMin, hHalf );
+    val b4 = Box.create( betaHalf, betaMax, hHalf, hMax );
+    addNewTasks( b1.createSubTasks( table, 1 ) );
+    addNewTasks( b2.createSubTasks( table, 1 ) );
+    addNewTasks( b3.createSubTasks( table, 1 ) );
+    addNewTasks( b4.createSubTasks( table, 1 ) );
     box.divided = true;
 
     Console.OUT.println( "newTasks : " + newTasks );

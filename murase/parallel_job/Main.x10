@@ -13,7 +13,7 @@ class Main {
       new PairTablesSearcher( new Tables(), new GridSearcher() )
     );
     at( refTableSearcher ) {
-      refTableSearcher().searcher.makeBox( refTableSearcher().tables, 0.2, 0.3, -1.0, 1.0 );
+      refTableSearcher().searcher.makeInitialBox( refTableSearcher().tables, 0.2, 0.3, -1.0, 1.0 );
     }
     val init = () => { return new MyTaskQueue( refTableSearcher ); };
     val glb = new GLB[MyTaskQueue, Long](init, GLBParameters.Default, true);
