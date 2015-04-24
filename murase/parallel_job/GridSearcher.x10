@@ -56,6 +56,7 @@ public class GridSearcher {
     Console.OUT.println( "  resultDiff of Box(" + box + ") : " + resultDiff );
     return ( box.betaMax - box.betaMin > 0.05 &&
              box.hMax - box.hMin > 0.1 &&
+             // box.lMax - box.lMin > 20 &&
              resultDiff > 1.0 );
   } 
 
@@ -67,6 +68,10 @@ public class GridSearcher {
     val hMin = box.hMin;
     val hMax = box.hMax;
     val hHalf = (hMin + hMax) / 2.0;
+    // val lMin = box.lMin;
+    // val lMax = box.lMax;
+    // var lHalf: Long = ( lMin + lMax ) / 2;
+    // if( lHalf % 2 == 1 ) { lHalf += 1; }  // lHalf must be even
     val newTasks = new ArrayList[Task]();
     val addNewTasks = ( tasks: ArrayList[Task] ): void => {
       for( task in tasks ) {
@@ -78,10 +83,22 @@ public class GridSearcher {
     val b2 = Box.create( betaMin, betaHalf, hHalf, hMax );
     val b3 = Box.create( betaHalf, betaMax, hMin, hHalf );
     val b4 = Box.create( betaHalf, betaMax, hHalf, hMax );
+    // val b1 = Box.create( betaMin, betaHalf, hMin, hHalf , lMin, lHalf );
+    // val b2 = Box.create( betaMin, betaHalf, hHalf, hMax , lMin, lHalf );
+    // val b3 = Box.create( betaHalf, betaMax, hMin, hHalf , lMin, lHalf );
+    // val b4 = Box.create( betaHalf, betaMax, hHalf, hMax , lMin, lHalf );
+    // val b5 = Box.create( betaMin, betaHalf, hMin, hHalf , lHalf, lMax );
+    // val b6 = Box.create( betaMin, betaHalf, hHalf, hMax , lHalf, lMax );
+    // val b7 = Box.create( betaHalf, betaMax, hMin, hHalf , lHalf, lMax );
+    // val b8 = Box.create( betaHalf, betaMax, hHalf, hMax , lHalf, lMax );
     addNewTasks( b1.createSubTasks( table, targetNumRuns ) );
     addNewTasks( b2.createSubTasks( table, targetNumRuns ) );
     addNewTasks( b3.createSubTasks( table, targetNumRuns ) );
     addNewTasks( b4.createSubTasks( table, targetNumRuns ) );
+    // addNewTasks( b5.createSubTasks( table, targetNumRuns ) );
+    // addNewTasks( b6.createSubTasks( table, targetNumRuns ) );
+    // addNewTasks( b7.createSubTasks( table, targetNumRuns ) );
+    // addNewTasks( b8.createSubTasks( table, targetNumRuns ) );
     box.divided = true;
 
     Console.OUT.println( "newTasks : " + newTasks );

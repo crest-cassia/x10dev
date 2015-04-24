@@ -56,10 +56,10 @@ public class Box {
       newPS.add( ps );
     };
 
-    addPS( InputParameters( betaMin, hMin ) );
-    addPS( InputParameters( betaMin, hMax ) );
-    addPS( InputParameters( betaMax, hMin ) );
-    addPS( InputParameters( betaMax, hMax ) );
+    addPS( InputParameters( betaMin, hMin, 100 ) );
+    addPS( InputParameters( betaMin, hMax, 100 ) );
+    addPS( InputParameters( betaMax, hMin, 100 ) );
+    addPS( InputParameters( betaMax, hMax, 100 ) );
     return newPS;
   }
 
