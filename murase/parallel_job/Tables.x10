@@ -38,5 +38,15 @@ public class Tables {
     val s = json.substring( 0n, json.length()-2n ) + "\n]";
     return s;
   }
+
+  def parameterSetsJson(): String {
+    var json: String = "[\n";
+    for( entry in psTable.entries() ) {
+      val ps = entry.getValue();
+      json += ps.toJson() + ",\n";
+    }
+    val s = json.substring( 0n, json.length()-2n ) + "\n]";
+    return s;
+  }
 }
 

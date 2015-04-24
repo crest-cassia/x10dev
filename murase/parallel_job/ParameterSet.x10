@@ -23,7 +23,7 @@ public class ParameterSet {
   }
 
   def toJson(): String {
-    val str = "{ \"id\": " + id + ", \"params\": " + params + " }";
+    val str = "{ \"id\": " + id + ", \"params\": " + params.toJson() + " }";
     return str;
   }
 

@@ -4,6 +4,7 @@ public class GridSearcher {
 
   val boxes: ArrayList[Box];
   val targetNumRuns = 1;
+  val expectedResultDiff = 0.5;
 
   def this() {
     boxes = new ArrayList[Box]();
@@ -64,7 +65,7 @@ public class GridSearcher {
     val resultDiff = Math.min( diff1, diff2 );
     Console.OUT.println( "  resultDiff of Box(" + box + ") in beta direction : " + resultDiff );
     return ( box.betaMax - box.betaMin > 0.005 &&
-             resultDiff > 0.5 );
+             resultDiff > expectedResultDiff );
   }
 
   private def needsToDivideInH( table: Tables, box: Box ): Boolean {
@@ -81,7 +82,7 @@ public class GridSearcher {
     val resultDiff = Math.min( diff1, diff2 );
     Console.OUT.println( "  resultDiff of Box(" + box + ") in h direction : " + resultDiff );
     return ( box.hMax - box.hMin > 0.01 &&
-             resultDiff > 0.5 );
+             resultDiff > expectedResultDiff );
   } 
 
   private def divideBox( table: Tables, box: Box ): ArrayList[Task] {
