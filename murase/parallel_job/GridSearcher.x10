@@ -14,17 +14,14 @@ public class GridSearcher {
     return box.createSubTasks( table, 1 );
   }
 
-  public def generateTasks( table: Tables, finishedRun: Run ): ArrayList[Task] {
+  public def onParameterSetFinished( table: Tables, finishedPS: ParameterSet ): ArrayList[Task] {
     val newTasks: ArrayList[Task] = new ArrayList[Task]();
     val appendTask = ( toAdd: ArrayList[Task] ) => {
       for( task in toAdd ) {
         newTasks.add( task );
       }
     };
-
-    val ps = finishedRun.parameterSet( table );
-    val boxes = findBoxesFromPS( ps );
-    // val boxes = ps.boxes( table );
+    val boxes = findBoxesFromPS( finishedPS );
     for( box in boxes ) {
       if( needsToDivide( table, box ) ) {
         Console.OUT.println("  dividing box " + box );

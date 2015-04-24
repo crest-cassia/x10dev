@@ -50,11 +50,17 @@ class JobQueue implements TaskQueue[JobQueue, Long] {
       };
 
       val newTasks = at( refTableSearcher ) {
-        val localNewTasks: ArrayList[Task];
-        val run = refTableSearcher().tables.runsTable.get( runId );
+        val localNewTasks: ArrayList[Task] = new ArrayList[Task]();
+        val tables = refTableSearcher().tables;
+        val searcher = refTableSearcher().searcher;
+        val run = tables.runsTable.get( runId );
         atomic {
           run.storeResult( localResult, runPlace, startAt, finishAt );
-          localNewTasks = refTableSearcher().searcher.generateTasks( refTableSearcher().tables, run );
+          val ps = run.parameterSet( tables );
+          if( ps.isFinished( tables ) ) {
+            val tasks = searcher.onParameterSetFinished( tables, ps );
+            appendTask( localNewTasks, tasks );
+          }
         }
         return localNewTasks;
       };
