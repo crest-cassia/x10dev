@@ -43,7 +43,7 @@ public class ParameterSet {
   def createRuns( table: Tables, numRuns: Long ): ArrayList[Run] {
     val a = new ArrayList[Run]();
     for( i in 1..numRuns ) {
-      val run = new Run( table.maxRunId, this );
+      val run = new Run( table.maxRunId, this, table.nextSeed() );
       table.maxRunId += 1;
       table.runsTable.put( run.id, run );
       runIds.add( run.id );

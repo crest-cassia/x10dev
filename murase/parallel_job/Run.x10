@@ -7,15 +7,15 @@ public class Run {
   public var startAt: Long;
   public var finishAt: Long;
   val cmd: String;
-  val seed: Long;
+  val seed: Int;
   public var result: OutputParameters;
   public var finished: Boolean;
   val parentPSId: Long;
 
-  def this( _id:Long, _ps: ParameterSet ) {
+  def this( _id:Long, _ps: ParameterSet, _seed: Int ) {
     id = _id;
     parentPSId = _ps.id;
-    seed = 12345; // TODO: IMPLEMENT ME
+    seed = _seed;
     cmd = generateCommand( _ps.params );
     finished = false;
   }

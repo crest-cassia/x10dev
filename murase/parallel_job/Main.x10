@@ -8,9 +8,9 @@ import x10.util.ArrayList;
 
 class Main {
 
-  def run(): void {
+  def run( seed: Long ): void {
     val refTableSearcher = new GlobalRef[PairTablesSearcher](
-      new PairTablesSearcher( new Tables(), new GridSearcher() )
+      new PairTablesSearcher( new Tables( seed ), new GridSearcher() )
     );
     val newTasks = at( refTableSearcher ) {
       val tasks = refTableSearcher().searcher.makeInitialBox( refTableSearcher().tables, 0.2, 0.3, -1.0, 1.0 );
@@ -31,6 +31,7 @@ class Main {
 
   static public def main( args: Rail[String] ) {
     val m = new Main();
-    m.run();
+    val seed = Long.parse( args(0) );
+    m.run( seed );
   }
 }

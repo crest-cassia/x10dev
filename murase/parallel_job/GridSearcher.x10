@@ -3,6 +3,7 @@ import x10.util.ArrayList;
 public class GridSearcher {
 
   val boxes: ArrayList[Box];
+  val targetNumRuns = 5;
 
   def this() {
     boxes = new ArrayList[Box]();
@@ -11,7 +12,7 @@ public class GridSearcher {
   public def makeInitialBox( table: Tables, betaMin: Double, betaMax: Double, hMin: Double, hMax: Double ): ArrayList[Task] {
     val box = Box.create( betaMin, betaMax, hMin, hMax );
     boxes.add( box );
-    return box.createSubTasks( table, 1 );
+    return box.createSubTasks( table, targetNumRuns );
   }
 
   public def onParameterSetFinished( table: Tables, finishedPS: ParameterSet ): ArrayList[Task] {
@@ -77,10 +78,10 @@ public class GridSearcher {
     val b2 = Box.create( betaMin, betaHalf, hHalf, hMax );
     val b3 = Box.create( betaHalf, betaMax, hMin, hHalf );
     val b4 = Box.create( betaHalf, betaMax, hHalf, hMax );
-    addNewTasks( b1.createSubTasks( table, 1 ) );
-    addNewTasks( b2.createSubTasks( table, 1 ) );
-    addNewTasks( b3.createSubTasks( table, 1 ) );
-    addNewTasks( b4.createSubTasks( table, 1 ) );
+    addNewTasks( b1.createSubTasks( table, targetNumRuns ) );
+    addNewTasks( b2.createSubTasks( table, targetNumRuns ) );
+    addNewTasks( b3.createSubTasks( table, targetNumRuns ) );
+    addNewTasks( b4.createSubTasks( table, targetNumRuns ) );
     box.divided = true;
 
     Console.OUT.println( "newTasks : " + newTasks );
