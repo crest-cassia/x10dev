@@ -65,8 +65,8 @@ public class GridSearcher {
     val resultBetaMin = averageResults( table, psBetaMin );
     val resultDiff = Math.abs( resultBetaMax - resultBetaMin );
     Console.OUT.println( "  resultDiff of Box(" + box + ") in beta direction : " + resultDiff );
-    return ( box.betaMax - box.betaMin > 0.05 &&
-             resultDiff > 1.0 );
+    return ( box.betaMax - box.betaMin > 0.005 &&
+             resultDiff > 0.5 );
   }
 
   private def needsToDivideInH( table: Tables, box: Box ): Boolean {
@@ -82,8 +82,8 @@ public class GridSearcher {
     val resultHMin = averageResults( table, psHMin );
     val resultDiff = Math.abs( resultHMax - resultHMin );
     Console.OUT.println( "  resultDiff of Box(" + box + ") in h direction : " + resultDiff );
-    return ( box.hMax - box.hMin > 0.1 &&
-             resultDiff > 1.0 );
+    return ( box.hMax - box.hMin > 0.01 &&
+             resultDiff > 0.5 );
   } 
 
   private def divideBox( table: Tables, box: Box ): ArrayList[Task] {
@@ -125,6 +125,7 @@ public class GridSearcher {
       for( task in tasks ) {
         newTasks.add( task );
       }
+      boxes.add( newBox );
     }
 
     box.divided = true;
