@@ -43,13 +43,11 @@ public class GridSearcher {
     return ret;
   }
 
-  private def averageResults( table: Tables, parameterSets: ArrayList[ParameterSet] ): Double {
-    var sum: Double = 0.0;
-    for( ps in parameterSets ) {
-      val r = ps.averagedResult( table );
-      sum += r;
-    }
-    return sum / parameterSets.size();
+  private def diffResults( table: Tables, parameterSets: ArrayList[ParameterSet] ): Double {
+    assert parameterSets.size() == 2;
+    val r0 = parameterSets(0).averagedResult( table );
+    val r1 = parameterSets(1).averagedResult( table );
+    return Math.abs( r0 - r1 );
   }
 
   private def needsToDivideInBeta( table: Tables, box: Box ): Boolean {
@@ -61,9 +59,9 @@ public class GridSearcher {
     val psBetaMin = box.parameterSetsWhere( table, (ps: ParameterSet): Boolean => {
         return ps.params.beta == box.betaMin;
       } );
-    val resultBetaMax = averageResults( table, psBetaMax );
-    val resultBetaMin = averageResults( table, psBetaMin );
-    val resultDiff = Math.abs( resultBetaMax - resultBetaMin );
+    val diff1 = diffResults( table, psBetaMax );
+    val diff2 = diffResults( table, psBetaMin );
+    val resultDiff = Math.min( diff1, diff2 );
     Console.OUT.println( "  resultDiff of Box(" + box + ") in beta direction : " + resultDiff );
     return ( box.betaMax - box.betaMin > 0.005 &&
              resultDiff > 0.5 );
@@ -78,9 +76,9 @@ public class GridSearcher {
     val psHMin = box.parameterSetsWhere( table, (ps: ParameterSet): Boolean => {
         return ps.params.h == box.hMin;
       } );
-    val resultHMax = averageResults( table, psHMax );
-    val resultHMin = averageResults( table, psHMin );
-    val resultDiff = Math.abs( resultHMax - resultHMin );
+    val diff1 = diffResults( table, psHMax );
+    val diff2 = diffResults( table, psHMin );
+    val resultDiff = Math.min( diff1, diff2 );
     Console.OUT.println( "  resultDiff of Box(" + box + ") in h direction : " + resultDiff );
     return ( box.hMax - box.hMin > 0.01 &&
              resultDiff > 0.5 );
