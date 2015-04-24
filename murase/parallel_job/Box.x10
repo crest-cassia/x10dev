@@ -47,6 +47,17 @@ public class Box {
     return a;
   }
 
+  def parameterSetsWhere( table: Tables, condition: (ParameterSet) => Boolean ) {
+    val a = new ArrayList[ParameterSet]();
+    for( psId in psIds ) {
+      val ps = table.psTable( psId );
+      if( condition( ps ) ) {
+        a.add( ps );
+      }
+    }
+    return a;
+  }
+
   def createParameterSets( table: Tables ): ArrayList[ParameterSet] {
     val newPS = new ArrayList[ParameterSet]();
 
