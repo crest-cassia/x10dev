@@ -4,7 +4,7 @@ public class GridSearcher {
 
   val boxes: ArrayList[Box];
   val targetNumRuns = 1;
-  val expectedResultDiff = 0.5;
+  val expectedResultDiff = 0.3;
 
   def this() {
     boxes = new ArrayList[Box]();
@@ -54,14 +54,14 @@ public class GridSearcher {
   private def needsToDivideInBeta( table: Tables, box: Box ): Boolean {
     // check beta direction
     val results = new ArrayList[Double]();
-    val psBetaMax = box.parameterSetsWhere( table, (ps: ParameterSet): Boolean => {
-        return ps.params.beta == box.betaMax;
+    val psHMax = box.parameterSetsWhere( table, (ps: ParameterSet): Boolean => {
+        return ps.params.h == box.hMax;
       } );
-    val psBetaMin = box.parameterSetsWhere( table, (ps: ParameterSet): Boolean => {
-        return ps.params.beta == box.betaMin;
+    val psHMin = box.parameterSetsWhere( table, (ps: ParameterSet): Boolean => {
+        return ps.params.h == box.hMin;
       } );
-    val diff1 = diffResults( table, psBetaMax );
-    val diff2 = diffResults( table, psBetaMin );
+    val diff1 = diffResults( table, psHMax );
+    val diff2 = diffResults( table, psHMin );
     val resultDiff = Math.min( diff1, diff2 );
     Console.OUT.println( "  resultDiff of Box(" + box + ") in beta direction : " + resultDiff );
     return ( box.betaMax - box.betaMin > 0.005 &&
@@ -71,14 +71,14 @@ public class GridSearcher {
   private def needsToDivideInH( table: Tables, box: Box ): Boolean {
     // check beta direction
     val results = new ArrayList[Double]();
-    val psHMax = box.parameterSetsWhere( table, (ps: ParameterSet): Boolean => {
-        return ps.params.h == box.hMax;
+    val psBetaMax = box.parameterSetsWhere( table, (ps: ParameterSet): Boolean => {
+        return ps.params.beta == box.betaMax;
       } );
-    val psHMin = box.parameterSetsWhere( table, (ps: ParameterSet): Boolean => {
-        return ps.params.h == box.hMin;
+    val psBetaMin = box.parameterSetsWhere( table, (ps: ParameterSet): Boolean => {
+        return ps.params.beta == box.betaMin;
       } );
-    val diff1 = diffResults( table, psHMax );
-    val diff2 = diffResults( table, psHMin );
+    val diff1 = diffResults( table, psBetaMax );
+    val diff2 = diffResults( table, psBetaMin );
     val resultDiff = Math.min( diff1, diff2 );
     Console.OUT.println( "  resultDiff of Box(" + box + ") in h direction : " + resultDiff );
     return ( box.hMax - box.hMin > 0.01 &&
