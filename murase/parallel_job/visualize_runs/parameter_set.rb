@@ -15,7 +15,6 @@ class ParameterSet
   end
 
   def avg_result
-    pp @runs
     @runs.map {|run| run.result["orderParameter"] }.inject(:+)/@runs.size
   end
 
