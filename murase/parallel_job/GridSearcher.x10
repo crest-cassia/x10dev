@@ -4,7 +4,7 @@ public class GridSearcher {
 
   val boxes: ArrayList[Box];
   val targetNumRuns = 1;
-  val expectedResultDiff = 0.3;
+  val expectedResultDiff = 0.05;
 
   def this() {
     boxes = new ArrayList[Box]();
