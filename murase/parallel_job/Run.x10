@@ -16,7 +16,8 @@ public class Run {
     id = _id;
     parentPSId = _ps.id;
     seed = _seed;
-    cmd = generateCommand( _ps.params );
+    val params = Simulator.deregularize( _ps.point );
+    cmd = generateCommand( params );
     finished = false;
   }
 

@@ -1,4 +1,5 @@
 import x10.util.ArrayList;
+import x10.regionarray.Region;
 
 public class GridSearcher {
 
@@ -10,8 +11,8 @@ public class GridSearcher {
     boxes = new ArrayList[Box]();
   }
 
-  public def makeInitialBox( table: Tables, betaMin: Double, betaMax: Double, hMin: Double, hMax: Double ): ArrayList[Task] {
-    val box = Box.create( betaMin, betaMax, hMin, hMax );
+  public def makeInitialBox( table: Tables, searchRegion: Region{self.rank==Simulator.numParams} ): ArrayList[Task] {
+    val box = new Box( searchRegion );
     boxes.add( box );
     return box.createSubTasks( table, targetNumRuns );
   }
@@ -51,6 +52,33 @@ public class GridSearcher {
     return Math.abs( r0 - r1 );
   }
 
+  // return true if box needs to be divided in the direction of axis
+  private def needToDivide( table: Tables, box: Box, axis: Long ): Boolean {
+    if( box.region.projection( axis ).size() <= 1 ) { // undividable
+      return false;
+    }
+
+    var minDiff: Double = Double.MAX_VALUE;
+
+    val arraySmallerPS = box.parameterSetsWhere( table, (ps: ParameterSet) => {
+      return ps.point( axis ) == box.region.min( axis );
+    });
+    for( smallerPS in arraySmallerPS ) {
+      val psPairToCompare = box.parameterSetsWhere( table, (ps: ParameterSet) => {
+        return ps.isSimilarToWithRespectTo( smallerPS, axis );
+      });
+      val diff = diffResults( table, psPairToCompare );
+      if( diff < minDiff ) {
+        minDiff = diff;
+      }
+    }
+
+    Console.OUT.println( "  resultDiff of Box(" + box + ") in " + axis + " direction: " + minDiff );
+
+    return minDiff > expectedResultDiff;
+  }
+
+  /*
   private def needsToDivideInBeta( table: Tables, box: Box ): Boolean {
     // check beta direction
     val results = new ArrayList[Double]();
@@ -84,7 +112,64 @@ public class GridSearcher {
     return ( box.hMax - box.hMin > 0.01 &&
              resultDiff > expectedResultDiff );
   } 
+  */
 
+  private def divideBoxIn( box: Box, axis: Long ): ArrayList[Box] {
+    val ranges = box.toRanges();
+    val split = ranges( axis ).split(2);
+
+    ranges(axis) = split(0);
+    val newRegion1 = Region.makeRectangular( ranges );
+    val newBox1 = new Box( newRegion1 );
+
+    ranges(axis) = split(1);
+    val newRegion2 = Region.makeRectangular( ranges );
+    val newBox2 = new Box( newRegion2 );
+
+    val boxes = new ArrayList[Box]();
+    boxes.add( newBox1 );
+    boxes.add( newBox2 );
+    return boxes;
+  }
+
+  private def divideBox( table: Tables, box: Box ): ArrayList[Task] {
+    Console.OUT.println("  dividing : " + box );
+
+    var boxesToBeDivided: ArrayList[Box] = new ArrayList[Box]();
+    boxesToBeDivided.add( box );
+
+    val newBoxes = new ArrayList[Box]();
+    for( axis in 0..(box.region.rank-1) ) {
+      val bDivide = needToDivide( table, box, axis );
+      if( bDivide ) {
+        newBoxes.clear();
+        for( boxToBeDivided in boxesToBeDivided ) {
+          val dividedBoxes = divideBoxIn( boxToBeDivided, axis );
+          boxToBeDivided.divided = true;
+          newBoxes.addAll( dividedBoxes );
+        }
+      }
+      boxesToBeDivided = newBoxes;
+    }
+
+    val newTasks = new ArrayList[Task]();
+    for( newBox in newBoxes ) {
+      val tasks = newBox.createSubTasks( table, targetNumRuns );
+      for( task in tasks ) {
+        newTasks.add( task );
+      }
+      boxes.add( newBox );
+    }
+
+    box.divided = true;
+
+    Console.OUT.println( "newTasks : " + newTasks );
+
+    return newTasks;
+  }
+
+
+  /*
   private def divideBox( table: Tables, box: Box ): ArrayList[Task] {
     Console.OUT.println("  dividing : " + box );
 
@@ -133,5 +218,6 @@ public class GridSearcher {
 
     return newTasks;
   }
+  */
 }
 

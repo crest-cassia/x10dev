@@ -14,7 +14,7 @@ class Main {
       new PairTablesSearcher( new Tables( seed ), new GridSearcher() )
     );
     val newTasks = at( refTableSearcher ) {
-      val tasks = refTableSearcher().searcher.makeInitialBox( refTableSearcher().tables, 0.1, 0.5, -1.0, 1.0 );
+      val tasks = refTableSearcher().searcher.makeInitialBox( refTableSearcher().tables, Simulator.searchRegion() );
       return tasks;
     };
     val init = () => { return new JobQueue( refTableSearcher ); };

@@ -2,28 +2,24 @@ import x10.io.Console;
 import x10.util.ArrayList;
 import x10.util.Pair;
 
-public class ParameterSet {
-  public val id: Long;
-  public val params: InputParameters;
+public class ParameterSet( id: Long, point: Point{self.rank==Simulator.numParams} ) {
   val parentBoxIds: ArrayList[Long] = new ArrayList[Long]();
   public val runIds: ArrayList[Long] = new ArrayList[Long]();
-
-  def this( _id:Long, _params: InputParameters ) {
-    id = _id;
-    params = _params;
-  }
 
   def getParentBoxIds(): ArrayList[Long] {
     return parentBoxIds;
   }
 
   def toString(): String {
-    val str = "{ id: " + id + ", params: " + params + " }";
+    val str = "{ id: " + id + ", point: " + point + ", params: " + Simulator.deregularize(point) + " }";
     return str;
   }
 
   def toJson(): String {
-    val str = "{ \"id\": " + id + ", \"params\": " + params.toJson() + " }";
+    val str = "{ " +
+                "\"id\": " + id + ", \"point\": " + point.toString() +
+                "\"params\": " + Simulator.deregularize(point).toJson() + 
+              " }";
     return str;
   }
 
@@ -75,19 +71,29 @@ public class ParameterSet {
     return sum / runs.size();
   }
 
+  def isSimilarToWithRespectTo( another: ParameterSet, axis: Long ): Boolean {
+    val d = point - another.point;
+    for( i in 0..(d.rank-1) ) {
+      if( i != axis && d(i) != 0 ) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   static val tolerance: Double = 0.0000001;
 
-  static def find( table: Tables, p: InputParameters ): ParameterSet {
+  static def find( table: Tables, p: Point{self.rank==Simulator.numParams} ): ParameterSet {
     for( entry in table.psTable.entries() ) {
       val ps = entry.getValue();
-      if( ps.params == p ) {
+      if( ps.point == p ) {
         return ps;
       }
     }
     return null;
   }
 
-  static def findOrCreateParameterSet( table: Tables, p: InputParameters ): ParameterSet {
+  static def findOrCreateParameterSet( table: Tables, p: Point{self.rank==Simulator.numParams} ): ParameterSet {
     var ps: ParameterSet = find( table, p );
     if( ps == null ) {
       ps = new ParameterSet( table.maxPSId, p );

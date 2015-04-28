@@ -1,32 +1,29 @@
 import x10.io.Console;
 import x10.util.HashMap;
 import x10.util.ArrayList;
+import x10.regionarray.Region;
 
-public class Box {
+public class Box( region: Region{self.rank==Simulator.numParams} ) {
   public val psIds: ArrayList[Long] = new ArrayList[Long]();
-  public val betaMin: Double;
-  public val betaMax: Double;
-  public val hMin: Double;
-  public val hMax: Double;
-  public var divided: Boolean;
-
-  def this(_betaMin:Double, _betaMax:Double, _hMin:Double, _hMax:Double) {
-    betaMin = _betaMin;
-    betaMax = _betaMax;
-    hMin = _hMin;
-    hMax = _hMax;
-    divided = false;
-  }
+  public var divided: Boolean = false;
 
   def toString(): String {
     val str = "{ " +
-               " betaMin: " + betaMin + "," +
-               " betaMax: " + betaMax + "," +
-               " hMin: " + hMin + "," +
-               " hMax: " + hMax + "," +
+               " region: " + region + "," +
                " psIds: " + psIds +
                " }";
     return str;
+  }
+
+  def toRanges(): Rail[LongRange]{self.size==Simulator.numParams} {
+    val init = (i: Long): LongRange => {
+      val min = region.min(i);
+      val max = region.max(i);
+      val range = new LongRange( min, max );
+      return range;
+    };
+    val ranges = new Rail[LongRange]( region.rank, init );
+    return ranges;
   }
 
   def isFinished( table: Tables ): Boolean {
@@ -58,19 +55,39 @@ public class Box {
     return a;
   }
 
-  def createParameterSets( table: Tables ): ArrayList[ParameterSet] {
-    val newPS = new ArrayList[ParameterSet]();
-
-    val addPS = ( params: InputParameters ) => {
-      val ps = ParameterSet.findOrCreateParameterSet( table, params );
-      psIds.add( ps.id );
-      newPS.add( ps );
+  private def boundingPoints(): ArrayList[Point{self.rank==Simulator.numParams}] {
+    val pointToRail = ( p: Point{self.rank==Simulator.numParams} ): Rail[Long]{self.size==Simulator.numParams} => {
+      val r = new Rail[Long]( p.rank );
+      for( i in 0..(p.rank-1) ) {
+        r(i) = p(i);
+      }
+      return r;
     };
 
-    addPS( InputParameters( betaMin, hMin, 100 ) );
-    addPS( InputParameters( betaMin, hMax, 100 ) );
-    addPS( InputParameters( betaMax, hMin, 100 ) );
-    addPS( InputParameters( betaMax, hMax, 100 ) );
+    var points: ArrayList[Point{self.rank==Simulator.numParams}] = new ArrayList[Point{self.rank==Simulator.numParams}]();
+    points.add( region.minPoint() );
+    for( axis in 0..(region.rank-1) ) {
+      val tmpPoints = new ArrayList[Point{self.rank==Simulator.numParams}]();
+      for( point in points ) {
+        val r = pointToRail( point );
+        r( axis ) = region.min( axis );
+        tmpPoints.add( Point.make(r) );
+        r( axis ) = region.max( axis );
+        tmpPoints.add( Point.make(r) );
+      }
+      points = tmpPoints;
+    }
+
+    return points;
+  }
+
+  def createParameterSets( table: Tables ): ArrayList[ParameterSet] {
+    val newPS = new ArrayList[ParameterSet]();
+    for( point in boundingPoints() ) {
+      val ps = ParameterSet.findOrCreateParameterSet( table, point );
+      psIds.add( ps.id );
+      newPS.add( ps );
+    }
     return newPS;
   }
 
@@ -84,10 +101,6 @@ public class Box {
       }
     }
     return newTasks;
-  }
-
-  static def create( betaMin: Double, betaMax: Double, hMin: Double, hMax: Double ): Box {
-    return new Box( betaMin, betaMax, hMin, hMax );
   }
 }
 
