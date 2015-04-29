@@ -152,14 +152,14 @@ public class GridSearcher {
         debug( "  dividing in " + axis + " direction : " + boxesToBeDivided );
         newBoxes.clear();
         for( boxToBeDivided in boxesToBeDivided ) {
-          debug( "  dividing Box : " + boxToBeDivided );
           val dividedBoxes = divideBoxIn( boxToBeDivided, axis );
           boxToBeDivided.divided = true;
           newBoxes.addAll( dividedBoxes );
         }
-        boxesToBeDivided = newBoxes;
+        boxesToBeDivided = newBoxes.clone();
       }
     }
+    debug( "  newBoxes: " + newBoxes );
 
     val newTasks = new ArrayList[Task]();
     for( newBox in newBoxes ) {
