@@ -59,7 +59,7 @@ public class GridSearcher {
 
   // return true if box needs to be divided in the direction of axis
   private def needToDivide( table: Tables, box: Box, axis: Long ): Boolean {
-    if( box.region.projection( axis ).size() <= 1 ) { // undividable
+    if( box.region.projection( axis ).size() <= 2 ) { // undividable
       return false;
     }
 
