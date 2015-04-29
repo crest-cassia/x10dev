@@ -121,13 +121,15 @@ public class GridSearcher {
 
   private def divideBoxIn( box: Box, axis: Long ): ArrayList[Box] {
     val ranges = box.toRanges();
-    val split = ranges( axis ).split(2);
+    val min = ranges( axis ).min;
+    val max = ranges( axis ).max;
+    val mid = (min + max) / 2;
 
-    ranges(axis) = split(0);
+    ranges(axis) = min..mid;
     val newRegion1 = Region.makeRectangular( ranges );
     val newBox1 = new Box( newRegion1 );
 
-    ranges(axis) = split(1);
+    ranges(axis) = mid..max;
     val newRegion2 = Region.makeRectangular( ranges );
     val newBox2 = new Box( newRegion2 );
 
