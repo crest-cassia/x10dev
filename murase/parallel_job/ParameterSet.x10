@@ -17,8 +17,9 @@ public class ParameterSet( id: Long, point: Point{self.rank==Simulator.numParams
 
   def toJson(): String {
     val str = "{ " +
-                "\"id\": " + id + ", \"point\": " + point.toString() +
-                "\"params\": " + Simulator.deregularize(point).toJson() + 
+                "\"id\": " + id +
+                ", \"point\": " + point.toString() +
+                ", \"params\": " + Simulator.deregularize(point).toJson() +
               " }";
     return str;
   }
