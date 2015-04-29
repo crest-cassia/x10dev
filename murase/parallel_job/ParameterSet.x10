@@ -87,7 +87,7 @@ public class ParameterSet( id: Long, point: Point{self.rank==Simulator.numParams
   static def find( table: Tables, p: Point{self.rank==Simulator.numParams} ): ParameterSet {
     for( entry in table.psTable.entries() ) {
       val ps = entry.getValue();
-      if( ps.point == p ) {
+      if( ps.point.equals( p ) ) {
         return ps;
       }
     }
