@@ -5,10 +5,14 @@ public class GridSearcher {
 
   val boxes: ArrayList[Box];
   val targetNumRuns = 1;
-  val expectedResultDiff = 0.05;
+  val expectedResultDiff = 0.5;
 
   def this() {
     boxes = new ArrayList[Box]();
+  }
+
+  def debug( o: Any ): void {
+    Console.ERR.println(o);
   }
 
   public def makeInitialBox( table: Tables, searchRegion: Region{self.rank==Simulator.numParams} ): ArrayList[Task] {
@@ -49,6 +53,7 @@ public class GridSearcher {
     assert parameterSets.size() == 2;
     val r0 = parameterSets(0).averagedResult( table );
     val r1 = parameterSets(1).averagedResult( table );
+    debug( "  diffResults of " + parameterSets + " = " + Math.abs(r0-r1) );
     return Math.abs( r0 - r1 );
   }
 
@@ -58,7 +63,7 @@ public class GridSearcher {
       return false;
     }
 
-    var minDiff: Double = Double.MAX_VALUE;
+    var maxDiff: Double = 0.0;
 
     val arraySmallerPS = box.parameterSetsWhere( table, (ps: ParameterSet) => {
       return ps.point( axis ) == box.region.min( axis );
@@ -68,14 +73,14 @@ public class GridSearcher {
         return ps.isSimilarToWithRespectTo( smallerPS, axis );
       });
       val diff = diffResults( table, psPairToCompare );
-      if( diff < minDiff ) {
-        minDiff = diff;
+      if( diff > maxDiff ) {
+        maxDiff = diff;
       }
     }
 
-    Console.OUT.println( "  resultDiff of Box(" + box + ") in " + axis + " direction: " + minDiff );
+    Console.OUT.println( "  resultDiff of Box(" + box + ") in " + axis + " direction: " + maxDiff );
 
-    return minDiff > expectedResultDiff;
+    return maxDiff > expectedResultDiff;
   }
 
   /*
@@ -142,14 +147,16 @@ public class GridSearcher {
     for( axis in 0..(box.region.rank-1) ) {
       val bDivide = needToDivide( table, box, axis );
       if( bDivide ) {
+        debug( "  dividing in " + axis + " direction : " + boxesToBeDivided );
         newBoxes.clear();
         for( boxToBeDivided in boxesToBeDivided ) {
+          debug( "  dividing Box : " + boxToBeDivided );
           val dividedBoxes = divideBoxIn( boxToBeDivided, axis );
           boxToBeDivided.divided = true;
           newBoxes.addAll( dividedBoxes );
         }
+        boxesToBeDivided = newBoxes;
       }
-      boxesToBeDivided = newBoxes;
     }
 
     val newTasks = new ArrayList[Task]();
