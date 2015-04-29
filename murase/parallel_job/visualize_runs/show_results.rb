@@ -13,8 +13,8 @@ class ShowResults < Processing::App
     end
 
     size 600, 600
-    runs_json_file = File.join( File.dirname(__FILE__), ARGV[1] )
-    ps_json_file = File.join( File.dirname(__FILE__), ARGV[0] )
+    runs_json_file = ARGV[1]
+    ps_json_file = ARGV[0]
     runs = JSON.parse( File.open(runs_json_file).read )
     pss = JSON.parse( File.open(ps_json_file).read )
 
