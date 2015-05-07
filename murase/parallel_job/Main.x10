@@ -10,11 +10,11 @@ import x10.io.File;
 class Main {
 
   def run( seed: Long ): void {
-    val refTableSearcher = new GlobalRef[PairTablesSearcher](
-      new PairTablesSearcher( new Tables( seed ), new GridSearcher() )
+    val refTableSearcher = new GlobalRef[PairTablesSearchEngine](
+      new PairTablesSearchEngine( new Tables( seed ), new GridSearcher() )
     );
     val newTasks = at( refTableSearcher ) {
-      val tasks = refTableSearcher().searcher.makeInitialBox( refTableSearcher().tables, Simulator.searchRegion() );
+      val tasks = refTableSearcher().searcher.createInitialTask( refTableSearcher().tables, Simulator.searchRegion() );
       return tasks;
     };
     val init = () => { return new JobQueue( refTableSearcher ); };

@@ -18,10 +18,10 @@ import org.json.simple.*;
 
 class JobQueue implements TaskQueue[JobQueue, Long] {
   val tb = new ArrayListTaskBag[Task]();
-  val refTableSearcher: GlobalRef[ PairTablesSearcher ];
+  val refTableSearcher: GlobalRef[ PairTablesSearchEngine ];
   val timer: Timer = new Timer();
 
-  public def this( _refTableSearcher: GlobalRef[ PairTablesSearcher ] ) {
+  public def this( _refTableSearcher: GlobalRef[ PairTablesSearchEngine ] ) {
     refTableSearcher = _refTableSearcher;
   }
 

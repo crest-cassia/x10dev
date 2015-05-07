@@ -1,7 +1,7 @@
 import x10.util.ArrayList;
 import x10.regionarray.Region;
 
-public class GridSearcher {
+public class GridSearcher implements SearchEngineI {
 
   val boxes: ArrayList[Box];
   val targetNumRuns = 1;
@@ -15,7 +15,7 @@ public class GridSearcher {
     Console.ERR.println(o);
   }
 
-  public def makeInitialBox( table: Tables, searchRegion: Region{self.rank==Simulator.numParams} ): ArrayList[Task] {
+  public def createInitialTask( table: Tables, searchRegion: Region{self.rank==Simulator.numParams} ): ArrayList[Task] {
     val box = new Box( searchRegion );
     boxes.add( box );
     return box.createSubTasks( table, targetNumRuns );
