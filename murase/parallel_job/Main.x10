@@ -11,7 +11,7 @@ class Main {
 
   def run( seed: Long ): void {
     val refTableSearcher = new GlobalRef[PairTablesSearchEngine](
-      new PairTablesSearchEngine( new Tables( seed ), new GridSearcher() )
+      new PairTablesSearchEngine( new Tables( seed ), new ComprehensiveSearcher() )
     );
     val newTasks = at( refTableSearcher ) {
       val tasks = refTableSearcher().searcher.createInitialTask( refTableSearcher().tables, Simulator.searchRegion() );
