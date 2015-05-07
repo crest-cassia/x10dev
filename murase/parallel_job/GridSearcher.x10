@@ -5,7 +5,7 @@ public class GridSearcher implements SearchEngineI {
 
   val boxes: ArrayList[Box];
   val targetNumRuns = 1;
-  val expectedResultDiff = 0.5;
+  val expectedResultDiff = 0.1;
 
   def this() {
     boxes = new ArrayList[Box]();

@@ -1,5 +1,5 @@
 import x10.util.ArrayList;
-import x10.glb.ArrayListTaskBag;
+// import x10.glb.ArrayListTaskBag;
 import x10.glb.TaskQueue;
 import x10.glb.TaskBag;
 import x10.glb.GLBParameters;
@@ -17,7 +17,7 @@ import x10.interop.Java;
 import org.json.simple.*;
 
 class JobQueue implements TaskQueue[JobQueue, Long] {
-  val tb = new ArrayListTaskBag[Task]();
+  val tb = new FifoTaskBag[Task]();
   val refTableSearcher: GlobalRef[ PairTablesSearchEngine ];
   val timer: Timer = new Timer();
 
@@ -35,7 +35,7 @@ class JobQueue implements TaskQueue[JobQueue, Long] {
     context.yield();
 
     for( var i:Long = 0; tb.bag().size() > 0 && i < n; i++) {
-      val task = tb.bag().removeLast();
+      val task = tb.bag().removeFirst();
       val runId = task.runId;
       Console.OUT.println("running at " + here + " processing " + runId);
       val startAt = timer.milliTime();
@@ -77,7 +77,7 @@ class JobQueue implements TaskQueue[JobQueue, Long] {
 
   public def merge( var _tb: TaskBag): void { 
     Console.OUT.println("JobQueue#merge at " + here );
-    tb.merge( _tb as ArrayListTaskBag[Task]);
+    tb.merge( _tb as FifoTaskBag[Task]);
   }
   
   public def split(): TaskBag {

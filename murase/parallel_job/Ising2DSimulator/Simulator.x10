@@ -49,14 +49,14 @@ class Simulator {
   public static val numParams = 2;
 
   static def deregularize( point: Point{self.rank==numParams} ): InputParameters {
-    val beta = point(0) * 0.1;
-    val h    = point(1) * 0.2;
+    val beta = point(0) * 0.01;
+    val h    = point(1) * 0.01;
     val lx   = 100;
     return InputParameters( beta, h, lx );
   }
 
   static def searchRegion(): Region{self.rank==numParams} {
-    return Region.makeRectangular( 2..5, -5..5 );
+    return Region.makeRectangular( 20..50, -100..100 );
   }
 
 }
