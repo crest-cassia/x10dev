@@ -2,6 +2,16 @@ import x10.regionarray.Region;
 
 class Simulator {
 
+  static struct InputParameters( beta: Double, h: Double, l: Long ) {
+    public def toString(): String {
+      return "{ \"beta\": " + beta + ", \"h\": " + h + " }";
+    }
+
+    public def toJson(): String {
+      return toString();
+    }
+  }
+
   static def command( params: InputParameters, seed: Long ): String {
     return "../../build/ising2d.out " +
            (params.l-1) + " " +
@@ -24,5 +34,6 @@ class Simulator {
   static def searchRegion(): Region{self.rank==numParams} {
     return Region.makeRectangular( 20..50, -100..100 );
   }
+
 }
 

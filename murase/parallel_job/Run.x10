@@ -26,7 +26,7 @@ public class Run {
     return task;
   }
 
-  private def generateCommand( input: InputParameters ): String {
+  private def generateCommand( input: Simulator.InputParameters ): String {
     val cmd = Simulator.command( input, seed );
     Console.OUT.println( cmd );
     return cmd;
