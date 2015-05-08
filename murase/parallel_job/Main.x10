@@ -6,14 +6,26 @@ import x10.util.Pair;
 import x10.util.HashMap;
 import x10.util.ArrayList;
 import x10.io.File;
+import x10.interop.Java;
+import java.util.logging.Logger;
+import java.util.logging.Level;
+import java.util.logging.Handler;
 
 class Main {
 
   def run( seed: Long ): void {
+    val logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+    logger.setLevel(Level.INFO);   // set Level.ALL for debugging
+    val handlers:Rail[Handler] = Java.convert[Handler]( logger.getParent().getHandlers() );
+    for( handler in handlers ) {
+      handler.setLevel( logger.getLevel() );
+    }
+
     val refTableSearcher = new GlobalRef[PairTablesSearchEngine](
       new PairTablesSearchEngine( new Tables( seed ), new GridSearcher() )
-      // new PairTablesSearchEngine( new Tables( seed ), new ComprehensiveSearcher() )
     );
+
+    logger.info("Creating initial tasks");
     val newTasks = at( refTableSearcher ) {
       val tasks = refTableSearcher().searcher.createInitialTask( refTableSearcher().tables, Simulator.searchRegion() );
       return tasks;
@@ -21,10 +33,10 @@ class Main {
     val init = () => { return new JobQueue( refTableSearcher ); };
     val glb = new GLB[JobQueue, Long](init, GLBParameters.Default, true);
 
-    Console.OUT.println("Starting ... ");
+    logger.info("Staring GLB");
     val start = () => { glb.taskQueue().addInitialTasks( newTasks ); };
     val r = glb.run(start);
-    Console.OUT.println("r : " + r);
+    logger.info("Finished GLB");
 
     at( refTableSearcher ) {
       val f = new File("runs.json");

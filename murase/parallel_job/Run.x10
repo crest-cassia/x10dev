@@ -1,4 +1,3 @@
-import x10.io.Console;
 import x10.util.ArrayList;
 
 public class Run {
@@ -28,7 +27,6 @@ public class Run {
 
   private def generateCommand( input: Simulator.InputParameters ): String {
     val cmd = Simulator.command( input, seed );
-    Console.OUT.println( cmd );
     return cmd;
   }
 

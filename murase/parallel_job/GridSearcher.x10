@@ -1,18 +1,21 @@
 import x10.util.ArrayList;
 import x10.regionarray.Region;
+import x10.interop.Java;
+import java.util.logging.Logger;
 
 public class GridSearcher implements SearchEngineI {
 
   val boxes: ArrayList[Box];
   val targetNumRuns = 1;
   val expectedResultDiff = 0.1;
+  val logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
   def this() {
     boxes = new ArrayList[Box]();
   }
 
   def debug( o: Any ): void {
-    Console.ERR.println(o);
+    logger.fine( o.toString() );
   }
 
   public def createInitialTask( table: Tables, searchRegion: Region{self.rank==Simulator.numParams} ): ArrayList[Task] {
@@ -31,7 +34,7 @@ public class GridSearcher implements SearchEngineI {
     val boxes = findBoxesFromPS( finishedPS );
     for( box in boxes ) {
       if( box.divided == false && box.isFinished( table ) == true ) {
-        Console.OUT.println("  dividing box " + box );
+        logger.fine("  dividing box " + box );
         val tasks = divideBox( table, box );
         appendTask( tasks );
       }
@@ -78,7 +81,7 @@ public class GridSearcher implements SearchEngineI {
       }
     }
 
-    Console.OUT.println( "  resultDiff of Box(" + box + ") in " + axis + " direction: " + maxDiff );
+    logger.fine( "  resultDiff of Box(" + box + ") in " + axis + " direction: " + maxDiff );
 
     return maxDiff > expectedResultDiff;
   }
@@ -140,7 +143,7 @@ public class GridSearcher implements SearchEngineI {
   }
 
   private def divideBox( table: Tables, box: Box ): ArrayList[Task] {
-    Console.OUT.println("  dividing : " + box );
+    logger.fine( "  dividing : " + box );
 
     var boxesToBeDivided: ArrayList[Box] = new ArrayList[Box]();
     boxesToBeDivided.add( box );
@@ -149,7 +152,7 @@ public class GridSearcher implements SearchEngineI {
     for( axis in 0..(box.region.rank-1) ) {
       val bDivide = needToDivide( table, box, axis );
       if( bDivide ) {
-        debug( "  dividing in " + axis + " direction : " + boxesToBeDivided );
+        logger.fine( "  dividing in " + axis + " direction : " + boxesToBeDivided );
         newBoxes.clear();
         for( boxToBeDivided in boxesToBeDivided ) {
           val dividedBoxes = divideBoxIn( boxToBeDivided, axis );
@@ -159,7 +162,7 @@ public class GridSearcher implements SearchEngineI {
         boxesToBeDivided = newBoxes.clone();
       }
     }
-    debug( "  newBoxes: " + newBoxes );
+    logger.fine( "  newBoxes: " + newBoxes );
 
     val newTasks = new ArrayList[Task]();
     for( newBox in newBoxes ) {
@@ -172,7 +175,7 @@ public class GridSearcher implements SearchEngineI {
 
     box.divided = true;
 
-    Console.OUT.println( "newTasks : " + newTasks );
+    logger.fine( "newTasks : " + newTasks );
 
     return newTasks;
   }

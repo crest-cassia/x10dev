@@ -15,11 +15,14 @@ import x10.util.Timer;
 import x10.util.Pair;
 import x10.interop.Java;
 import org.json.simple.*;
+import java.util.logging.Logger;
 
 class JobQueue implements TaskQueue[JobQueue, Long] {
   val tb = new FifoTaskBag[Task]();
   val refTableSearcher: GlobalRef[ PairTablesSearchEngine ];
   val timer: Timer = new Timer();
+  val logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+
 
   public def this( _refTableSearcher: GlobalRef[ PairTablesSearchEngine ] ) {
     refTableSearcher = _refTableSearcher;
@@ -37,7 +40,7 @@ class JobQueue implements TaskQueue[JobQueue, Long] {
     for( var i:Long = 0; tb.bag().size() > 0 && i < n; i++) {
       val task = tb.bag().removeFirst();
       val runId = task.runId;
-      Console.OUT.println("running at " + here + " processing " + runId);
+      logger.info("running at " + here + " processing " + runId);
       val startAt = timer.milliTime();
       val runPlace = here.id;
       val localResult = task.run();
@@ -76,36 +79,30 @@ class JobQueue implements TaskQueue[JobQueue, Long] {
   }
 
   public def merge( var _tb: TaskBag): void { 
-    Console.OUT.println("JobQueue#merge at " + here );
+    logger.finer("JobQueue#merge at " + here );
     tb.merge( _tb as FifoTaskBag[Task]);
   }
   
   public def split(): TaskBag {
-    Console.OUT.println("JobQueue#split at " + here);
+    logger.finer("JobQueue#split at " + here);
     return tb.split();
   }
 
   public def printLog(): void {
-    Console.OUT.println("JobQueue#printLog at " + here);
   }
 
   public def getResult(): MyResult {
-    Console.OUT.println("JobQueue#getResult at " + here);
-    return new MyResult(0);
+    return new MyResult();
   }
 
   class MyResult extends GLBResult[Long] {
-    val result: Long;
 
-    public def this(local_result:Long) {
-      Console.OUT.println("constructor of MyResult");
-      result = local_result;
+    public def this() {
     }
 
     public def getResult():x10.lang.Rail[Long] {
       val r = new Rail[Long](1);
-      r(0) = result;
-      Console.OUT.println("MyResult#getResult at " + here + " : " + r );
+      r(0) = 0;
       return r;
     }
 
@@ -114,7 +111,6 @@ class JobQueue implements TaskQueue[JobQueue, Long] {
     }
 
     public def display(r:Rail[Long]):void {
-      Console.OUT.println("MyResult#display: " + r(0));
     }
   }
 }

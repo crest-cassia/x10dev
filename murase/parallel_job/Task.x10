@@ -3,14 +3,17 @@ import x10.io.File;
 import x10.interop.Java;
 import x10.compiler.Native;
 import org.json.simple.*;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 struct Task( runId: Long, cmd: String) {
 
   public def run(): Simulator.OutputParameters {
     val scriptPath = ShellScriptGenerator.generateScript( runId, cmd );
-    Console.OUT.println( "  running : " + runId );
+    val logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+    logger.fine( "  running : " + runId );
     val rc = system( "bash " + scriptPath );
-    Console.OUT.println( "  finished : " + scriptPath + " => " + rc );
+    logger.fine( "  finished : " + scriptPath + " => " + rc );
 
     val result = parseOutputJson();
     return result;

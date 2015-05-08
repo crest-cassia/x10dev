@@ -19,7 +19,6 @@ class Simulator {
   static struct OutputParameters( orderParameter: Double ) {
 
     static def parseFromJson( jsonPath: String ): OutputParameters {
-      Console.OUT.println( "  parsing : " + jsonPath );
       val input = new File(jsonPath);
       var json:String = "";
       for( line in input.lines() ) {
@@ -27,7 +26,6 @@ class Simulator {
       }
       val o = JSONValue.parse(json) as JSONObject;
       val orderParameter = o.get("order_parameter") as Double;
-      Console.OUT.println( orderParameter );
       return OutputParameters( orderParameter );
     }
 
