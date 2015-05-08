@@ -1,4 +1,3 @@
-import x10.io.Console;
 import x10.util.ArrayList;
 import x10.util.HashMap;
 import x10.util.Random;
@@ -19,14 +18,6 @@ public class Tables {
 
   def nextSeed(): Int {
     return random.nextInt( seedMax );
-  }
-
-  def printRunsTable() {
-    atomic {
-      for( entry in runsTable.entries() ) {
-        Console.OUT.println(entry.getKey() + ":" + entry.getValue() );
-      }
-    }
   }
 
   def runsJson(): String {

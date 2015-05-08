@@ -1,4 +1,3 @@
-import x10.io.Console;
 import x10.util.ArrayList;
 import x10.util.Pair;
 

@@ -86,42 +86,6 @@ public class GridSearcher implements SearchEngineI {
     return maxDiff > expectedResultDiff;
   }
 
-  /*
-  private def needsToDivideInBeta( table: Tables, box: Box ): Boolean {
-    // check beta direction
-    val results = new ArrayList[Double]();
-    val psHMax = box.parameterSetsWhere( table, (ps: ParameterSet): Boolean => {
-        return ps.params.h == box.hMax;
-      } );
-    val psHMin = box.parameterSetsWhere( table, (ps: ParameterSet): Boolean => {
-        return ps.params.h == box.hMin;
-      } );
-    val diff1 = diffResults( table, psHMax );
-    val diff2 = diffResults( table, psHMin );
-    val resultDiff = Math.min( diff1, diff2 );
-    Console.OUT.println( "  resultDiff of Box(" + box + ") in beta direction : " + resultDiff );
-    return ( box.betaMax - box.betaMin > 0.005 &&
-             resultDiff > expectedResultDiff );
-  }
-
-  private def needsToDivideInH( table: Tables, box: Box ): Boolean {
-    // check beta direction
-    val results = new ArrayList[Double]();
-    val psBetaMax = box.parameterSetsWhere( table, (ps: ParameterSet): Boolean => {
-        return ps.params.beta == box.betaMax;
-      } );
-    val psBetaMin = box.parameterSetsWhere( table, (ps: ParameterSet): Boolean => {
-        return ps.params.beta == box.betaMin;
-      } );
-    val diff1 = diffResults( table, psBetaMax );
-    val diff2 = diffResults( table, psBetaMin );
-    val resultDiff = Math.min( diff1, diff2 );
-    Console.OUT.println( "  resultDiff of Box(" + box + ") in h direction : " + resultDiff );
-    return ( box.hMax - box.hMin > 0.01 &&
-             resultDiff > expectedResultDiff );
-  } 
-  */
-
   private def divideBoxIn( box: Box, axis: Long ): ArrayList[Box] {
     val ranges = box.toRanges();
     val min = ranges( axis ).min;
@@ -179,57 +143,5 @@ public class GridSearcher implements SearchEngineI {
 
     return newTasks;
   }
-
-
-  /*
-  private def divideBox( table: Tables, box: Box ): ArrayList[Task] {
-    Console.OUT.println("  dividing : " + box );
-
-    val betaMin = box.betaMin;
-    val betaMax = box.betaMax;
-    val betaHalf = (betaMin + betaMax) / 2.0;
-    val hMin = box.hMin;
-    val hMax = box.hMax;
-    val hHalf = (hMin + hMax) / 2.0;
-    // val lMin = box.lMin;
-    // val lMax = box.lMax;
-    // var lHalf: Long = ( lMin + lMax ) / 2;
-    // if( lHalf % 2 == 1 ) { lHalf += 1; }  // lHalf must be even
-
-    val divBeta = needsToDivideInBeta( table, box );
-    val divH    = needsToDivideInH( table, box );
-
-    val newBoxes = new ArrayList[Box]();
-    if( divBeta && divH ) {
-      newBoxes.add( Box.create( betaMin, betaHalf, hMin, hHalf ) );
-      newBoxes.add( Box.create( betaMin, betaHalf, hHalf, hMax ) );
-      newBoxes.add( Box.create( betaHalf, betaMax, hMin, hHalf ) );
-      newBoxes.add( Box.create( betaHalf, betaMax, hHalf, hMax ) );
-    }
-    else if( divBeta ) {
-      newBoxes.add( Box.create( betaMin, betaHalf, hMin, hMax ) );
-      newBoxes.add( Box.create( betaHalf, betaMax, hMin, hMax ) );
-    }
-    else if( divH ) {
-      newBoxes.add( Box.create( betaMin, betaMax, hMin, hHalf ) );
-      newBoxes.add( Box.create( betaMin, betaMax, hHalf, hMax ) );
-    }
-
-    val newTasks = new ArrayList[Task]();
-    for( newBox in newBoxes ) {
-      val tasks = newBox.createSubTasks( table, targetNumRuns );
-      for( task in tasks ) {
-        newTasks.add( task );
-      }
-      boxes.add( newBox );
-    }
-
-    box.divided = true;
-
-    Console.OUT.println( "newTasks : " + newTasks );
-
-    return newTasks;
-  }
-  */
 }
 

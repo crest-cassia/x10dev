@@ -8,10 +8,6 @@ public class MockSearchEngine implements SearchEngineI {
   def this() {
   }
 
-  def debug( o: Any ): void {
-    Console.ERR.println(o);
-  }
-
   public def createInitialTask( table: Tables, searchRegion: Region{self.rank==Simulator.numParams} ): ArrayList[Task] {
     val newTasks = new ArrayList[Task]();
     val point = Point.make( 30, 10, 0 );

@@ -1,4 +1,3 @@
-import x10.io.Console;
 import x10.io.File;
 import x10.interop.Java;
 import x10.compiler.Native;
