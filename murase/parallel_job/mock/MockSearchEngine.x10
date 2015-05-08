@@ -14,7 +14,7 @@ public class MockSearchEngine implements SearchEngineI {
 
   public def createInitialTask( table: Tables, searchRegion: Region{self.rank==Simulator.numParams} ): ArrayList[Task] {
     val newTasks = new ArrayList[Task]();
-    val p = new Point( 30, 10, 0 )
+    val point = Point.make( 30, 10, 0 );
     val ps = ParameterSet.findOrCreateParameterSet( table, point );
     val runs = ps.createRunsUpTo( table, targetNumRuns );
     for( run in runs ) {
