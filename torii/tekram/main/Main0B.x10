@@ -694,6 +694,10 @@ public class Main0B {
 
 		Console.OUT.println("# LARGEST_TIME_WINDOW_SIZE " + LARGEST_TIME_WINDOW_SIZE);
 
+
+		if (true) LARGEST_TIME_WINDOW_SIZE = 0;
+
+
 		val TIME_CONFIGURE_END = System.nanoTime();
 
 
@@ -881,6 +885,9 @@ public class Main0B {
 		}
 
 		Console.OUT.println("# LARGEST_TIME_WINDOW_SIZE " + LARGEST_TIME_WINDOW_SIZE);
+
+		
+		if (true) LARGEST_TIME_WINDOW_SIZE = 0;
 
 
 		////////////////////////////////////
