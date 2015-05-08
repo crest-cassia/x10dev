@@ -34,6 +34,12 @@ class Simulator {
     public def toString(): String {
       return "{ \"orderParameter\": " + orderParameter + " }";
     }
+
+    public def normalize(): Rail[Double]{self.size==numOutputs} {
+      val r = new Rail[Double](numOutputs);
+      r(0) = orderParameter * 2.0 - 1.0;
+      return r;
+    }
   }
 
   static def command( params: InputParameters, seed: Long ): String {
@@ -47,6 +53,7 @@ class Simulator {
   }
 
   public static val numParams = 2;
+  public static val numOutputs = 1;
 
   static def deregularize( point: Point{self.rank==numParams} ): InputParameters {
     val beta = point(0) * 0.01;

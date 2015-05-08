@@ -67,7 +67,7 @@ public class ParameterSet( id: Long, point: Point{self.rank==Simulator.numParams
     var sum: Double = 0.0;
     val runs = runs( table );
     for( run in runs ) {
-      sum += run.result.orderParameter;
+      sum += run.result.normalize()(0);  // TODO: check other results
     }
     return sum / runs.size();
   }
