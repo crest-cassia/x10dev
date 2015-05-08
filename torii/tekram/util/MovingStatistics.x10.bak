@@ -1,0 +1,111 @@
+package tekram.util;
+import x10.util.ArrayList;
+import x10.util.HashMap;
+import x10.util.Map;
+import x10.util.List;
+import x10.util.Pair;
+import x10.util.Random;
+
+public class MovingStatistics {
+
+	static class State {
+		public var sum:Double;
+		public var sumsq:Double;
+		public var t:Long;
+	}
+
+	public var cache:Map[List[Double],Map[Long,State]];
+	
+	public def this() {
+		this.cache = new HashMap[List[Double],Map[Long,State]]();
+	}
+
+	public def register(a:List[Double], size:Long) {
+		if (!this.cache.containsKey(a)) {
+			this.cache.put(a, new HashMap[Long,State]());
+		}
+		if (!this.cache.get(a)().containsKey(size)) {
+			this.cache.get(a)().put(size, new State());
+		}
+	}
+
+	public def update(a:List[Double]) {
+		for (size in this.cache.get(a)().keySet()) {
+			val s = this.cache.get(a)().get(size)();
+			val oldest = a(s.t);
+			val latest = a.getLast();
+			if (a.size() - s.t < size) {
+				s.sum += latest;
+				s.sumsq += latest * latest;
+			} else {
+				s.sum -= oldest;
+				s.sum += latest;
+				s.sumsq -= oldest * oldest;
+				s.sumsq += latest * latest;
+				s.t += 1;
+			}
+		}
+	}
+
+	public def sum(a:List[Double], size:Long):Double {
+//		this.cache.get(new Pair[List[Double],List[Double]](a, a))().get(size)().sum;
+		return this.cache.get(a)().get(size)().sum;
+	}
+
+	public def sumofsquares(a:List[Double], size:Long):Double {
+		return this.cache.get(a)().get(size)().sumsq;
+	}
+
+	public def mean(a:List[Double], size:Long):Double {
+		return this.sum(a, size) / size;
+	}
+
+	public static def variance(a:List[Double], size:Long):Double {
+		val m = this.mean(a, size);
+		return this.sumofsquares(a, size) / size - m * m;
+	}
+
+	public static def main(Rail[String]) {
+		val random = new Random();
+		val s = new MovingStatistics();
+		val a0 = new ArrayList[Double]();
+
+		// 0. Register.
+		s.register(a0, 10);
+		s.register(a0, 20);
+		for (i in 0..100) {
+			// 1. A new observation.
+			a0.add(random.nextDouble());
+			// 2. Update.
+			s.update(a0);
+			Console.OUT.println(s.sum(a0, 10));
+			Console.OUT.println(s.sum(a0, 20));
+		}
+
+
+
+		val h = new HashMap[Pair[List[Double],Long],Double]();
+
+		val a1 = new ArrayList[Double]();
+		for (i in 0..100) {
+			a1.add(random.nextDouble());
+		}
+		val a2 = new ArrayList[Double]();
+		for (i in 0..100) {
+			a2.add(random.nextDouble());
+		}
+
+
+
+		// A pair of time-series and window-size maps to a statistic.
+		h.put(new Pair[List[Double],Long](a1,1), 11.0);
+		h.put(new Pair[List[Double],Long](a1,2), 12.0);
+		h.put(new Pair[List[Double],Long](a2,1), 21.0);
+		h.put(new Pair[List[Double],Long](a2,2), 22.0);
+
+		Console.OUT.println(h.get(new Pair[List[Double],Long](a1,1))());
+		Console.OUT.println(h.get(new Pair[List[Double],Long](a1,2))());
+		Console.OUT.println(h.get(new Pair[List[Double],Long](a2,1))());
+		Console.OUT.println(h.get(new Pair[List[Double],Long](a2,2))());
+	}
+}

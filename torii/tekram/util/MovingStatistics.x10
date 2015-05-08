@@ -41,7 +41,7 @@ public class MovingStatistics {
 
 	public def getState(a:List[Double], b:List[Double], size:Long):State {
 		val key = this.getKey(a, b);
-		return this.cache.get(key)().get(size)();
+		return this.cache.get(key).get(size);
 	}
 
 	public def tick(a:List[Double], b:List[Double], size:Long):Long {
@@ -58,7 +58,7 @@ public class MovingStatistics {
 		if (!cache.containsKey(key)) {
 			return false;
 		}
-		val states = cache.get(key)();
+		val states = cache.get(key);
 		if (!states.containsKey(size)) {
 			return false;
 		}
@@ -76,12 +76,12 @@ public class MovingStatistics {
 		if (!cache.containsKey(key)) {
 			cache.put(key, new HashMap[Long,State]());
 		}
-		val states = cache.get(key)();
+		val states = cache.get(key);
 		if (!states.containsKey(size)) {
 			states.put(size, new State(f));
 		}
 		if (a.size() > 0 && b.size() > 0) {
-			val s = states.get(size)();
+			val s = states.get(size);
 			val t1 = a.size() - 1;
 			val t2 = b.size() - 1;
 			val sub1 = a.subList(Math.max(t1 - size + 1, 0), t1 + 1);
@@ -116,9 +116,9 @@ public class MovingStatistics {
 		assert a.size() == b.size() : "a.size() == b.size(): Currently not supported";
 		val cache = this.cache;
 		val key = this.getKey(a, b);
-		val states = cache.get(key)();
+		val states = cache.get(key);
 		for (size in states.keySet()) {
-			val s = states.get(size)();
+			val s = states.get(size);
 			val f = (s.f != null ? s.f : (x:Double) => x);
 			val t1 = a.size() - 1 - size;
 			val t2 = b.size() - 1 - size;
