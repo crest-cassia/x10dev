@@ -1,10 +1,17 @@
 import sys
 import json
 import time
-print sys.argv[1]
+import random
 print sys.argv
+mu = float(sys.argv[1])
+sigma = float(sys.argv[2])
+seed = int(sys.argv[3])
 
-time.sleep(1);
-o = {'result': 1234.56789 }
+random.seed(seed)
+r = random.gauss(mu, sigma)
+
+time.sleep(r);
+o = {'duration': r }
 f = open('_output.json', 'w')
 f.write( json.dumps(o) )
+
