@@ -81,6 +81,21 @@ public class ParameterSet( id: Long, point: Point{self.rank==Simulator.numParams
     return true;
   }
 
+  static def count( table: Tables ): Long {
+    return table.psTable.size();
+  }
+
+  static def countWhere( table: Tables , condition: (ParameterSet) => Boolean ): Long {
+    var count: Long = 0;
+    for( entry in table.psTable.entries() ) {
+      val ps = entry.getValue();
+      if( condition( ps ) ) {
+        count += 1;
+      }
+    }
+    return count;
+  }
+
   static def find( table: Tables, p: Point{self.rank==Simulator.numParams} ): ParameterSet {
     for( entry in table.psTable.entries() ) {
       val ps = entry.getValue();

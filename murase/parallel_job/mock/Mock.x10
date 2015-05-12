@@ -13,7 +13,7 @@ import java.util.logging.Handler;
 
 class Mock {
 
-  def run( seed: Long ): void {
+  def run( seed: Long, engine: SearchEngineI ): void {
     val logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     logger.setLevel(Level.INFO);   // set Level.ALL for debugging
     val handlers:Rail[Handler] = Java.convert[Handler]( logger.getParent().getHandlers() );
@@ -22,7 +22,7 @@ class Mock {
     }
 
     val refTableSearcher = new GlobalRef[PairTablesSearchEngine](
-      new PairTablesSearchEngine( new Tables( seed ), new MockSearchEngine() )
+      new PairTablesSearchEngine( new Tables( seed ), engine )
     );
 
     logger.info("Creating initial tasks");
@@ -52,7 +52,8 @@ class Mock {
 
   static public def main( args: Rail[String] ) {
     val m = new Mock();
+    val engine = new MockSearchEngine( 24, 120, 0.9, 5, 3.0, 0.0 );
     val seed = Long.parse( args(0) );
-    m.run( seed );
+    m.run( seed, engine );
   }
 }
