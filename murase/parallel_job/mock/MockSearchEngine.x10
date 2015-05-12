@@ -50,8 +50,8 @@ public class MockSearchEngine implements SearchEngineI {
   }
 
   public def onParameterSetFinished( table: Tables, finishedPS: ParameterSet ): ArrayList[Task] {
-    Console.ERR.println("on PS finished");
-    val numRunningPS = ParameterSet.countWhere( table, (ps:ParameterSet):Boolean => { return ps.isFinished(table); } );
+    val numRunningPS = ParameterSet.countWhere( table, (ps:ParameterSet):Boolean => { return !ps.isFinished(table); } );
+    Console.ERR.println("on PS finished: " + numRunningPS);
     if( rnd.nextDouble() < jobGenProb || numRunningPS == 0 ) {
       val numTodo = numStaticJobs + numDynamicJobs - ParameterSet.count( table );
       val numTasks = numTodo > numJobsPerGen ? numJobsPerGen : numTodo;
