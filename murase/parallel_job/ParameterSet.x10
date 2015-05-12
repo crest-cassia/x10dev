@@ -81,8 +81,6 @@ public class ParameterSet( id: Long, point: Point{self.rank==Simulator.numParams
     return true;
   }
 
-  static val tolerance: Double = 0.0000001;
-
   static def find( table: Tables, p: Point{self.rank==Simulator.numParams} ): ParameterSet {
     for( entry in table.psTable.entries() ) {
       val ps = entry.getValue();
