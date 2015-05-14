@@ -31,7 +31,8 @@ class Mock {
       return tasks;
     };
     val init = () => { return new JobQueue( refTableSearcher ); };
-    val glb = new GLB[JobQueue, Long](init, GLBParameters.Default, true);
+    val glbParam = GLBParameters( 2n,4n,3n, GLBParameters.computeZ(Place.numPlaces(),3n),1024n,15n);
+    val glb = new GLB[JobQueue, Long](init, glbParam, true);
 
     logger.info("Staring GLB");
     val start = () => { glb.taskQueue().addInitialTasks( newTasks ); };
@@ -52,7 +53,7 @@ class Mock {
 
   static public def main( args: Rail[String] ) {
     val m = new Mock();
-    val engine = new MockSearchEngine( 8, 80, 0.3, 5, 0.5, 0.0 );
+    val engine = new MockSearchEngine( 100, 700, 0.03, 40, 0.5, 0.0 );
     val seed = Long.parse( args(0) );
     m.run( seed, engine );
   }
