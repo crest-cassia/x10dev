@@ -1,4 +1,3 @@
-import x10.io.Console;
 import x10.util.ArrayList;
 
 public class Run {
@@ -6,38 +5,36 @@ public class Run {
   public var placeId: Long;
   public var startAt: Long;
   public var finishAt: Long;
-  public val beta: Double;
-  public val h: Double;
-  val seed: Long;
-  public var result: Double;
+  val cmd: String;
+  val seed: Int;
+  public var result: Simulator.OutputParameters;
   public var finished: Boolean;
-  val parentBoxIds: ArrayList[Long] = new ArrayList[Long]();
+  val parentPSId: Long;
 
-  def this( _id:Long, _beta: Double, _h:Double ) {
+  def this( _id:Long, _ps: ParameterSet, _seed: Int ) {
     id = _id;
-    beta = _beta;
-    h = _h;
-
-    seed = 12345; // TODO: IMPLEMENT ME
-
+    parentPSId = _ps.id;
+    seed = _seed;
+    val params = Simulator.deregularize( _ps.point );
+    cmd = generateCommand( params );
     finished = false;
   }
 
   public def generateTask(): Task {
-    val task = new Task(id, generateCommand() );
+    val task = new Task( id, cmd );
     return task;
   }
 
-  def pushParentBoxId(box_id: Long): void {
-    parentBoxIds.add( box_id );
-  }
-
-  def generateCommand(): String {
-    val cmd = "../../build/ising2d.out 99 100 " + beta + " " + h + " 10000 10000 " + seed;
+  private def generateCommand( input: Simulator.InputParameters ): String {
+    val cmd = Simulator.command( input, seed );
     return cmd;
   }
 
-  def storeResult( _result: Double, _placeId: Long, _startAt: Long, _finishAt: Long ) {
+  def parameterSet( table: Tables ): ParameterSet {
+    return table.psTable.get( parentPSId );
+  }
+
+  def storeResult( _result: Simulator.OutputParameters, _placeId: Long, _startAt: Long, _finishAt: Long ) {
     result = _result;
     placeId = _placeId;
     startAt = _startAt;
@@ -45,19 +42,15 @@ public class Run {
     finished = true;
   }
 
-  def getParentBoxIds(): ArrayList[Long] {
-    return parentBoxIds;
-  }
-
   def toString(): String {
-    val str = "{ id: " + id + ", beta: " + beta + ", h: " + h + ", seed: " + seed +
+    val str = "{ id: " + id + ", parentPSId: " + parentPSId + ", seed: " + seed +
               ", result: " + result +
               ", placeId: " + placeId + ", startAt: " + startAt + ", finishAt: " + finishAt + " }";
     return str;
   }
 
   def toJson(): String {
-    val str = "{ \"id\": " + id + ", \"beta\": " + beta + ", \"h\": " + h + ", \"seed\": " + seed +
+    val str = "{ \"id\": " + id + ", \"parentPSId\": " + parentPSId + ", \"seed\": " + seed +
               ", \"result\": " + result +
               ", \"placeId\": " + placeId + ", \"startAt\": " + startAt + ", \"finishAt\": " + finishAt + " }";
     return str;

@@ -1,3 +1,7 @@
 build/*
 memo.md
 task_list.txt
+.ruby-version
+**/.DS_Store
+visualize_runs/figs
+visualize_runs/figs2

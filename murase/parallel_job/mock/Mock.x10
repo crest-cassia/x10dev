@@ -11,9 +11,9 @@ import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.util.logging.Handler;
 
-class Main {
+class Mock {
 
-  def run( seed: Long ): void {
+  def run( seed: Long, engine: SearchEngineI ): void {
     val logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     logger.setLevel(Level.INFO);   // set Level.ALL for debugging
     val handlers:Rail[Handler] = Java.convert[Handler]( logger.getParent().getHandlers() );
@@ -22,7 +22,7 @@ class Main {
     }
 
     val refTableSearcher = new GlobalRef[PairTablesSearchEngine](
-      new PairTablesSearchEngine( new Tables( seed ), new GridSearcher() )
+      new PairTablesSearchEngine( new Tables( seed ), engine )
     );
 
     logger.info("Creating initial tasks");
@@ -31,7 +31,9 @@ class Main {
       return tasks;
     };
     val init = () => { return new JobQueue( refTableSearcher ); };
-    val glb = new GLB[JobQueue, Long](init, GLBParameters.Default, true);
+    // val glbParam = GLBParameters( 2n,4n,3n, GLBParameters.computeZ(Place.numPlaces(),3n),1024n,15n);
+    val glbParam = GLBParameters.Default;
+    val glb = new GLB[JobQueue, Long](init, glbParam, true);
 
     logger.info("Staring GLB");
     val start = () => { glb.taskQueue().addInitialTasks( newTasks ); };
@@ -51,8 +53,9 @@ class Main {
   }
 
   static public def main( args: Rail[String] ) {
-    val m = new Main();
+    val m = new Mock();
+    val engine = new MockSearchEngine( 96, 0, 0.03, 40, 6.0, 0.0 );
     val seed = Long.parse( args(0) );
-    m.run( seed );
+    m.run( seed, engine );
   }
 }

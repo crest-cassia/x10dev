@@ -3,22 +3,29 @@ require 'json'
 require File.expand_path('run', File.dirname(__FILE__))
 
 class ShowTimeline < Processing::App
+
   def setup
+    $stderr.puts ARGV
+    unless ARGV.size == 1
+      $stderr.puts "usage: rp5 run show_timeline.rb runs.json"
+      raise "invalid argument"
+    end
+
     size 600, 600
-    json_file = File.join( File.dirname(__FILE__), 'runs.json' )
-    runs = JSON.parse( File.open(json_file).read )
+    runs_json_file = ARGV[0]
+    runs = JSON.parse( File.open(runs_json_file).read )
 
     min_start_at = runs.map {|run| run["startAt"] }.min
     max_finish_at = runs.map {|run| run["finishAt"] }.max
-    num_places = runs.map {|run| run["placeId"] }.uniq.size
-    Run.set_scale( num_places, min_start_at, max_finish_at )
+    @time_scale = [ min_start_at, max_finish_at ]
+    @num_places = runs.map {|run| run["placeId"] }.uniq.size
 
     @runs = runs.map {|run| Run.new( run ) }
   end
 
   def draw
     background(0)
-    @runs.each {|run| run.draw_timeline }
+    @runs.each {|run| run.draw_timeline( @num_places, @time_scale ) }
   end
 end
 

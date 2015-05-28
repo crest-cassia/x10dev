@@ -1,43 +1,29 @@
-import x10.io.Console;
 import x10.io.File;
 import x10.interop.Java;
+import x10.compiler.Native;
+import x10.util.Timer;
 import org.json.simple.*;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
-public class Task {
+struct Task( runId: Long, cmd: String) {
 
-  public val runId: Long;
-  public val cmd: String;
-
-  def this( _runId: Long, _cmd: String ) {
-    runId = _runId;
-    cmd = _cmd;
-  }
-
-  def run(): Double {
+  public def run(): Simulator.OutputParameters {
     val scriptPath = ShellScriptGenerator.generateScript( runId, cmd );
-    Console.OUT.println( "  running : " + runId );
-    val rc = MySystem.system( "bash " + scriptPath );
-    Console.OUT.println( "  finished : " + scriptPath + " => " + rc );
-
+    val rc = system( "bash " + scriptPath );
     val result = parseOutputJson();
     return result;
   }
   
-  def parseOutputJson(): Double {
+  @Native("java", "JRuntime.exec(#1)")
+  native private def system(cmd:String):Int;
+
+  private def parseOutputJson(): Simulator.OutputParameters {
     val jsonPath = runId + "/_output.json";
-    Console.OUT.println( "  parsing : " + jsonPath );
-    val input = new File(jsonPath);
-    var json:String = "";
-    for( line in input.lines() ) {
-      json += line;
-    }
-    val o = JSONValue.parse(json) as JSONObject;
-    val order_parameter = o.get("order_parameter") as Double;
-    Console.OUT.println(order_parameter);
-    return order_parameter;
+    return Simulator.OutputParameters.parseFromJson( jsonPath );
   }
 
-  def toString(): String {
+  public def toString(): String {
     return "{ runId : " + runId + ", cmd : " + cmd + " }";
   }
 }
