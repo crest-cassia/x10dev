@@ -18,7 +18,7 @@ class ShowTimeline < Processing::App
     min_start_at = runs.map {|run| run["startAt"] }.min
     max_finish_at = runs.map {|run| run["finishAt"] }.max
     @time_scale = [ min_start_at, max_finish_at ]
-    @num_places = runs.map {|run| run["placeId"] }.uniq.size
+    @num_places = runs.map {|run| run["placeId"] }.max + 1
 
     @runs = runs.map {|run| Run.new( run ) }
   end
