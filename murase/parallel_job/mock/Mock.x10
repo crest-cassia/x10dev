@@ -21,6 +21,23 @@ class Mock {
       handler.setLevel( logger.getLevel() );
     }
 
+    val refJobProducer = new GlobalRef[JobProducer](
+      new JobProducer( new Tables(seed), engine )
+    );
+
+    finish for( place in Place.places() ) {
+      if( place == here ) { continue; }
+      async at( place ) {
+        val consumer = new JobConsumer( refJobProducer );
+        consumer.run();
+      }
+    }
+
+    at( refJobProducer ) {
+      refJobProducer().printJSON("parameter_sets.json", "runs.json");
+    }
+
+  /*
     val refTableSearcher = new GlobalRef[PairTablesSearchEngine](
       new PairTablesSearchEngine( new Tables( seed ), engine )
     );
@@ -50,11 +67,12 @@ class Mock {
       p2.println( refTableSearcher().tables.parameterSetsJson() );
       p2.flush();
     }
+    */
   }
 
   static public def main( args: Rail[String] ) {
     val m = new Mock();
-    val engine = new MockSearchEngine( 96, 0, 0.03, 40, 6.0, 0.0 );
+    val engine = new MockSearchEngine( 96, 0, 0.03, 40, 2.0, 0.0 );
     val seed = Long.parse( args(0) );
     m.run( seed, engine );
   }
