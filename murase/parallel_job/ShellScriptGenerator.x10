@@ -20,8 +20,9 @@ class ShellScriptGenerator {
       "echo \"  \\\"rc\\\": $?,\" >> ../" + run_id + "_status.json\n" +
       "echo \"  \\\"finished_at\\\": \\\"`date`\\\"\" >> ../" + run_id + "_status.json\n" +
       "echo \"}\" >> ../" + run_id + "_status.json\n" +
-      "cd .. && tar cvf " + run_id + ".tar " + run_id  + "\n" +
-      "bzip2 " + run_id + ".tar\n";
+      // "cd .. && tar cvf " + run_id + ".tar " + run_id  + "\n" +
+      // "bzip2 " + run_id + ".tar\n";
+      "";
 
     val scriptPath = run_id + ".sh";
     val out = new File( scriptPath );

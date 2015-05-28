@@ -3,11 +3,11 @@ class JRuntime {
   public static int exec(String cmd) {
     try{
       Process proc = Runtime.getRuntime().exec(cmd);
-      BufferedReader in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-      String line;
-      while((line=in.readLine())!=null)  {
-        System.out.println(line);
-      }
+      // BufferedReader in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+      // String line;
+      // while((line=in.readLine())!=null)  {
+      //   System.out.println(line);
+      // }
       proc.waitFor();
       return proc.exitValue();
     }catch(IOException e){
