@@ -6,18 +6,26 @@ class JobProducer {
   val tables: Tables;
   val engine: SearchEngineI;
   val taskQueue: ArrayList[Task];
+  val sleepingConsumers: ArrayList[GlobalRef[JobConsumer]];
 
   def this( _tables: Tables, _engine: SearchEngineI ) {
     tables = _tables;
     engine = _engine;
     taskQueue = new ArrayList[Task]();
     enqueueInitialTasks();
+    sleepingConsumers = new ArrayList[GlobalRef[JobConsumer]]();
   }
 
   private def enqueueInitialTasks() {
     val tasks = engine.createInitialTask( tables, Simulator.searchRegion() );
     for( task in tasks ) {
       taskQueue.add( task );
+    }
+  }
+
+  public def registerSleepingConsumer( refConsumer: GlobalRef[JobConsumer] ) {
+    atomic {
+      sleepingConsumers.add( refConsumer );
     }
   }
 
@@ -31,6 +39,20 @@ class JobProducer {
         for( task in tasks ) {
           taskQueue.add( task );
         }
+      }
+    }
+
+    wakeUpSleepingConsumers( taskQueue.size() );
+  }
+
+  private def wakeUpSleepingConsumers( numConsumers: Long ) {
+    // This method is called only by saveResult. So please do not insert atomic
+    // Otherwise, you'll get a runtime exception.
+    for( i in 1..numConsumers ) {
+      if( sleepingConsumers.size() == 0 ) { break; }
+      val refConsumer = sleepingConsumers.removeFirst();
+      async at( refConsumer ) {
+        refConsumer().run();
       }
     }
   }

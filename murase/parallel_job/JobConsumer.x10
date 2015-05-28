@@ -40,6 +40,11 @@ class JobConsumer {
         tasks.add( newTask );
       }
     }
+
+    val refMe = new GlobalRef[JobConsumer]( this );
+    at( refProducer ) {
+      refProducer().registerSleepingConsumer( refMe );
+    }
   }
 
   def storeResult( result: RunResult ) {
