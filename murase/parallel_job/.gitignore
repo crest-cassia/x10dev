@@ -1,4 +1,5 @@
-build/*
+build/*.java
+build/*.class
 memo.md
 task_list.txt
 .ruby-version
