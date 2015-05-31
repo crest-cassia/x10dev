@@ -1,7 +1,8 @@
 #!/bin/sh
 #============ pjsub Options ============
-#PJM --rsc-list "node=12"
+#PJM --rsc-list "node=1024"
 #PJM --rsc-list "elapse=00:10:00"
+#PJM --rsc-list "rscgrp=large"
 #PJM --stg-transfiles all
 #PJM --mpi "use-rankdir"
 #PJM --stgin-dir "rank=* ./build %r:./"
@@ -18,8 +19,8 @@
 
 tar xf ../icedCopy.tar -C ../
 
-export X10_NPLACES=12
-export X10_NTHREADS=2
+export X10_NPLACES=1024
+export X10_NTHREADS=8
 export X10RT_MPI_ENABLE_COLLECTIVES=true
 
 ICED_COPY=../icedCopy
