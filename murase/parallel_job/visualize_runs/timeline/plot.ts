@@ -101,5 +101,5 @@ class BoxPlot {
 
 document.body.onload = function() {
   var box = new BoxPlot('#plot');
-  box.build('timeline/runs.json');
+  box.build('/runs');
 }

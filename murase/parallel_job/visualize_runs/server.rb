@@ -12,6 +12,9 @@ end
 runs = JSON.parse( File.open(ARGV[0]).read )
 parameter_sets = JSON.parse( File.open(ARGV[1]).read ) if ARGV[1]
 
+min_start_at = runs.map {|run| run["startAt"] }.min
+runs.each {|run| run["startAt"] -= min_start_at; run["finishAt"] -= min_start_at }
+
 # example: /filter?x0=1&x1=2
 #  => list of parameter sets whose point is [1,2,...]
 get '/filter' do
@@ -38,3 +41,7 @@ get '/domain' do
   {x: x_minmax, y: y_minmax}.to_json
 end
 
+get '/runs' do
+  content_type :json
+  runs.to_json
+end
