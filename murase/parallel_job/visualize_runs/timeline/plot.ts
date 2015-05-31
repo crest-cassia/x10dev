@@ -36,7 +36,7 @@ class BoxPlot {
   public build(url: string) {
     d3.json(url, (error: any, data: Run[]):void => {
       
-      this.xScale.domain( data.map( (d)=>{ return d.placeId;}) );
+      this.xScale.domain( data.map( (d)=>{ return d.placeId;}).sort( (a,b) => {return a-b;} ) );
       this.yScale.domain([
         d3.min(data, (d)=>{ return d.startAt;}),
         d3.max(data, (d)=>{ return d.finishAt;})
