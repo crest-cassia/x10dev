@@ -9,9 +9,24 @@ interface ParameterSet {
   num_runs: number;
 }
 
+interface Domain {
+  min: number;
+  max: number;
+}
+
 interface Domains {
-  x: number[];
-  y: number[];
+  numParams: number;
+  paramDomains: Domain[];  // size: numParams
+  numOutputs: number;
+  outputDomains: Domain[]; // size: numOutputs
+}
+
+function getMinPoint(domains: Domains): number[] {
+  var minPoint = new Array( domains.numParams );
+  for( var i=0; i < domains.numParams; i++) {
+    minPoint[i] = domains.paramDomains[i].min;
+  }
+  return minPoint;
 }
 
 class LinePlot {
@@ -21,8 +36,11 @@ class LinePlot {
   private height: number;
   private xScale: D3.Scale.LinearScale;
   private yScale: D3.Scale.LinearScale;
+  private domains: Domains;
+  private xKey: number;
+  private yKey: number;
   
-  constructor(elementId: string) {
+  constructor(elementId: string, domains: Domains) {
     var margin = {top: 20, right: 20, bottom: 30, left: 40};
     this.width = 960 - margin.left - margin.right,
     this.height = 600 - margin.top - margin.bottom;
@@ -35,22 +53,25 @@ class LinePlot {
       .attr("height", this.height + margin.top + margin.bottom)
       .append("g")
         .attr("transform", "translate("+margin.left+","+margin.top+")");
+
+    this.domains = domains;
   }
-  
-  public build(url: string) {
-    d3.json('/domain?x=x2', (error: any, data: Domains) => {
-      
-      this.xScale.domain( data.x );
-      this.yScale.domain( data.y );
-      
-      this.buildAxis();
-      
-      var path = this.svg.append("path").attr("id", "dataline").attr("class", "dataline");
-      this.update(0,0);
-    });
+
+  public build(xKey: number, yKey: number) {
+    this.xKey = xKey;
+    this.yKey = yKey;
+
+    this.buildAxis();
+    var path = this.svg.append("path").attr("id", "dataline").attr("class", "dataline");
+    this.update( getMinPoint(this.domains) );
   }
   
   private buildAxis() {
+    var xDomain = this.domains.paramDomains[this.xKey];
+    this.xScale.domain([xDomain.min, xDomain.max]);
+    var yDomain = this.domains.outputDomains[this.yKey];
+    this.yScale.domain([yDomain.min, yDomain.max]);
+
     var xAxis = d3.svg.axis().scale(this.xScale).orient("bottom");
     var yAxis = d3.svg.axis().scale(this.yScale).orient("left");
     this.svg.append("g")
@@ -68,8 +89,8 @@ class LinePlot {
       .text("Result");
   }
 
-  public update(x0:number, x1:number) {
-    var url = this.buildUrlFilteredData(x0,x1);
+  public update( point: number[] ) {
+    var url = this.buildUrlFilteredData(point, this.xKey);
     d3.json(url, (error: any, data: ParameterSet[]) => {
       var points = this.svg.selectAll("circle.point")
         .data(data);
@@ -83,8 +104,13 @@ class LinePlot {
     });
   }
   
-  private buildUrlFilteredData(x0: number, x1: number) {
-    var url = `/filter?x0=${x0}&x1=${x1}`;
+  private buildUrlFilteredData( point: number[], xkey: number ): string {
+    var params = new Array();
+    for( var i = 0; i < point.length; i++ ) {
+      if( i == xkey ) continue;
+      params.push( `x${i}=${point[i]}` );
+    }
+    var url = "/filter?" + params.join('&');
     return url;
   }
 
@@ -189,12 +215,29 @@ class Slider {
   }
 }
 
+
 document.body.onload = function() {
-  var plot = new LinePlot('#plot');
-  // plot.build('parameter_sets.json');
-  plot.build('/filter');
-  var slider0 = new Slider('#sliders', 'x0', 0, 2);
-  var slider1 = new Slider('#sliders', 'x1', 0, 9);
-  slider0.setOnChange( (n:number) => { plot.update(n, slider1.getVal()); } );
-  slider1.setOnChange( (n:number) => { plot.update(slider0.getVal(), n); } );
+  var url = '/domains';
+  d3.json(url, (error: any, domains: Domains) => {
+    var plot = new LinePlot('#plot', domains);
+    plot.build(2, 0);
+    var sliders: Slider[] = [];
+    for( var i=0; i < domains.numParams; i++) {
+      var domain = domains.paramDomains[i];
+      var slider = new Slider('#sliders', `x${i}`, domain.min, domain.max);
+      sliders.push( slider );
+    }
+
+    var slidersToPoint = ():number[] => {
+      var point: number[] = new Array( sliders.length );
+      for( var i=0; i < sliders.length; i++ ) {
+        point[i] = sliders[i].getVal();
+      }
+      return point;
+    }
+
+    for( var i=0; i < sliders.length; i++ ) {
+      sliders[i].setOnChange( (n:number) => { plot.update( slidersToPoint() ); } );
+    }
+  });
 }

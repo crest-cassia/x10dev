@@ -20,25 +20,51 @@ runs.each {|run| run["startAt"] -= min_start_at; run["finishAt"] -= min_start_at
 get '/filter' do
   content_type :json
   selected = parameter_sets
-  pp params
   params.each_pair do |key,val|
     n = key[1..-1].to_i
-	v = val.to_i
-	selected = selected.select do |ps|
+	  v = val.to_i
+	  selected = selected.select do |ps|
       ps["point"][n] == v
     end
   end
+
+  # TODO: tentative implementation
+  selected.each {|ps| ps["result"] = ps["point"].inject(:+) }
   selected.to_json
 end
 
-# example: /domain?x=x0
-#  => { x0: [ min_of_x0, max_of_x0 ], y: [ min_of_result, max_of_result ] }
-get '/domain' do
+# /domains  =>
+# interface Domains {
+#   numParams: number;
+#   paramDomains: Domain[];  // size: numParams
+#   numOutputs: number;
+#   outputDomains: Domain[]; // size: numOutputs
+# }
+# interface Domain {
+#   min: number;
+#   max: number;
+# }
+get '/domains' do
   content_type :json
-  n = params["x"][1..-1].to_i
-  x_minmax = parameter_sets.map {|ps| ps["point"][n] }.minmax
-  y_minmax = parameter_sets.map {|ps| ps["result"] }.minmax
-  {x: x_minmax, y: y_minmax}.to_json
+
+  num_params = parameter_sets.first["point"].size
+  param_domains = Array.new(num_params) do |i|
+    d = parameter_sets.map {|ps| ps["point"][i] }.minmax
+    {min: d[0], max: d[1]}
+  end
+
+  num_outputs = 1
+  output_domains = Array.new(num_outputs) do |i|
+    # d = parameter_sets.map {|ps| ps["results"][i] }.minmax
+    d = parameter_sets.map {|ps| ps["point"].inject(:+) }.minmax  # TODO: temporary implementation
+    {min: d[0], max: d[1]}
+  end
+
+  { numParams: num_params,
+    paramDomains: param_domains,
+    numOutputs: num_outputs,
+    outputDomains: output_domains
+  }.to_json
 end
 
 get '/runs' do
