@@ -14,4 +14,4 @@ time.sleep(r);
 o = {'duration': r }
 f = open('_output.json', 'w')
 f.write( json.dumps(o) )
-
+f.flush
