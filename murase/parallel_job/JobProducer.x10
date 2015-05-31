@@ -46,11 +46,16 @@ class JobProducer {
   }
 
   private def wakeUpSleepingConsumers( numConsumers: Long ) {
-    // This method is called only by saveResult. So please do not insert atomic
-    // Otherwise, you'll get a runtime exception.
-    for( i in 1..numConsumers ) {
-      if( sleepingConsumers.size() == 0 ) { break; }
-      val refConsumer = sleepingConsumers.removeFirst();
+    // `async at` must be called outside of atomic. Otherwise, you'll get a runtime exception.
+    val refConsumers = new ArrayList[GlobalRef[JobConsumer]]();
+    atomic {
+      for( i in 1..numConsumers ) {
+        if( sleepingConsumers.size() == 0 ) { break; }
+        val refConsumer = sleepingConsumers.removeFirst();
+        refConsumers.add(refConsumer);
+      }
+    }
+    for( refConsumer in refConsumers ) {
       async at( refConsumer ) {
         refConsumer().run();
       }
