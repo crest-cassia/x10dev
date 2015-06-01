@@ -54,25 +54,6 @@ class JobBuffer {
     return tasks;
   }
 
-  /*
-  private def sleepIfEmpty() {
-    var goingToSleep: Boolean = false;
-    atomic {
-      if( !sleeping && taskQueue.size() == 0 ) {
-        sleeping = true;
-        goingToSleep = true;
-      }
-    }
-    if( goingToSleep ) {
-      logger.info(" goingToSleep : Buffer" + here.id() );
-      val refMe = new GlobalRef[JobBuffer]( this );
-      at( refProducer ) {
-        refProducer().registerSleepingBuffer( refMe );
-      }
-    }
-  }
-  */
-
   def saveResult( result: JobConsumer.RunResult ) {
     val resultsToSave: ArrayList[JobConsumer.RunResult] = new ArrayList[JobConsumer.RunResult]();
     atomic {
