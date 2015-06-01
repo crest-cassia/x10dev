@@ -40,7 +40,6 @@ class JobBuffer {
     val n = 1;  // TODO: tune up number of return tasks
     val tasks = new ArrayList[Task]();
     fillTaskQueueIfEmpty();
-    awakenSleepingConsumers();
     atomic {
       for( i in 1..n ) {
         if( taskQueue.size() == 0 ) {
@@ -83,7 +82,6 @@ class JobBuffer {
 
   def saveResult( result: JobConsumer.RunResult ) {
     val resultsToSave: ArrayList[JobConsumer.RunResult] = new ArrayList[JobConsumer.RunResult]();
-    var readyToSleep: Boolean = false;
     atomic {
       resultsBuffer.add( result );
       numRunning -= 1;
@@ -92,25 +90,28 @@ class JobBuffer {
           resultsToSave.add( resultsBuffer.removeFirst() );
         }
       }
-      readyToSleep = ( taskQueue.size() == 0 && numRunning == 0 );
     }
 
-    if( readyToSleep ) {
-      logger.info(" goingToSleep : Buffer" + here.id() + " after saved result for run " + result.runId );
-      val refMe = new GlobalRef[JobBuffer]( this );
-      at( refProducer ) {
-        refProducer().registerSleepingBuffer( refMe );
-      }
-    }
     at( refProducer ) {
       refProducer().saveResults( resultsToSave );
     }
   }
 
   def registerSleepingConsumer( refCons: GlobalRef[JobConsumer] ) {
+    var registerToProducer: Boolean = false;
     atomic {
+      if( sleepingConsumers.isEmpty() ) {
+        registerToProducer = true;
+      }
       sleepingConsumers.add( refCons );
       logger.info(" registered Consumer at " + here + " :: " + sleepingConsumers );
+    }
+    if( registerToProducer ) {
+      logger.info(" registering free buffer : " + here.id() );
+      val refMe = new GlobalRef[JobBuffer]( this );
+      at( refProducer ) {
+        refProducer().registerFreeBuffer( refMe );
+      }
     }
   }
 

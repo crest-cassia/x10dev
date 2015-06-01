@@ -6,14 +6,14 @@ class JobProducer {
   val tables: Tables;
   val engine: SearchEngineI;
   val taskQueue: ArrayList[Task];
-  val sleepingBuffers: ArrayList[GlobalRef[JobBuffer]];
+  val freeBuffers: ArrayList[GlobalRef[JobBuffer]];
 
   def this( _tables: Tables, _engine: SearchEngineI ) {
     tables = _tables;
     engine = _engine;
     taskQueue = new ArrayList[Task]();
     enqueueInitialTasks();
-    sleepingBuffers = new ArrayList[GlobalRef[JobBuffer]]();
+    freeBuffers = new ArrayList[GlobalRef[JobBuffer]]();
   }
 
   private def enqueueInitialTasks() {
@@ -23,9 +23,9 @@ class JobProducer {
     }
   }
 
-  public def registerSleepingBuffer( refBuffer: GlobalRef[JobBuffer] ) {
+  public def registerFreeBuffer( refBuffer: GlobalRef[JobBuffer] ) {
     atomic {
-      sleepingBuffers.add( refBuffer );
+      freeBuffers.add( refBuffer );
     }
   }
 
@@ -44,15 +44,18 @@ class JobProducer {
       }
     }
 
-    awakenSleepingBuffers();
+    if( taskQueue.size() > 0 ) {
+      pushTaskToFreeBuffer();
+    }
   }
 
-  private def awakenSleepingBuffers() {
+  private def pushTaskToFreeBuffer() {
     // `async at` must be called outside of atomic. Otherwise, you'll get a runtime exception.
+    if( taskQueue.size() == 0 ) { return; }
     val refBuffers = new ArrayList[GlobalRef[JobBuffer]]();
     atomic {
-      while( sleepingBuffers.size() > 0 && refBuffers.size() < taskQueue.size() ) {
-        val refBuf = sleepingBuffers.removeFirst();
+      while( freeBuffers.size() > 0 && refBuffers.size() <= taskQueue.size() ) {
+        val refBuf = freeBuffers.removeFirst();
         refBuffers.add( refBuf );
       }
     }
