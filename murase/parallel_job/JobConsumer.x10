@@ -23,6 +23,7 @@ class JobConsumer {
   ) {};
 
   def run() {
+    logger.info("Consumer#run " + here);
     val tasks = getTasksFromBuffer();
     while( tasks.size() > 0 ) {
       val task = tasks.removeFirst();
@@ -31,6 +32,7 @@ class JobConsumer {
       at( refBuffer ) {
         refBuffer().saveResult( result );
       }
+      logger.info("saved result at " + here + " for run " + result.runId);
 
       val newTasks = getTasksFromBuffer();
       for( newTask in newTasks ) {
@@ -42,11 +44,12 @@ class JobConsumer {
     at( refBuffer ) {
       refBuffer().registerSleepingConsumer( refMe );
     }
+    logger.info("Consumer#run " + here + " finished");
   }
 
   private def runTask( task: Task ): RunResult {
     val runId = task.runId;
-    logger.info("running at " + here + " processing " + runId);
+    logger.info("running at " + here + " run " + runId);
     val startAt = timer.milliTime();
     val runPlace = here.id;
     val localResult = task.run();

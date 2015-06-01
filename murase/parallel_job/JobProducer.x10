@@ -51,13 +51,13 @@ class JobProducer {
     // `async at` must be called outside of atomic. Otherwise, you'll get a runtime exception.
     val refBuffers = new ArrayList[GlobalRef[JobBuffer]]();
     atomic {
-      while( sleepingBuffers.size() > 0 ) {
+      while( sleepingBuffers.size() > 0 && refBuffers.size() < taskQueue.size() ) {
         val refBuf = sleepingBuffers.removeFirst();
         refBuffers.add( refBuf );
       }
     }
     for( refBuf in refBuffers ) {
-      async at( refBuf ) {
+      at( refBuf ) {
         refBuf().wakeUp();
       }
     }
