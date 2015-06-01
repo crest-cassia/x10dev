@@ -51,7 +51,7 @@ class JobBuffer {
         numRunning += 1;
       }
     }
-    logger.info(" ending buf#popTasks at " + here.id + " : " + taskQueue.size() );
+    logger.info(" ending buf#popTasks at " + here.id + " : " + taskQueue.size() + " : " + numRunning + " running tasks");
     // logger.info("   return Task " + tasks(0).runId );
     return tasks;
   }
@@ -82,6 +82,7 @@ class JobBuffer {
 
   def saveResult( result: JobConsumer.RunResult ) {
     val resultsToSave: ArrayList[JobConsumer.RunResult] = new ArrayList[JobConsumer.RunResult]();
+    var readyToSleep: Boolean = false;
     atomic {
       resultsBuffer.add( result );
       numRunning -= 1;
@@ -90,18 +91,18 @@ class JobBuffer {
           resultsToSave.add( resultsBuffer.removeFirst() );
         }
       }
+      readyToSleep = ( taskQueue.size() == 0 && numRunning == 0 );
     }
 
-    at( refProducer ) {
-      refProducer().saveResults( resultsToSave );
-    }
-
-    if( taskQueue.size() == 0 && numRunning == 0 ) {
+    if( readyToSleep ) {
       logger.info(" goingToSleep : Buffer" + here.id() );
       val refMe = new GlobalRef[JobBuffer]( this );
       at( refProducer ) {
         refProducer().registerSleepingBuffer( refMe );
       }
+    }
+    at( refProducer ) {
+      refProducer().saveResults( resultsToSave );
     }
   }
 
