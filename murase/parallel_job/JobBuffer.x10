@@ -36,7 +36,7 @@ class JobBuffer {
   }
 
   def popTasks(): ArrayList[Task] {
-    logger.info(" starting buf#popTasks at " + here.id + " : " + taskQueue.size() + " : " + numRunning + " running tasks");
+    logger.info("Buffer#popTasks " + numRunning + "/" + taskQueue.size() + " tasks at " + here);
     val n = 1;  // TODO: tune up number of return tasks
     val tasks = new ArrayList[Task]();
     fillTaskQueueIfEmpty();
@@ -50,8 +50,7 @@ class JobBuffer {
         numRunning += 1;
       }
     }
-    logger.info(" ending buf#popTasks at " + here.id + " : " + taskQueue.size() + " : " + numRunning + " running tasks");
-    // logger.info("   return Task " + tasks(0).runId );
+    logger.info("> Buffer#popTasks " + numRunning + "/" + taskQueue.size() + " tasks at " + here);
     return tasks;
   }
 
@@ -73,12 +72,6 @@ class JobBuffer {
     }
   }
   */
-
-  def wakeUp() {
-    logger.info(" waking up Buffer " + here.id() + " :: " + sleepingConsumers );
-    fillTaskQueueIfEmpty();
-    awakenSleepingConsumers();
-  }
 
   def saveResult( result: JobConsumer.RunResult ) {
     val resultsToSave: ArrayList[JobConsumer.RunResult] = new ArrayList[JobConsumer.RunResult]();
@@ -104,10 +97,10 @@ class JobBuffer {
         registerToProducer = true;
       }
       sleepingConsumers.add( refCons );
-      logger.info(" registered Consumer at " + here + " :: " + sleepingConsumers );
+      logger.info("Buffer#registerSleepingConsumer " + sleepingConsumers + " at " + here );
     }
     if( registerToProducer ) {
-      logger.info(" registering free buffer : " + here.id() );
+      logger.info("Buffer#registerFreeBuffer at " + here );
       val refMe = new GlobalRef[JobBuffer]( this );
       at( refProducer ) {
         refProducer().registerFreeBuffer( refMe );
@@ -115,9 +108,16 @@ class JobBuffer {
     }
   }
 
+  def wakeUp() {
+    logger.info("Buffer#wakeUp " + sleepingConsumers + " at " + here);
+    fillTaskQueueIfEmpty();
+    logger.info("Buffer#wakeUp -> fillTask : " + numRunning + "/" + taskQueue.size() + " tasks at " + here);
+    awakenSleepingConsumers();
+  }
+
   private def awakenSleepingConsumers() {
     // if( taskQueue.size() == 0 ) { return; }
-    logger.info(" awakening Consumer at " + here + " :: " + sleepingConsumers );
+    logger.info("Buffer#awakenSleepingConsumers " + sleepingConsumers + " at " + here );
     val refConsumers = new ArrayList[GlobalRef[JobConsumer]]();
     atomic {
       while( sleepingConsumers.size() > 0 ) {
@@ -126,6 +126,7 @@ class JobBuffer {
       }
     }
     for( refConsumer in sleepingConsumers ) {
+      logger.info("Buffer#awakenSleepingConsumers : booting Consumer at " + refConsumer.home );
       async at( refConsumer ) {
         refConsumer().run();
       }
