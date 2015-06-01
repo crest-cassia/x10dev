@@ -14,10 +14,12 @@ class Mock {
     for( handler in handlers ) {
       handler.setLevel( logger.getLevel() );
     }
+
     val modBuf = 4;
+    val numBuffers = Place.numPlaces() / modBuf;
 
     val refJobProducer = new GlobalRef[JobProducer](
-      new JobProducer( new Tables(seed), engine )
+      new JobProducer( new Tables(seed), engine, numBuffers )
     );
 
     finish for( place in Place.places() ) {
@@ -46,7 +48,7 @@ class Mock {
 
   static public def main( args: Rail[String] ) {
     val m = new Mock();
-    val engine = new MockSearchEngine( 8, 16, 0.0, 8, 2.0, 0.0 );
+    val engine = new MockSearchEngine( 16, 0, 0.30, 4, 1.0, 0.0 );
     val seed = Long.parse( args(0) );
     m.run( seed, engine );
   }

@@ -7,13 +7,15 @@ class JobProducer {
   val engine: SearchEngineI;
   val taskQueue: ArrayList[Task];
   val freeBuffers: ArrayList[GlobalRef[JobBuffer]];
+  val numBuffers: Long;
 
-  def this( _tables: Tables, _engine: SearchEngineI ) {
+  def this( _tables: Tables, _engine: SearchEngineI, _numBuffers: Long ) {
     tables = _tables;
     engine = _engine;
     taskQueue = new ArrayList[Task]();
     enqueueInitialTasks();
     freeBuffers = new ArrayList[GlobalRef[JobBuffer]]();
+    numBuffers = _numBuffers;
   }
 
   private def enqueueInitialTasks() {
@@ -67,9 +69,9 @@ class JobProducer {
   }
 
   public def popTasks(): ArrayList[Task] {
-    val n = 1; // TODO: tune up parameters
     atomic {
       val tasks = new ArrayList[Task]();
+      val n = calcNumTasksToPop();
       for( i in 1..n ) {
         if( taskQueue.size() == 0 ) break;
         val task = taskQueue.removeFirst();
@@ -77,6 +79,10 @@ class JobProducer {
       }
       return tasks;
     }
+  }
+
+  private def calcNumTasksToPop(): Long {
+    return Math.ceil((taskQueue.size() as Double) / (2.0*numBuffers)) as Long;
   }
 
   public def printJSON( psJson: String, runsJson: String ) {
