@@ -125,7 +125,7 @@ class JobBuffer {
         refConsumers.add( refCons );
       }
     }
-    for( refConsumer in sleepingConsumers ) {
+    for( refConsumer in refConsumers ) {
       logger.info("Buffer#awakenSleepingConsumers : booting Consumer at " + refConsumer.home );
       async at( refConsumer ) {
         refConsumer().run();
