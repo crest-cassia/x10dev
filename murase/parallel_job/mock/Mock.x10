@@ -46,7 +46,7 @@ class Mock {
 
   static public def main( args: Rail[String] ) {
     val m = new Mock();
-    val engine = new MockSearchEngine( 8, 32, 0.0, 16, 2.0, 0.0 );
+    val engine = new MockSearchEngine( 8, 8, 0.0, 16, 2.0, 0.0 );
     val seed = Long.parse( args(0) );
     m.run( seed, engine );
   }

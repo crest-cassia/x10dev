@@ -36,6 +36,7 @@ class JobBuffer {
   }
 
   def popTasks(): ArrayList[Task] {
+    logger.info(" starting buf#popTasks at " + here.id + " : " + taskQueue.size() );
     val n = 1;  // TODO: tune up number of return tasks
     val tasks = new ArrayList[Task]();
     fillTaskQueueIfEmpty();
@@ -50,32 +51,31 @@ class JobBuffer {
         numRunning += 1;
       }
     }
-    if( taskQueue.size() == 0 ) {
-      sleep();
-    }
+    logger.info(" ending buf#popTasks at " + here.id + " : " + taskQueue.size() );
+    // logger.info("   return Task " + tasks(0).runId );
     return tasks;
   }
 
-  private def sleep() {
+  /*
+  private def sleepIfEmpty() {
     var goingToSleep: Boolean = false;
     atomic {
-      if( !sleeping ) {
+      if( !sleeping && taskQueue.size() == 0 ) {
         sleeping = true;
         goingToSleep = true;
       }
     }
     if( goingToSleep ) {
+      logger.info(" goingToSleep : Buffer" + here.id() );
       val refMe = new GlobalRef[JobBuffer]( this );
       at( refProducer ) {
         refProducer().registerSleepingBuffer( refMe );
       }
     }
   }
+  */
 
   def wakeUp() {
-    atomic {
-      sleeping = false;
-    }
     fillTaskQueueIfEmpty();
     awakenSleepingConsumers();
   }
@@ -94,6 +94,14 @@ class JobBuffer {
 
     at( refProducer ) {
       refProducer().saveResults( resultsToSave );
+    }
+
+    if( taskQueue.size() == 0 && numRunning == 0 ) {
+      logger.info(" goingToSleep : Buffer" + here.id() );
+      val refMe = new GlobalRef[JobBuffer]( this );
+      at( refProducer ) {
+        refProducer().registerSleepingBuffer( refMe );
+      }
     }
   }
 
