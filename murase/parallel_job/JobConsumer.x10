@@ -6,12 +6,12 @@ import java.util.logging.Logger;
 
 class JobConsumer {
 
-  val refProducer: GlobalRef[JobProducer];
+  val refBuffer: GlobalRef[JobBuffer];
   val timer = new Timer();
   val logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-  def this( _refProcuer: GlobalRef[JobProducer] ) {
-    refProducer = _refProcuer;
+  def this( _refBuffer: GlobalRef[JobBuffer] ) {
+    refBuffer = _refBuffer;
   }
 
   static struct RunResult(
@@ -23,39 +23,41 @@ class JobConsumer {
   ) {};
 
   def run() {
-    val tasks = getTasksFromProducer();
+    val tasks = getTasksFromBuffer();
     while( tasks.size() > 0 ) {
       val task = tasks.removeFirst();
-      val runId = task.runId;
-      logger.info("running at " + here + " processing " + runId);
-      val startAt = timer.milliTime();
-      val runPlace = here.id;
-      val localResult = task.run();
-      val finishAt = timer.milliTime();
-      val result = RunResult( runId, localResult, runPlace, startAt, finishAt );
+      val result = runTask( task );
 
-      storeResult( result );
-      val newTasks = getTasksFromProducer();
+      at( refBuffer ) {
+        refBuffer().saveResult( result );
+      }
+
+      val newTasks = getTasksFromBuffer();
       for( newTask in newTasks ) {
         tasks.add( newTask );
       }
     }
 
     val refMe = new GlobalRef[JobConsumer]( this );
-    at( refProducer ) {
-      refProducer().registerSleepingConsumer( refMe );
+    at( refBuffer ) {
+      refBuffer().registerSleepingConsumer( refMe );
     }
   }
 
-  def storeResult( result: RunResult ) {
-    at( refProducer ) {
-      refProducer().saveResult( result );
-    }
+  private def runTask( task: Task ): RunResult {
+    val runId = task.runId;
+    logger.info("running at " + here + " processing " + runId);
+    val startAt = timer.milliTime();
+    val runPlace = here.id;
+    val localResult = task.run();
+    val finishAt = timer.milliTime();
+    val result = RunResult( runId, localResult, runPlace, startAt, finishAt );
+    return result;
   }
 
-  def getTasksFromProducer(): ArrayList[Task] {
-    val tasks = at( refProducer ) {
-      return refProducer().popTasks(1);
+  def getTasksFromBuffer(): ArrayList[Task] {
+    val tasks = at( refBuffer ) {
+      return refBuffer().popTasks();
     };
     return tasks;
   }

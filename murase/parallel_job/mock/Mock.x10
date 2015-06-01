@@ -14,16 +14,28 @@ class Mock {
     for( handler in handlers ) {
       handler.setLevel( logger.getLevel() );
     }
+    val modBuf = 4;
 
     val refJobProducer = new GlobalRef[JobProducer](
       new JobProducer( new Tables(seed), engine )
     );
 
     finish for( place in Place.places() ) {
-      if( place == here ) { continue; }
-      async at( place ) {
-        val consumer = new JobConsumer( refJobProducer );
-        consumer.run();
+      if( place.id() % modBuf == 0 ) {
+        at( place ) {
+          val buffer = new JobBuffer( refJobProducer );
+          buffer.getInitialTasks();
+          val refBuffer = new GlobalRef[JobBuffer]( buffer );
+
+          for( place2 in Place.places() ) {
+            if( place2.id() / modBuf == place.id() / modBuf && place2 != place ) {
+              async at( place2 ) {
+                val consumer = new JobConsumer( refBuffer );
+                consumer.run();
+              }
+            }
+          }
+        }
       }
     }
 
@@ -39,3 +51,4 @@ class Mock {
     m.run( seed, engine );
   }
 }
+

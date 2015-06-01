@@ -6,14 +6,14 @@ class JobProducer {
   val tables: Tables;
   val engine: SearchEngineI;
   val taskQueue: ArrayList[Task];
-  val sleepingConsumers: ArrayList[GlobalRef[JobConsumer]];
+  val sleepingBuffers: ArrayList[GlobalRef[JobBuffer]];
 
   def this( _tables: Tables, _engine: SearchEngineI ) {
     tables = _tables;
     engine = _engine;
     taskQueue = new ArrayList[Task]();
     enqueueInitialTasks();
-    sleepingConsumers = new ArrayList[GlobalRef[JobConsumer]]();
+    sleepingBuffers = new ArrayList[GlobalRef[JobBuffer]]();
   }
 
   private def enqueueInitialTasks() {
@@ -23,46 +23,48 @@ class JobProducer {
     }
   }
 
-  public def registerSleepingConsumer( refConsumer: GlobalRef[JobConsumer] ) {
+  public def registerSleepingBuffer( refBuffer: GlobalRef[JobBuffer] ) {
     atomic {
-      sleepingConsumers.add( refConsumer );
+      sleepingBuffers.add( refBuffer );
     }
   }
 
-  public def saveResult( res: JobConsumer.RunResult ) {
+  public def saveResults( results: ArrayList[JobConsumer.RunResult] ) {
     atomic {
-      val run = tables.runsTable.get( res.runId );
-      run.storeResult( res.result, res.placeId, res.startAt, res.finishAt );
-      val ps = run.parameterSet( tables );
-      if( ps.isFinished( tables ) ) {
-        val tasks = engine.onParameterSetFinished( tables, ps );
-        for( task in tasks ) {
-          taskQueue.add( task );
+      for( res in results ) {
+        val run = tables.runsTable.get( res.runId );
+        run.storeResult( res.result, res.placeId, res.startAt, res.finishAt );
+        val ps = run.parameterSet( tables );
+        if( ps.isFinished( tables ) ) {
+          val tasks = engine.onParameterSetFinished( tables, ps );
+          for( task in tasks ) {
+            taskQueue.add( task );
+          }
         }
       }
     }
 
-    wakeUpSleepingConsumers( taskQueue.size() );
+    awakenSleepingBuffers();
   }
 
-  private def wakeUpSleepingConsumers( numConsumers: Long ) {
+  private def awakenSleepingBuffers() {
     // `async at` must be called outside of atomic. Otherwise, you'll get a runtime exception.
-    val refConsumers = new ArrayList[GlobalRef[JobConsumer]]();
+    val refBuffers = new ArrayList[GlobalRef[JobBuffer]]();
     atomic {
-      for( i in 1..numConsumers ) {
-        if( sleepingConsumers.size() == 0 ) { break; }
-        val refConsumer = sleepingConsumers.removeFirst();
-        refConsumers.add(refConsumer);
+      while( sleepingBuffers.size() > 0 ) {
+        val refBuf = sleepingBuffers.removeFirst();
+        refBuffers.add( refBuf );
       }
     }
-    for( refConsumer in refConsumers ) {
-      async at( refConsumer ) {
-        refConsumer().run();
+    for( refBuf in refBuffers ) {
+      async at( refBuf ) {
+        refBuf().wakeUp();
       }
     }
   }
 
-  public def popTasks(n: Long): ArrayList[Task] {
+  public def popTasks(): ArrayList[Task] {
+    val n = 1; // TODO: tune up parameters
     atomic {
       val tasks = new ArrayList[Task]();
       for( i in 1..n ) {
