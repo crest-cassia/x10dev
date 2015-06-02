@@ -2,12 +2,7 @@ import x10.util.ArrayList;
 import x10.util.Pair;
 
 public class ParameterSet( id: Long, point: Point{self.rank==Simulator.numParams} ) {
-  val parentBoxIds: ArrayList[Long] = new ArrayList[Long]();
   public val runIds: ArrayList[Long] = new ArrayList[Long]();
-
-  def getParentBoxIds(): ArrayList[Long] {
-    return parentBoxIds;
-  }
 
   def toString(): String {
     val str = "{ id: " + id + ", point: " + point + ", params: " + Simulator.deregularize(point) + " }";
