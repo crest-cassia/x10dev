@@ -22,19 +22,20 @@ class Mock {
       new JobProducer( new Tables(seed), engine, numBuffers )
     );
 
-    finish for( place in Place.places() ) {
-      if( place.id() % modBuf == 0 ) {
-        at( place ) {
-          val buffer = new JobBuffer( refJobProducer );
-          buffer.getInitialTasks();
-          val refBuffer = new GlobalRef[JobBuffer]( buffer );
+    finish for( var i:Long = 0; i < Place.numPlaces(); i+=modBuf) {
+      at( Place(i) ) {
+        val buffer = new JobBuffer( refJobProducer );
+        buffer.getInitialTasks();
+        val refBuffer = new GlobalRef[JobBuffer]( buffer );
 
-          for( place2 in Place.places() ) {
-            if( place2.id() / modBuf == place.id() / modBuf && place2 != place ) {
-              async at( place2 ) {
-                val consumer = new JobConsumer( refBuffer );
-                consumer.run();
-              }
+        val min = Runtime.hereLong();
+        val max = Math.min( min+modBuf, Place.numPlaces() );
+        for( var j:Long=min; j< max; j++ ) {
+          if( j == 0 ) { continue; }
+          at( Place(j) ) {
+            async {
+              val consumer = new JobConsumer( refBuffer );
+              consumer.run();
             }
           }
         }
