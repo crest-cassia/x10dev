@@ -23,8 +23,9 @@ class JobBuffer {
 
   private def fillTaskQueueIfEmpty(): void {
     if( m_taskQueue.size() == 0 ) {
-      val tasks = at( m_refProducer ) {
-        return m_refProducer().popTasks();
+      val refProd = m_refProducer;
+      val tasks = at( refProd ) {
+        return refProd().popTasks();
       };
       atomic {
         for( task in tasks ) {
@@ -65,9 +66,9 @@ class JobBuffer {
       }
     }
 
-    val tmpRefProd = m_refProducer;
-    at( tmpRefProd ) {
-      tmpRefProd().saveResults( resultsToSave );
+    val refProd = m_refProducer;
+    at( refProd ) {
+      refProd().saveResults( resultsToSave );
     }
   }
 
@@ -83,8 +84,9 @@ class JobBuffer {
     if( registerToProducer ) {
       m_logger.fine("Buffer#registerFreeBuffer at " + here );
       val refMe = new GlobalRef[JobBuffer]( this );
-      at( m_refProducer ) {
-        m_refProducer().registerFreeBuffer( refMe );
+      val refProd = m_refProducer;
+      at( refProd ) {
+        refProd().registerFreeBuffer( refMe );
       }
     }
   }

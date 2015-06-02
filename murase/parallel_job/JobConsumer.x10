@@ -24,13 +24,15 @@ class JobConsumer {
 
   def run() {
     m_logger.fine("Consumer#run " + here);
+    val refBuf = m_refBuffer;
+
     val tasks = getTasksFromBuffer();
     while( tasks.size() > 0 ) {
       val task = tasks.removeFirst();
       val result = runTask( task );
 
-      at( m_refBuffer ) {
-        m_refBuffer().saveResult( result );
+      at( refBuf ) {
+        refBuf().saveResult( result );
       }
       m_logger.fine("Consumer#saveResult " + result.runId + " at " + here);
 
@@ -41,8 +43,8 @@ class JobConsumer {
     }
 
     val refMe = new GlobalRef[JobConsumer]( this );
-    at( m_refBuffer ) {
-      m_refBuffer().registerSleepingConsumer( refMe );
+    at( refBuf ) {
+      refBuf().registerSleepingConsumer( refMe );
     }
     m_logger.fine("> Consumer#run " + here);
   }
@@ -59,9 +61,11 @@ class JobConsumer {
   }
 
   def getTasksFromBuffer(): ArrayList[Task] {
-    val tasks = at( m_refBuffer ) {
-      return m_refBuffer().popTasks();
+    val refBuf = m_refBuffer;
+    val tasks = at( refBuf ) {
+      return refBuf().popTasks();
     };
     return tasks;
   }
 }
+
