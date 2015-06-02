@@ -59,7 +59,7 @@ class JobBuffer {
     atomic {
       resultsBuffer.add( result );
       numRunning -= 1;
-      if( resultsBuffer.size() >= 4 || numRunning == 0 ) { // TODO: set parameter
+      if( resultsBuffer.size() >= 16 || numRunning == 0 ) { // TODO: set parameter
         while( resultsBuffer.size() > 0 ) {
           resultsToSave.add( resultsBuffer.removeFirst() );
         }
