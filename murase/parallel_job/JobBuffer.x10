@@ -6,16 +6,15 @@ import java.util.logging.Logger;
 
 class JobBuffer {
 
-  val refProducer: GlobalRef[JobProducer];
-  val logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-  val taskQueue = new ArrayList[Task]();
-  val resultsBuffer = new ArrayList[JobConsumer.RunResult]();
-  var numRunning: Long = 0;
-  val sleepingConsumers = new ArrayList[GlobalRef[JobConsumer]]();
-  var sleeping: Boolean = false;
+  val m_refProducer: GlobalRef[JobProducer];
+  val m_logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+  val m_taskQueue = new ArrayList[Task]();
+  val m_resultsBuffer = new ArrayList[JobConsumer.RunResult]();
+  var m_numRunning: Long = 0;
+  val m_sleepingConsumers = new ArrayList[GlobalRef[JobConsumer]]();
 
   def this( _refProducer: GlobalRef[JobProducer] ) {
-    refProducer = _refProducer;
+    m_refProducer = _refProducer;
   }
 
   public def getInitialTasks() {
@@ -23,91 +22,92 @@ class JobBuffer {
   }
 
   private def fillTaskQueueIfEmpty(): void {
-    if( taskQueue.size() == 0 ) {
-      val tasks = at( refProducer ) {
-        return refProducer().popTasks();
+    if( m_taskQueue.size() == 0 ) {
+      val tasks = at( m_refProducer ) {
+        return m_refProducer().popTasks();
       };
       atomic {
         for( task in tasks ) {
-          taskQueue.add( task );
+          m_taskQueue.add( task );
         }
       }
     }
   }
 
   def popTasks(): ArrayList[Task] {
-    logger.fine("Buffer#popTasks " + numRunning + "/" + taskQueue.size() + " tasks at " + here);
+    m_logger.fine("Buffer#popTasks " + m_numRunning + "/" + m_taskQueue.size() + " tasks at " + here);
     val n = 1;  // TODO: tune up number of return tasks
     val tasks = new ArrayList[Task]();
     fillTaskQueueIfEmpty();
     atomic {
       for( i in 1..n ) {
-        if( taskQueue.size() == 0 ) {
+        if( m_taskQueue.size() == 0 ) {
           break;
         }
-        val task = taskQueue.removeFirst();
+        val task = m_taskQueue.removeFirst();
         tasks.add( task );
-        numRunning += 1;
+        m_numRunning += 1;
       }
     }
-    logger.fine("> Buffer#popTasks " + numRunning + "/" + taskQueue.size() + " tasks at " + here);
+    m_logger.fine("> Buffer#popTasks " + m_numRunning + "/" + m_taskQueue.size() + " tasks at " + here);
     return tasks;
   }
 
   def saveResult( result: JobConsumer.RunResult ) {
     val resultsToSave: ArrayList[JobConsumer.RunResult] = new ArrayList[JobConsumer.RunResult]();
     atomic {
-      resultsBuffer.add( result );
-      numRunning -= 1;
-      if( resultsBuffer.size() >= 16 || numRunning == 0 ) { // TODO: set parameter
-        while( resultsBuffer.size() > 0 ) {
-          resultsToSave.add( resultsBuffer.removeFirst() );
+      m_resultsBuffer.add( result );
+      m_numRunning -= 1;
+      if( m_resultsBuffer.size() >= 16 || m_numRunning == 0 ) { // TODO: set parameter
+        while( m_resultsBuffer.size() > 0 ) {
+          resultsToSave.add( m_resultsBuffer.removeFirst() );
         }
       }
     }
 
-    at( refProducer ) {
-      refProducer().saveResults( resultsToSave );
+    val tmpRefProd = m_refProducer;
+    at( tmpRefProd ) {
+      tmpRefProd().saveResults( resultsToSave );
     }
   }
 
   def registerSleepingConsumer( refCons: GlobalRef[JobConsumer] ) {
     var registerToProducer: Boolean = false;
     atomic {
-      if( sleepingConsumers.isEmpty() ) {
+      if( m_sleepingConsumers.isEmpty() ) {
         registerToProducer = true;
       }
-      sleepingConsumers.add( refCons );
-      logger.fine("Buffer#registerSleepingConsumer " + sleepingConsumers + " at " + here );
+      m_sleepingConsumers.add( refCons );
+      m_logger.fine("Buffer#registerSleepingConsumer " + m_sleepingConsumers + " at " + here );
     }
     if( registerToProducer ) {
-      logger.fine("Buffer#registerFreeBuffer at " + here );
+      m_logger.fine("Buffer#registerFreeBuffer at " + here );
       val refMe = new GlobalRef[JobBuffer]( this );
-      at( refProducer ) {
-        refProducer().registerFreeBuffer( refMe );
+      at( m_refProducer ) {
+        m_refProducer().registerFreeBuffer( refMe );
       }
     }
   }
 
   def wakeUp() {
-    logger.fine("Buffer#wakeUp " + sleepingConsumers + " at " + here);
+    m_logger.fine("Buffer#wakeUp " + m_sleepingConsumers + " at " + here);
     fillTaskQueueIfEmpty();
-    logger.fine("Buffer#wakeUp -> fillTask : " + numRunning + "/" + taskQueue.size() + " tasks at " + here);
+    m_logger.fine("Buffer#wakeUp -> fillTask : " + m_numRunning + "/" + m_taskQueue.size() + " tasks at " + here);
     awakenSleepingConsumers();
   }
 
   private def awakenSleepingConsumers() {
     // if( taskQueue.size() == 0 ) { return; }
-    logger.fine("Buffer#awakenSleepingConsumers " + sleepingConsumers + " at " + here );
+    m_logger.fine("Buffer#awakenSleepingConsumers " + m_sleepingConsumers + " at " + here );
     val refConsumers = new ArrayList[GlobalRef[JobConsumer]]();
     atomic {
-      while( sleepingConsumers.size() > 0 ) {
-        val refCons = sleepingConsumers.removeFirst();
+      while( m_sleepingConsumers.size() > 0 ) {
+        val refCons = m_sleepingConsumers.removeFirst();
         refConsumers.add( refCons );
       }
     }
     for( refConsumer in refConsumers ) {
-      logger.fine("Buffer#awakenSleepingConsumers : booting Consumer at " + refConsumer.home );
+      m_logger.fine("Buffer#awakenSleepingConsumers : booting Consumer at " + refConsumer.home );
       async at( refConsumer ) {
         refConsumer().run();
       }
