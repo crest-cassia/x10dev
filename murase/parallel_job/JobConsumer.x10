@@ -42,9 +42,9 @@ class JobConsumer {
       }
     }
 
-    val refMe = new GlobalRef[JobConsumer]( this );
+    val place = here;
     at( refBuf ) {
-      refBuf().registerSleepingConsumer( refMe );
+      refBuf().registerFreePlace( place );
     }
     m_logger.fine("> Consumer#run " + here);
   }

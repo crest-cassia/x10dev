@@ -11,7 +11,7 @@ class JobBuffer {
   val m_taskQueue = new ArrayList[Task]();
   val m_resultsBuffer = new ArrayList[JobConsumer.RunResult]();
   var m_numRunning: Long = 0;
-  val m_sleepingConsumers = new ArrayList[GlobalRef[JobConsumer]]();
+  val m_freePlaces = new ArrayList[Place]();
 
   def this( _refProducer: GlobalRef[JobProducer] ) {
     m_refProducer = _refProducer;
@@ -72,14 +72,14 @@ class JobBuffer {
     }
   }
 
-  def registerSleepingConsumer( refCons: GlobalRef[JobConsumer] ) {
+  def registerFreePlace( freePlace: Place ) {
     var registerToProducer: Boolean = false;
     atomic {
-      if( m_sleepingConsumers.isEmpty() ) {
+      if( m_freePlaces.isEmpty() ) {
         registerToProducer = true;
       }
-      m_sleepingConsumers.add( refCons );
-      m_logger.fine("Buffer#registerSleepingConsumer " + m_sleepingConsumers + " at " + here );
+      m_freePlaces.add( freePlace );
+      m_logger.fine("Buffer#registerFreePlace " + m_freePlaces + " at " + here );
     }
     if( registerToProducer ) {
       m_logger.fine("Buffer#registerFreeBuffer at " + here );
@@ -92,26 +92,28 @@ class JobBuffer {
   }
 
   def wakeUp() {
-    m_logger.fine("Buffer#wakeUp " + m_sleepingConsumers + " at " + here);
+    m_logger.fine("Buffer#wakeUp " + m_freePlaces + " at " + here);
     fillTaskQueueIfEmpty();
     m_logger.fine("Buffer#wakeUp -> fillTask : " + m_numRunning + "/" + m_taskQueue.size() + " tasks at " + here);
-    awakenSleepingConsumers();
+    launchConsumerAtFreePlace();
   }
 
-  private def awakenSleepingConsumers() {
+  private def launchConsumerAtFreePlace() {
     // if( taskQueue.size() == 0 ) { return; }
-    m_logger.fine("Buffer#awakenSleepingConsumers " + m_sleepingConsumers + " at " + here );
-    val refConsumers = new ArrayList[GlobalRef[JobConsumer]]();
+    m_logger.fine("Buffer#launchConsumerAtFreePlace " + m_freePlaces + " at " + here );
+    val freePlaces = new ArrayList[Place]();
     atomic {
-      while( m_sleepingConsumers.size() > 0 ) {
-        val refCons = m_sleepingConsumers.removeFirst();
-        refConsumers.add( refCons );
+      while( m_freePlaces.size() > 0 ) {
+        val place = m_freePlaces.removeFirst();
+        freePlaces.add( place );
       }
     }
-    for( refConsumer in refConsumers ) {
-      m_logger.fine("Buffer#awakenSleepingConsumers : booting Consumer at " + refConsumer.home );
-      async at( refConsumer ) {
-        refConsumer().run();
+    val refMe = new GlobalRef[JobBuffer]( this );
+    for( place in freePlaces ) {
+      m_logger.fine("Buffer#launchConsumerAtFreePlace : booting Consumer at " + place );
+      async at( place ) {
+        val consumer = new JobConsumer( refMe );
+        consumer.run();
       }
     }
   }
