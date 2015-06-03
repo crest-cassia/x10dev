@@ -30,8 +30,7 @@ class Mock {
 
         val min = Runtime.hereLong();
         val max = Math.min( min+modBuf, Place.numPlaces() );
-        for( var j:Long=min; j< max; j++ ) {
-          if( j == 0 ) { continue; }
+        for( var j:Long=min+1; j< max; j++ ) {
           at( Place(j) ) {
             async {
               val consumer = new JobConsumer( refBuffer );
