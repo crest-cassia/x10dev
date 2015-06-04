@@ -22,8 +22,8 @@ class Mock {
       new JobProducer( new Tables(seed), engine, numBuffers )
     );
 
-    finish for( var i:Long = 0; i < Place.numPlaces(); i+=modBuf) {
-      at( Place(i) ) {
+    finish for( i in 0..((Place.numPlaces()-1)/modBuf) ) {
+      async at( Place(i*modBuf) ) {
         val buffer = new JobBuffer( refJobProducer );
         buffer.getInitialTasks();
         val refBuffer = new GlobalRef[JobBuffer]( buffer );
