@@ -42,20 +42,23 @@ class JobConsumer {
     }
 
     val refMe = new GlobalRef[JobConsumer]( this );
-    at( m_refProducer ) {
-      m_refProducer().registerSleepingConsumer( refMe );
+    val refProd = m_refProducer;
+    at( refProd ) {
+      refProd().registerSleepingConsumer( refMe );
     }
   }
 
   def storeResult( result: RunResult ) {
-    at( m_refProducer ) {
-      m_refProducer().saveResult( result );
+    val refProd = m_refProducer;
+    at( refProd ) {
+      refProd().saveResult( result );
     }
   }
 
   def getTasksFromProducer(): ArrayList[Task] {
-    val tasks = at( m_refProducer ) {
-      return m_refProducer().popTasks(1);
+    val refProd = m_refProducer;
+    val tasks = at( refProd ) {
+      return refProd().popTasks(1);
     };
     return tasks;
   }
