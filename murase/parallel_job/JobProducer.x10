@@ -54,8 +54,8 @@ class JobProducer {
     val refBuffers = new ArrayList[GlobalRef[JobBuffer]]();
     atomic {
       if( m_taskQueue.size() == 0 ) { return; }
-      while( m_freeBuffers.size() > 0 && refBuffers.size() <= m_taskQueue.size() ) {
-        val refBuf = m_freeBuffers.removeFirst();
+      for( refBuf in m_freeBuffers ) {
+        if( refBuffers.size() > m_taskQueue.size() ) { break; }
         refBuffers.add( refBuf );
       }
     }
