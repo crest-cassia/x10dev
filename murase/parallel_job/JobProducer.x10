@@ -6,14 +6,13 @@ class JobProducer {
   val m_tables: Tables;
   val m_engine: SearchEngineI;
   val m_taskQueue: ArrayList[Task];
-  val m_sleepingConsumers: ArrayList[GlobalRef[JobConsumer]];
+  val m_freePlaces: ArrayList[Place] = new ArrayList[Place]();
 
   def this( _tables: Tables, _engine: SearchEngineI ) {
     m_tables = _tables;
     m_engine = _engine;
     m_taskQueue = new ArrayList[Task]();
     enqueueInitialTasks();
-    m_sleepingConsumers = new ArrayList[GlobalRef[JobConsumer]]();
   }
 
   private def enqueueInitialTasks() {
@@ -23,13 +22,14 @@ class JobProducer {
     }
   }
 
-  public def registerSleepingConsumer( refConsumer: GlobalRef[JobConsumer] ) {
+  public def registerFreePlace( place: Place ) {
     atomic {
-      m_sleepingConsumers.add( refConsumer );
+      m_freePlaces.add( place );
     }
   }
 
   public def saveResult( res: JobConsumer.RunResult ) {
+    val qSize: Long;
     atomic {
       val run = m_tables.runsTable.get( res.runId );
       run.storeResult( res.result, res.placeId, res.startAt, res.finishAt );
@@ -40,24 +40,27 @@ class JobProducer {
           m_taskQueue.add( task );
         }
       }
+      qSize = m_taskQueue.size();
     }
 
-    wakeUpSleepingConsumers( m_taskQueue.size() );
+    launchConsumersAtFreePlace( qSize );
   }
 
-  private def wakeUpSleepingConsumers( numConsumers: Long ) {
+  private def launchConsumersAtFreePlace( numConsumers: Long ) {
     // `async at` must be called outside of atomic. Otherwise, you'll get a runtime exception.
-    val refConsumers = new ArrayList[GlobalRef[JobConsumer]]();
+    val freePlaces = new ArrayList[Place]();
     atomic {
       for( i in 1..numConsumers ) {
-        if( m_sleepingConsumers.size() == 0 ) { break; }
-        val refConsumer = m_sleepingConsumers.removeFirst();
-        refConsumers.add(refConsumer);
+        if( m_freePlaces.size() == 0 ) { break; }
+        val p = m_freePlaces.removeFirst();
+        freePlaces.add( p );
       }
     }
-    for( refConsumer in refConsumers ) {
-      async at( refConsumer ) {
-        refConsumer().run();
+    val refMe = new GlobalRef[JobProducer]( this );
+    for( place in freePlaces ) {
+      async at( place ) {
+        val consumer = new JobConsumer( refMe );
+        consumer.run();
       }
     }
   }

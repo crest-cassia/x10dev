@@ -41,10 +41,10 @@ class JobConsumer {
       }
     }
 
-    val refMe = new GlobalRef[JobConsumer]( this );
+    val place = here;
     val refProd = m_refProducer;
     at( refProd ) {
-      refProd().registerSleepingConsumer( refMe );
+      refProd().registerFreePlace( place );
     }
   }
 
