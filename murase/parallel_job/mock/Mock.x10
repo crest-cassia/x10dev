@@ -19,11 +19,18 @@ class Mock {
       new JobProducer( new Tables(seed), engine )
     );
 
-    finish for( place in Place.places() ) {
-      if( place == here ) { continue; }
-      async at( place ) {
-        val consumer = new JobConsumer( refJobProducer );
-        consumer.run();
+    val modBuf = 4;
+    finish for( i in 0..((Place.numPlaces()-1)/modBuf) ) {
+      async at( Place(i*modBuf) ) {
+        val min = Runtime.hereLong();
+        val max = Math.min( min+modBuf, Place.numPlaces() );
+        for( j in min..(max-1) ) {
+          if( j == 0 ) { continue; }
+          async at( Place(j) ) {
+            val consumer = new JobConsumer( refJobProducer );
+            consumer.run();
+          }
+        }
       }
     }
 
