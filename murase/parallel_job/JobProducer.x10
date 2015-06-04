@@ -46,16 +46,14 @@ class JobProducer {
       }
     }
 
-    if( m_taskQueue.size() > 0 ) {
-      notifyFreeBuffer();
-    }
+    notifyFreeBuffer();
   }
 
   private def notifyFreeBuffer() {
     // `async at` must be called outside of atomic. Otherwise, you'll get a runtime exception.
-    if( m_taskQueue.size() == 0 ) { return; }
     val refBuffers = new ArrayList[GlobalRef[JobBuffer]]();
     atomic {
+      if( m_taskQueue.size() == 0 ) { return; }
       while( m_freeBuffers.size() > 0 && refBuffers.size() <= m_taskQueue.size() ) {
         val refBuf = m_freeBuffers.removeFirst();
         refBuffers.add( refBuf );
