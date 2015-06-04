@@ -59,10 +59,11 @@ class JobBuffer {
     atomic {
       m_resultsBuffer.add( result );
       m_numRunning -= 1;
-      if( m_resultsBuffer.size() >= 16 || m_numRunning == 0 ) { // TODO: set parameter
-        while( m_resultsBuffer.size() > 0 ) {
-          resultsToSave.add( m_resultsBuffer.removeFirst() );
+      if( m_resultsBuffer.size() >= 1 || m_numRunning == 0 ) { // TODO: set parameter
+        for( res in m_resultsBuffer ) {
+          resultsToSave.add( res );
         }
+        m_resultsBuffer.clear();
       }
     }
 
@@ -103,10 +104,10 @@ class JobBuffer {
     m_logger.fine("Buffer#launchConsumerAtFreePlace " + m_freePlaces + " at " + here );
     val freePlaces = new ArrayList[Place]();
     atomic {
-      while( m_freePlaces.size() > 0 ) {
-        val place = m_freePlaces.removeFirst();
+      for( place in m_freePlaces ) {
         freePlaces.add( place );
       }
+      m_freePlaces.clear();
     }
     val refMe = new GlobalRef[JobBuffer]( this );
     for( place in freePlaces ) {
