@@ -6,12 +6,12 @@ import java.util.logging.Logger;
 
 class JobConsumer {
 
-  val refProducer: GlobalRef[JobProducer];
-  val timer = new Timer();
-  val logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+  val m_refProducer: GlobalRef[JobProducer];
+  val m_timer = new Timer();
+  val m_logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
   def this( _refProcuer: GlobalRef[JobProducer] ) {
-    refProducer = _refProcuer;
+    m_refProducer = _refProcuer;
   }
 
   static struct RunResult(
@@ -27,11 +27,11 @@ class JobConsumer {
     while( tasks.size() > 0 ) {
       val task = tasks.removeFirst();
       val runId = task.runId;
-      logger.info("running at " + here + " processing " + runId);
-      val startAt = timer.milliTime();
+      m_logger.info("running at " + here + " processing " + runId);
+      val startAt = m_timer.milliTime();
       val runPlace = here.id;
       val localResult = task.run();
-      val finishAt = timer.milliTime();
+      val finishAt = m_timer.milliTime();
       val result = RunResult( runId, localResult, runPlace, startAt, finishAt );
 
       storeResult( result );
@@ -42,20 +42,20 @@ class JobConsumer {
     }
 
     val refMe = new GlobalRef[JobConsumer]( this );
-    at( refProducer ) {
-      refProducer().registerSleepingConsumer( refMe );
+    at( m_refProducer ) {
+      m_refProducer().registerSleepingConsumer( refMe );
     }
   }
 
   def storeResult( result: RunResult ) {
-    at( refProducer ) {
-      refProducer().saveResult( result );
+    at( m_refProducer ) {
+      m_refProducer().saveResult( result );
     }
   }
 
   def getTasksFromProducer(): ArrayList[Task] {
-    val tasks = at( refProducer ) {
-      return refProducer().popTasks(1);
+    val tasks = at( m_refProducer ) {
+      return m_refProducer().popTasks(1);
     };
     return tasks;
   }
