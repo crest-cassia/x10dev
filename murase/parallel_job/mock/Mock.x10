@@ -1,19 +1,19 @@
 import x10.util.ArrayList;
 import x10.io.File;
-import x10.interop.Java;
-import java.util.logging.Logger;
-import java.util.logging.Level;
-import java.util.logging.Handler;
+// import x10.interop.Java;
+// import java.util.logging.Logger;
+// import java.util.logging.Level;
+// import java.util.logging.Handler;
 
 class Mock {
 
   def run( seed: Long, engine: SearchEngineI ): void {
-    val logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-    logger.setLevel(Level.INFO);   // set Level.ALL for debugging
-    val handlers:Rail[Handler] = Java.convert[Handler]( logger.getParent().getHandlers() );
-    for( handler in handlers ) {
-      handler.setLevel( logger.getLevel() );
-    }
+    // val logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+    // logger.setLevel(Level.INFO);   // set Level.ALL for debugging
+    // val handlers:Rail[Handler] = Java.convert[Handler]( logger.getParent().getHandlers() );
+    // for( handler in handlers ) {
+    //   handler.setLevel( logger.getLevel() );
+    // }
 
     val refJobProducer = new GlobalRef[JobProducer](
       new JobProducer( new Tables(seed), engine )

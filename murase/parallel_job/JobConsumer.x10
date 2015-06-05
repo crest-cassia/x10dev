@@ -1,14 +1,14 @@
 import x10.util.ArrayList;
 import x10.util.Timer;
-import x10.interop.Java;
-import org.json.simple.*;
-import java.util.logging.Logger;
+// import x10.interop.Java;
+// import org.json.simple.*;
+// import java.util.logging.Logger;
 
 class JobConsumer {
 
   val m_refProducer: GlobalRef[JobProducer];
   val m_timer = new Timer();
-  val m_logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+  // val m_logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
   def this( _refProcuer: GlobalRef[JobProducer] ) {
     m_refProducer = _refProcuer;
@@ -27,7 +27,7 @@ class JobConsumer {
     while( tasks.size() > 0 ) {
       val task = tasks.removeFirst();
       val runId = task.runId;
-      m_logger.info("running at " + here + " processing " + runId);
+      // m_logger.info("running at " + here + " processing " + runId);
       val startAt = m_timer.milliTime();
       val runPlace = here.id;
       val localResult = task.run();
