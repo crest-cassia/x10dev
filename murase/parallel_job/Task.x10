@@ -14,6 +14,7 @@ struct Task( runId: Long, cmd: String) {
     val rc = system( "bash " + scriptPath );
     val result = parseOutputJson();
     */
+    System.sleep(2000);
     val result = Simulator.OutputParameters( 3.0 );
     return result;
   }
