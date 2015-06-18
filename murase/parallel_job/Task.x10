@@ -6,7 +6,7 @@ import x10.util.Timer;
 // import java.util.logging.Logger;
 // import java.util.logging.Level;
 
-struct Task( runId: Long, cmd: String) {
+struct Task( runId: Long, params: Simulator.InputParameters, seed: Long) {
 
   public def run(): Simulator.OutputParameters {
     /*
@@ -14,8 +14,8 @@ struct Task( runId: Long, cmd: String) {
     val rc = system( "bash " + scriptPath );
     val result = parseOutputJson();
     */
-    System.sleep(2000);
-    val result = Simulator.OutputParameters( 3.0 );
+    val result = Simulator.run( params, seed );
+    // val result = Simulator.OutputParameters( 3.0 );
     return result;
   }
   
@@ -29,6 +29,6 @@ struct Task( runId: Long, cmd: String) {
   }
 
   public def toString(): String {
-    return "{ runId : " + runId + ", cmd : " + cmd + " }";
+    return "{ runId : " + runId + ", params : " + params + ", seed: " + seed + " }";
   }
 }
