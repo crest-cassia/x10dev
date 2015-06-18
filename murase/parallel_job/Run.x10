@@ -5,7 +5,7 @@ public class Run {
   public var placeId: Long;
   public var startAt: Long;
   public var finishAt: Long;
-  val cmd: String;
+  val params: Simulator.InputParameters;
   val seed: Int;
   public var result: Simulator.OutputParameters;
   public var finished: Boolean;
@@ -15,20 +15,21 @@ public class Run {
     id = _id;
     parentPSId = _ps.id;
     seed = _seed;
-    val params = Simulator.deregularize( _ps.point );
-    cmd = generateCommand( params );
+    params = Simulator.deregularize( _ps.point );
     finished = false;
   }
 
   public def generateTask(): Task {
-    val task = new Task( id, cmd );
+    val task = new Task( id, params, seed );
     return task;
   }
 
+  /*
   private def generateCommand( input: Simulator.InputParameters ): String {
     val cmd = Simulator.command( input, seed );
     return cmd;
   }
+  */
 
   def parameterSet( table: Tables ): ParameterSet {
     return table.psTable.get( parentPSId );
