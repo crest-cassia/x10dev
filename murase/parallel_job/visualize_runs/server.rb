@@ -15,6 +15,17 @@ parameter_sets = JSON.parse( File.open(ARGV[1]).read ) if ARGV[1]
 min_start_at = runs.map {|run| run["startAt"] }.min
 runs.each {|run| run["startAt"] -= min_start_at; run["finishAt"] -= min_start_at }
 
+def calc_fillting_rate(runs)
+  min_start_at = runs.map {|run| run["startAt"] }.min
+  max_finish_at = runs.map {|run| run["finishAt"] }.max
+  num_places = runs.uniq {|run| run["placeId"] }.size
+  duration = runs.inject(0) {|sum,run| sum + (run["finishAt"] - run["startAt"]) }
+  filling_rate = duration.to_f / ((max_finish_at - min_start_at) * num_places)
+  filling_rate
+end
+
+$stderr.puts "filling_rate: #{calc_fillting_rate(runs)}"
+
 # example: /filter?x0=1&x1=2
 #  => list of parameter sets whose point is [1,2,...]
 get '/filter' do
