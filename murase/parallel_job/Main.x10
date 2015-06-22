@@ -13,7 +13,7 @@ import x10.io.File;
 
 class Main {
 
-  def run( seed: Long ): void {
+  def run( seed: Long, engine: SearchEngineI ): void {
     // val logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     // logger.setLevel(Level.INFO);   // set Level.ALL for debugging
     // val handlers:Rail[Handler] = Java.convert[Handler]( logger.getParent().getHandlers() );
@@ -21,38 +21,27 @@ class Main {
     //   handler.setLevel( logger.getLevel() );
     // }
 
-    val refTableSearcher = new GlobalRef[PairTablesSearchEngine](
-      new PairTablesSearchEngine( new Tables( seed ), new GridSearcher() )
+    val refJobProducer = new GlobalRef[JobProducer](
+      new JobProducer( new Tables(seed), engine )
     );
 
-    logger.info("Creating initial tasks");
-    val newTasks = at( refTableSearcher ) {
-      val tasks = refTableSearcher().searcher.createInitialTask( refTableSearcher().tables, Simulator.searchRegion() );
-      return tasks;
-    };
-    val init = () => { return new JobQueue( refTableSearcher ); };
-    val glb = new GLB[JobQueue, Long](init, GLBParameters.Default, true);
-
-    logger.info("Staring GLB");
-    val start = () => { glb.taskQueue().addInitialTasks( newTasks ); };
-    val r = glb.run(start);
-    logger.info("Finished GLB");
-
-    at( refTableSearcher ) {
-      val f = new File("runs.json");
-      val p = f.printer();
-      p.println( refTableSearcher().tables.runsJson() );
-      p.flush();
-      val f2 = new File("parameter_sets.json");
-      val p2 = f2.printer();
-      p2.println( refTableSearcher().tables.parameterSetsJson() );
-      p2.flush();
+    val modBuf = 96;
+    finish for( i in 0..((Place.numPlaces()-1)/modBuf) ) {
+      async at( Place(i*modBuf) ) {
+        val min = Runtime.hereLong();
+        val max = Math.min( min+modBuf, Place.numPlaces() );
+        for( j in min..(max-1) ) {
+          if( j == 0 ) { continue; }
+          async at( Place(j) ) {
+            val consumer = new JobConsumer( refJobProducer );
+            consumer.run();
+          }
+        }
+      }
     }
-  }
 
-  static public def main( args: Rail[String] ) {
-    val m = new Main();
-    val seed = Long.parse( args(0) );
-    m.run( seed );
+    at( refJobProducer ) {
+      refJobProducer().printJSON("parameter_sets.json", "runs.json");
+    }
   }
 }
