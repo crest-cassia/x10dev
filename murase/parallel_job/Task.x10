@@ -19,15 +19,6 @@ struct Task( runId: Long, params: Simulator.InputParameters, seed: Long) {
     return result;
   }
   
-  @Native("java", "JRuntime.exec(#1)")
-  @Native("c++", "system(#1)")
-  native private def system(cmd:String):Int;
-
-  private def parseOutputJson(): Simulator.OutputParameters {
-    val jsonPath = runId + "/_output.json";
-    return Simulator.OutputParameters.parseFromJson( jsonPath );
-  }
-
   public def toString(): String {
     return "{ runId : " + runId + ", params : " + params + ", seed: " + seed + " }";
   }
