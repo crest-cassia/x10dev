@@ -2,7 +2,7 @@
 #define MAIN_KUMPULA
 
 long RunSimulator(
-    int net_size,
+    long net_size,
     double p_tri,
     double p_jump,
     double delta,
@@ -15,7 +15,7 @@ long RunSimulator(
     double noise,
     double p_flight,
     double beta,
-    int t_max,
+    long t_max,
     long seed
   );
 
