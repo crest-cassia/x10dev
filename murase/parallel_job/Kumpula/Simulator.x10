@@ -41,10 +41,14 @@ class Simulator {
   }
 
   static def run( params: InputParameters, seed: Long ): OutputParameters {
+    val degree = runSimulator( params.p_ld, params.aging, seed );
     // TODO: IMPLEMENT ME
     // System.sleep(1000);
-    return OutputParameters( 100 );
+    return OutputParameters( degree );
   }
+
+  @Native("c++", "RunSimulator(2000, 0.05, 0.005, 1.0, 0.0, #1, #2, 0.01, 0.0, 0.0, 0.0, 0.0, 0.0, 5000, #3)")
+  native static def runSimulator( p_ld: Double, aging: Double, seed: Long ): Long;
 
   public static val numParams = 2;
   public static val numOutputs = 1;

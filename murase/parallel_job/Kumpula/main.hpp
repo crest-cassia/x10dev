@@ -1,7 +1,7 @@
 #ifndef MAIN_KUMPULA
 #define MAIN_KUMPULA
 
-int RunSimulator(
+long RunSimulator(
     int net_size,
     double p_tri,
     double p_jump,
@@ -16,7 +16,7 @@ int RunSimulator(
     double p_flight,
     double beta,
     int t_max,
-    int seed
+    long seed
   );
 
 #endif // MAIN_KUMPULA
