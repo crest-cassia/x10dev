@@ -15,10 +15,10 @@ ifeq ($(XSUB_TYPE), k)
 	INCLUDE=-I$(HOME)/program/libs/boost_1_54_0
 endif
 
-ising2d.a: *.cpp *.hpp Makefile
+libising2d.a: *.cpp *.hpp Makefile
 	$(CPP) $(OPT) $(INCLUDE) -c main.cpp $(LIBS) -o main.o
 	ar rcs $(BUILD)/libising2d.a main.o
 	cp main.hpp ..
 
 clean:
-	rm -f *.out *~ *.bak *.o
+	rm -f *.out *~ *.bak *.o $(BUILD)/libising2d.a
