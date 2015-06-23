@@ -1,6 +1,6 @@
 UNAME = ${shell uname}
 CPP=g++
-OPT=-O3 -Wall -DNDEBUG
+OPT=-O3 -Wall -DNDEBUG -fopenmp
 INCLUDE=
 LIBS=
 BUILD=../build
