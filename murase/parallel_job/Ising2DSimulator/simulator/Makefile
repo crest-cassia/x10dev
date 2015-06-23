@@ -1,11 +1,18 @@
-CPP=g++-4.9
+UNAME = ${shell uname}
+ifeq ($(UNAME), Linux)
+	CPP=g++
+endif
+ifeq ($(UNAME), Darwin)
+	CPP=g++-4.9
+endif
 OPT=-O3 -Wall -DNDEBUG
 INCLUDE=
 LIBS=
-BUILD_DIR=../../build
+BUILD=../../build
 
-ising2d.o: *.cpp *.hpp Makefile
-	$(CPP) $(OPT) $(INCLUDE) -c main.cpp $(LIBS) -o $(BUILD_DIR)/$@
+ising2d.a: *.cpp *.hpp Makefile
+	$(CPP) $(OPT) $(INCLUDE) -c main.cpp $(LIBS) -o main.o
+	ar rcs $(BUILD)/ising2d.a main.o
 	cp main.hpp ..
 
 clean:
