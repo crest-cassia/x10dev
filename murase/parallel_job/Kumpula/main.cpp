@@ -9,8 +9,8 @@
 #include <boost/timer.hpp>
 #include "kumpula_2d_mobile_nd_ld_aging.hpp"
 
-int RunSimulator(
-    int net_size,
+long RunSimulator(
+    long net_size,
     double p_tri,
     double p_jump,
     double delta,
@@ -23,8 +23,8 @@ int RunSimulator(
     double noise,
     double p_flight,
     double beta,
-    int t_max,
-    int seed
+    long t_max,
+    long seed
   ) {
   
   std::cerr << "Lists of given parameters are as follows:" << std::endl
