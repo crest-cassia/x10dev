@@ -43,7 +43,7 @@ class Simulator {
   }
 
   static def run( params: InputParameters, seed: Long ): OutputParameters {
-    val rnd = new Random();
+    val rnd = new Random(seed);
     val dt = (rnd.nextDouble() * 2.0 - 1.0) * params.sigma;
     val t = (params.mu + dt) * 1000.0;
     System.sleep( t as Long );
