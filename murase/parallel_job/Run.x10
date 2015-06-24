@@ -1,4 +1,5 @@
 import x10.util.ArrayList;
+import util.JSON;
 
 public class Run {
   public val id: Long;
@@ -17,6 +18,25 @@ public class Run {
     seed = _seed;
     params = Simulator.deregularize( _ps.point );
     finished = false;
+  }
+
+  public static def loadJSON( json: JSON.Value, table: Tables ) {
+    val id = json("id").toLong();
+    val parentPSId = json("parentPSId").toLong();
+    val ps = table.psTable.get(parentPSId);
+    val seed = json("seed").toLong();
+
+    val run = new Run( id, ps, seed );
+
+    if( json("startAt").toLong() != -1 ) {
+      val result = Simulator.OutputParameters.loadJSON( json("result") );
+      val placeId = json("placeId").toLong();
+      val startAt = json("startAt").toLong();
+      val finishAt = json("finishAt").toLong();
+      run.storeResult( result, placeId, startAt, finishAt );
+    }
+
+    return run;
   }
 
   public def generateTask(): Task {

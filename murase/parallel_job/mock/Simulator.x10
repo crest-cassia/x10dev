@@ -1,8 +1,7 @@
 import x10.regionarray.Region;
 import x10.io.File;
 import x10.util.Random;
-// import x10.interop.Java;
-// import org.json.simple.*;
+import util.JSON;
 
 
 class Simulator {
@@ -19,15 +18,8 @@ class Simulator {
 
   static struct OutputParameters( duration: Double ) {
 
-    static def parseFromJson( jsonPath: String ): OutputParameters {
-      // val input = new File(jsonPath);
-      // var json:String = "";
-      // for( line in input.lines() ) {
-      //   json += line;
-      // }
-      // val o = JSONValue.parse(json) as JSONObject;
-      // val duration = o.get("duration") as Double;
-      val duration = 3.0;
+    static def loadJSON( json: JSON.Value ): OutputParameters {
+      val duration = json("duration").toDouble();
       return OutputParameters( duration );
     }
 

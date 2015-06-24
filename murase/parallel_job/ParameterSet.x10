@@ -1,5 +1,6 @@
 import x10.util.ArrayList;
 import x10.util.Pair;
+import util.JSON;
 
 public class ParameterSet( id: Long, point: Point{self.rank==Simulator.numParams} ) {
   public val runIds: ArrayList[Long] = new ArrayList[Long]();
@@ -7,6 +8,16 @@ public class ParameterSet( id: Long, point: Point{self.rank==Simulator.numParams
   def toString(): String {
     val str = "{ id: " + id + ", point: " + point + ", params: " + Simulator.deregularize(point) + " }";
     return str;
+  }
+
+  static def loadJSON( json: JSON.Value ): ParameterSet {
+    val id = json("id").toLong();
+    val coordinates = new Rail[Long](Simulator.numParams);
+    for( i in 0..(Simulator.numParams-1) ) {
+      coordinates(i) = json("point")(i).toLong();
+    }
+    val point = Point.make( coordinates );
+    return new ParameterSet( id, point );
   }
 
   def toJson(): String {

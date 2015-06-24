@@ -26,6 +26,9 @@ class Mock {
       val engine = new MockSearchEngine( numStaticTasks, 0, 0.25, 4, sleepMu, sleepSigma );
       m.restart( psJson, runJson, engine, 2000 );
     }
+    else {
+      Console.ERR.println("Usage: ./a.out <numStaticTasks> <sleepMu> <sleepSigma> [psJSON] [runJSON]");
+    }
   }
 }
 
