@@ -1,5 +1,6 @@
 import x10.util.ArrayList;
 import x10.io.File;
+import x10.util.Timer;
 
 class JobProducer {
 
@@ -7,12 +8,19 @@ class JobProducer {
   val m_engine: SearchEngineI;
   val m_taskQueue: ArrayList[Task];
   val m_freePlaces: ArrayList[Place] = new ArrayList[Place]();
+  val m_timer = new Timer();
+  var m_lastSavedAt: Long;
+  val m_saveInterval: Long;
+  var m_dumpFileIndex: Long;
 
-  def this( _tables: Tables, _engine: SearchEngineI ) {
+  def this( _tables: Tables, _engine: SearchEngineI, _saveInterval: Long ) {
     m_tables = _tables;
     m_engine = _engine;
     m_taskQueue = new ArrayList[Task]();
     enqueueInitialTasks();
+    m_lastSavedAt = m_timer.milliTime();
+    m_saveInterval = _saveInterval;
+    m_dumpFileIndex = 0;
   }
 
   private def enqueueInitialTasks() {
@@ -40,10 +48,22 @@ class JobProducer {
           m_taskQueue.add( task );
         }
       }
+      serializePeriodically();
       qSize = m_taskQueue.size();
     }
 
     launchConsumersAtFreePlace( qSize );
+  }
+
+  private def serializePeriodically() {
+    val now = m_timer.milliTime();
+    if( now - m_lastSavedAt > m_saveInterval ) {
+      val psjson = "parameter_sets_" + m_dumpFileIndex + ".json";
+      val runjson = "runs_" + m_dumpFileIndex + ".json";
+      printJSON(psjson, runjson);
+      m_lastSavedAt = now;
+      m_dumpFileIndex += 1;
+    }
   }
 
   private def launchConsumersAtFreePlace( numConsumers: Long ) {

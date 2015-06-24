@@ -7,6 +7,6 @@ class Mock {
     val sleepSigma = Double.parse( args(2) );
     val engine = new MockSearchEngine( numStaticTasks, 0, 0.25, 4, sleepMu, sleepSigma );
     val seed = Long.parse( args(3) );
-    m.run( seed, engine );
+    m.run( seed, engine, 2000 );
   }
 }
