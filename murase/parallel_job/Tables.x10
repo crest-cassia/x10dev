@@ -1,5 +1,7 @@
 import x10.util.ArrayList;
 import x10.util.HashMap;
+import x10.io.File;
+import util.JSON;
 
 public class Tables {
   public val runsTable: HashMap[Long,Run];
@@ -12,8 +14,27 @@ public class Tables {
     psTable = new HashMap[Long, ParameterSet]();
   }
 
-  def load( psJson: String, runJson: String ) {
-    // TODO : IMPLEMENT ME
+  def load( psJsonFile: String, runJsonFile: String ) {
+    val psJson = JSON.parse( new File(psJsonFile) );
+    val runJson = JSON.parse( new File(runJsonFile) );
+
+    for( i in 0..(psJson.size()-1) ) {
+      val ps = ParameterSet.loadJSON( psJson(i) );
+      psTable.put( ps.id, ps );
+      if( ps.id+1 > maxPSId ) {
+        maxPSId = ps.id + 1;
+      }
+    }
+    for( i in 0..(runJson.size()-1) ) {
+      val run = Run.loadJSON( runJson(i), this );
+      runsTable( run.id ) = run;
+      if( run.id+1 > maxRunId ) {
+        maxRunId = run.id + 1;
+      }
+      run.parameterSet( this ).runIds.add( run.id );
+    }
+
+    Console.OUT.println( runsJson() );
   }
 
   def empty(): Boolean {
