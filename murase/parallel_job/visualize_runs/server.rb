@@ -12,6 +12,7 @@ end
 runs = JSON.parse( File.open(ARGV[0]).read )
 parameter_sets = JSON.parse( File.open(ARGV[1]).read ) if ARGV[1]
 
+runs.select! {|run| run["startAt"] > 0 }
 min_start_at = runs.map {|run| run["startAt"] }.min
 runs.each {|run| run["startAt"] -= min_start_at; run["finishAt"] -= min_start_at }
 
