@@ -7,7 +7,7 @@
 #PJM --stg-transfiles all
 #PJM --mpi "use-rankdir"
 #PJM --stgin  "rank=* ./build/a.out %r:./"
-#PJM --stgout-dir "rank=* %r:./ %j"
+#PJM --stgout-dir "rank=0 %r:./ %j"
 #PJM -s
 
 #============ Shell Script ============
@@ -24,5 +24,5 @@ export X10_NTHREADS=1
 # export X10RT_MPI_ENABLE_COLLECTIVES=true
 # export X10RT_MPI_FORCE_COLLECTIVES=false
 
-mpiexec ./a.out 4096 3.0 1.0 12345
+mpiexec ./a.out 4096 10.0 2.0 180
 
