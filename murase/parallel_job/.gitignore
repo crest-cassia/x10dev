@@ -1,8 +1,11 @@
 build/*.java
 build/*.class
-build/*.cc
-build/*.h
+build/**/*.cc
+build/**/*.h
 build/*.out
+build/*.a
+**/*.o
+util/*.json
 memo.md
 task_list.txt
 .ruby-version
@@ -10,3 +13,4 @@ task_list.txt
 visualize_runs/figs
 visualize_runs/figs2
 *[0-9][0-9][0-9][0-9][0-9][0-9][0-9]*
+build/main.hpp

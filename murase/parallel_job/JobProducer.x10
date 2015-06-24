@@ -1,5 +1,6 @@
 import x10.util.ArrayList;
 import x10.io.File;
+import x10.util.Timer;
 
 class JobProducer {
 
@@ -8,18 +9,37 @@ class JobProducer {
   val m_taskQueue: ArrayList[Task];
   val m_freeBuffers: ArrayList[GlobalRef[JobBuffer]];
   val m_numBuffers: Long;
+  val m_timer = new Timer();
+  var m_lastSavedAt: Long;
+  val m_saveInterval: Long;
+  var m_dumpFileIndex: Long;
 
-  def this( _tables: Tables, _engine: SearchEngineI, _numBuffers: Long ) {
+  def this( _tables: Tables, _engine: SearchEngineI, _numBuffers: Long, _saveInterval: Long ) {
     m_tables = _tables;
     m_engine = _engine;
     m_taskQueue = new ArrayList[Task]();
+    if( m_tables.empty() ) {
+      enqueueInitialTasks();
+    } else {
+      enqueueUnfinishedTasks();
+    }
     enqueueInitialTasks();
     m_freeBuffers = new ArrayList[GlobalRef[JobBuffer]]();
     m_numBuffers = _numBuffers;
+    m_lastSavedAt = m_timer.milliTime();
+    m_saveInterval = _saveInterval;
+    m_dumpFileIndex = 0;
   }
 
   private def enqueueInitialTasks() {
     val tasks = m_engine.createInitialTask( m_tables, Simulator.searchRegion() );
+    for( task in tasks ) {
+      m_taskQueue.add( task );
+    }
+  }
+
+  private def enqueueUnfinishedTasks() {
+    val tasks = m_tables.createTasksForUnfinishedRuns();
     for( task in tasks ) {
       m_taskQueue.add( task );
     }
@@ -44,9 +64,21 @@ class JobProducer {
           }
         }
       }
+      serializePeriodically();
     }
 
     notifyFreeBuffer();
+  }
+
+  private def serializePeriodically() {
+    val now = m_timer.milliTime();
+    if( now - m_lastSavedAt > m_saveInterval ) {
+      val psjson = "parameter_sets_" + m_dumpFileIndex + ".json";
+      val runjson = "runs_" + m_dumpFileIndex + ".json";
+      printJSON(psjson, runjson);
+      m_lastSavedAt = now;
+      m_dumpFileIndex += 1;
+    }
   }
 
   private def notifyFreeBuffer() {

@@ -13,46 +13,44 @@ import x10.io.File;
 
 class Main {
 
-  def run( seed: Long ): void {
-    // val logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-    // logger.setLevel(Level.INFO);   // set Level.ALL for debugging
-    // val handlers:Rail[Handler] = Java.convert[Handler]( logger.getParent().getHandlers() );
-    // for( handler in handlers ) {
-    //   handler.setLevel( logger.getLevel() );
-    // }
-
-    val refTableSearcher = new GlobalRef[PairTablesSearchEngine](
-      new PairTablesSearchEngine( new Tables( seed ), new GridSearcher() )
-    );
-
-    logger.info("Creating initial tasks");
-    val newTasks = at( refTableSearcher ) {
-      val tasks = refTableSearcher().searcher.createInitialTask( refTableSearcher().tables, Simulator.searchRegion() );
-      return tasks;
-    };
-    val init = () => { return new JobQueue( refTableSearcher ); };
-    val glb = new GLB[JobQueue, Long](init, GLBParameters.Default, true);
-
-    logger.info("Staring GLB");
-    val start = () => { glb.taskQueue().addInitialTasks( newTasks ); };
-    val r = glb.run(start);
-    logger.info("Finished GLB");
-
-    at( refTableSearcher ) {
-      val f = new File("runs.json");
-      val p = f.printer();
-      p.println( refTableSearcher().tables.runsJson() );
-      p.flush();
-      val f2 = new File("parameter_sets.json");
-      val p2 = f2.printer();
-      p2.println( refTableSearcher().tables.parameterSetsJson() );
-      p2.flush();
-    }
+  def run( engine: SearchEngineI, saveInterval: Long ): void {
+    val table = new Tables();
+    execute( table, engine, saveInterval );
   }
 
-  static public def main( args: Rail[String] ) {
-    val m = new Main();
-    val seed = Long.parse( args(0) );
-    m.run( seed );
+  def restart( psJson: String, runJson: String, engine: SearchEngineI, saveInterval: Long ) {
+    val table = new Tables();
+    table.load( psJson, runJson );
+    execute( table, engine, saveInterval );
+  }
+
+  private def execute( table: Tables, engine: SearchEngineI, saveInterval: Long) {
+    val modBuf = 4;
+    val numBuffers = Place.numPlaces() / modBuf;
+
+    val refJobProducer = new GlobalRef[JobProducer](
+      new JobProducer( new Tables(), engine, numBuffers, saveInterval )
+    );
+
+    finish for( i in 0..((Place.numPlaces()-1)/modBuf) ) {
+      async at( Place(i*modBuf) ) {
+        val buffer = new JobBuffer( refJobProducer );
+        buffer.getInitialTasks();
+        val refBuffer = new GlobalRef[JobBuffer]( buffer );
+
+        val min = Runtime.hereLong();
+        val max = Math.min( min+modBuf, Place.numPlaces() );
+        for( j in (min+1)..(max-1) ) {
+          async at( Place(j) ) {
+            val consumer = new JobConsumer( refBuffer );
+            consumer.run();
+          }
+        }
+      }
+    }
+
+    at( refJobProducer ) {
+      refJobProducer().printJSON("parameter_sets.json", "runs.json");
+    }
   }
 }

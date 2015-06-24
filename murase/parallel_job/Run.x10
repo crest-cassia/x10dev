@@ -1,17 +1,18 @@
 import x10.util.ArrayList;
+import util.JSON;
 
 public class Run {
   public val id: Long;
   public var placeId: Long;
-  public var startAt: Long;
-  public var finishAt: Long;
+  public var startAt: Long = -1;
+  public var finishAt: Long = -1;
   val params: Simulator.InputParameters;
-  val seed: Int;
+  val seed: Long;
   public var result: Simulator.OutputParameters;
   public var finished: Boolean;
   val parentPSId: Long;
 
-  def this( _id:Long, _ps: ParameterSet, _seed: Int ) {
+  def this( _id:Long, _ps: ParameterSet, _seed: Long ) {
     id = _id;
     parentPSId = _ps.id;
     seed = _seed;
@@ -19,9 +20,32 @@ public class Run {
     finished = false;
   }
 
+  public static def loadJSON( json: JSON.Value, table: Tables ) {
+    val id = json("id").toLong();
+    val parentPSId = json("parentPSId").toLong();
+    val ps = table.psTable.get(parentPSId);
+    val seed = json("seed").toLong();
+
+    val run = new Run( id, ps, seed );
+
+    if( json("startAt").toLong() != -1 ) {
+      val result = Simulator.OutputParameters.loadJSON( json("result") );
+      val placeId = json("placeId").toLong();
+      val startAt = json("startAt").toLong();
+      val finishAt = json("finishAt").toLong();
+      run.storeResult( result, placeId, startAt, finishAt );
+    }
+
+    return run;
+  }
+
   public def generateTask(): Task {
     val task = new Task( id, params, seed );
     return task;
+  }
+
+  def unfinished(): Boolean {
+    return (startAt == -1);
   }
 
   /*
