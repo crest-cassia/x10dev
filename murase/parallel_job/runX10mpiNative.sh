@@ -1,8 +1,9 @@
 #!/bin/sh
 #============ pjsub Options ============
-#PJM --rsc-list "node=12"
-#PJM --rsc-list "elapse=00:01:00"
+#PJM --rsc-list "node=96"
+#PJM --rsc-list "elapse=00:05:00"
 #PJM --rsc-list "rscgrp=small"
+#PJM --mpi "proc=768"
 #PJM --stg-transfiles all
 #PJM --mpi "use-rankdir"
 #PJM --stgin  "rank=* ./build/a.out %r:./"
@@ -17,11 +18,11 @@
 . /work/system/Env_base
 
 export GC_MARKERS=1
-export X10_NTHREADS=8
+export X10_NTHREADS=1
 # export X10_NPLACES=12
 # export X10_STATIC_THREADS=$X10_NTHREADS
 # export X10RT_MPI_ENABLE_COLLECTIVES=true
 # export X10RT_MPI_FORCE_COLLECTIVES=false
 
-mpiexec ./a.out 12345
+mpiexec ./a.out 4096 3.0 1.0 12345
 
