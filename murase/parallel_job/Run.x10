@@ -6,12 +6,12 @@ public class Run {
   public var startAt: Long = -1; // -1: run is not started
   public var finishAt: Long = -1;
   val params: Simulator.InputParameters;
-  val seed: Int;
+  val seed: Long;
   public var result: Simulator.OutputParameters;
   public var finished: Boolean;
   val parentPSId: Long;
 
-  def this( _id:Long, _ps: ParameterSet, _seed: Int ) {
+  def this( _id:Long, _ps: ParameterSet, _seed: Long ) {
     id = _id;
     parentPSId = _ps.id;
     seed = _seed;

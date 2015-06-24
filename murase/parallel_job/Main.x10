@@ -13,7 +13,7 @@ import x10.io.File;
 
 class Main {
 
-  def run( seed: Long, engine: SearchEngineI, saveInterval: Long ): void {
+  def run( engine: SearchEngineI, saveInterval: Long ): void {
     // val logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     // logger.setLevel(Level.INFO);   // set Level.ALL for debugging
     // val handlers:Rail[Handler] = Java.convert[Handler]( logger.getParent().getHandlers() );
@@ -22,7 +22,7 @@ class Main {
     // }
 
     val refJobProducer = new GlobalRef[JobProducer](
-      new JobProducer( new Tables(seed), engine, saveInterval )
+      new JobProducer( new Tables(), engine, saveInterval )
     );
 
     val modBuf = 96;
