@@ -42,15 +42,6 @@ class Simulator {
     return OutputParameters( t );
   }
 
-  /*
-  static def command( params: InputParameters, seed: Long ): String {
-    return "python ../../mock/dummy_simulator.py " +
-           params.mu + " " +
-           params.sigma + " " +
-           seed;
-  }
-  */
-
   public static val numParams = 3;
   public static val numOutputs = 1;
 
