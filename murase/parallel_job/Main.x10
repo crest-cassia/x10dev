@@ -14,13 +14,17 @@ import x10.io.File;
 class Main {
 
   def run( engine: SearchEngineI, saveInterval: Long ): void {
-    // val logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-    // logger.setLevel(Level.INFO);   // set Level.ALL for debugging
-    // val handlers:Rail[Handler] = Java.convert[Handler]( logger.getParent().getHandlers() );
-    // for( handler in handlers ) {
-    //   handler.setLevel( logger.getLevel() );
-    // }
+    val table = new Tables();
+    execute( table, engine, saveInterval );
+  }
 
+  def restart( psJson: String, runJson: String, engine: SearchEngineI, saveInterval: Long ) {
+    val table = new Tables();
+    table.load( psJson, runJson );
+    execute( table, engine, saveInterval );
+  }
+
+  private def execute( table: Tables, engine: SearchEngineI, saveInterval: Long) {
     val modBuf = 4;
     val numBuffers = Place.numPlaces() / modBuf;
 

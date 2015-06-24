@@ -18,6 +18,11 @@ class JobProducer {
     m_tables = _tables;
     m_engine = _engine;
     m_taskQueue = new ArrayList[Task]();
+    if( m_tables.empty() ) {
+      enqueueInitialTasks();
+    } else {
+      enqueueUnfinishedTasks();
+    }
     enqueueInitialTasks();
     m_freeBuffers = new ArrayList[GlobalRef[JobBuffer]]();
     m_numBuffers = _numBuffers;
@@ -28,6 +33,13 @@ class JobProducer {
 
   private def enqueueInitialTasks() {
     val tasks = m_engine.createInitialTask( m_tables, Simulator.searchRegion() );
+    for( task in tasks ) {
+      m_taskQueue.add( task );
+    }
+  }
+
+  private def enqueueUnfinishedTasks() {
+    val tasks = m_tables.createTasksForUnfinishedRuns();
     for( task in tasks ) {
       m_taskQueue.add( task );
     }

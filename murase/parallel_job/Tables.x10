@@ -12,6 +12,14 @@ public class Tables {
     psTable = new HashMap[Long, ParameterSet]();
   }
 
+  def load( psJson: String, runJson: String ) {
+    // TODO : IMPLEMENT ME
+  }
+
+  def empty(): Boolean {
+    return (runsTable.size() == 0);
+  }
+
   def runsJson(): String {
     var json:String = "[\n";
     for( entry in runsTable.entries() ) {
@@ -30,6 +38,17 @@ public class Tables {
     }
     val s = json.substring( 0n, json.length()-2n ) + "\n]";
     return s;
+  }
+
+  def createTasksForUnfinishedRuns(): ArrayList[Task] {
+    val tasks = new ArrayList[Task]();
+    for( entry in runsTable.entries() ) {
+      val run = entry.getValue();
+      if( run.unfinished() ) {
+        tasks.add( run.generateTask() );
+      }
+    }
+    return tasks;
   }
 }
 
