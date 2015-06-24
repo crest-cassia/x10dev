@@ -13,18 +13,18 @@ import x10.io.File;
 
 class Main {
 
-  def run( engine: SearchEngineI, saveInterval: Long ): void {
+  def run( engine: SearchEngineI, saveInterval: Long, timeOut: Long ): void {
     val table = new Tables();
-    execute( table, engine, saveInterval );
+    execute( table, engine, saveInterval, timeOut );
   }
 
-  def restart( psJson: String, runJson: String, engine: SearchEngineI, saveInterval: Long ) {
+  def restart( psJson: String, runJson: String, engine: SearchEngineI, saveInterval: Long, timeOut: Long ) {
     val table = new Tables();
     table.load( psJson, runJson );
-    execute( table, engine, saveInterval );
+    execute( table, engine, saveInterval, timeOut );
   }
 
-  private def execute( table: Tables, engine: SearchEngineI, saveInterval: Long) {
+  private def execute( table: Tables, engine: SearchEngineI, saveInterval: Long, timeOut: Long) {
     val modBuf = 4;
     val numBuffers = Place.numPlaces() / modBuf;
 
@@ -43,6 +43,7 @@ class Main {
         for( j in (min+1)..(max-1) ) {
           async at( Place(j) ) {
             val consumer = new JobConsumer( refBuffer );
+            consumer.setExpiration( timeOut );
             consumer.run();
           }
         }

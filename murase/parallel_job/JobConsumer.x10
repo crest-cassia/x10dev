@@ -8,10 +8,15 @@ class JobConsumer {
 
   val m_refBuffer: GlobalRef[JobBuffer];
   val m_timer = new Timer();
+  var m_timeOut: Long = -1;
   // val m_logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
   def this( _refBuffer: GlobalRef[JobBuffer] ) {
     m_refBuffer = _refBuffer;
+  }
+
+  def setExpiration( timeOutMilliTime: Long ) {
+    m_timeOut = m_timer.milliTime() + timeOutMilliTime;
   }
 
   static struct RunResult(
@@ -35,6 +40,7 @@ class JobConsumer {
         refBuf().saveResult( result );
       }
       // m_logger.fine("Consumer#saveResult " + result.runId + " at " + here);
+      if( isExpired() ) { return; }
 
       val newTasks = getTasksFromBuffer();
       for( newTask in newTasks ) {
@@ -66,6 +72,10 @@ class JobConsumer {
       return refBuf().popTasks();
     };
     return tasks;
+  }
+
+  private def isExpired(): Boolean {
+    return ((m_timeOut > 0) && (m_timer.milliTime() > m_timeOut));
   }
 }
 

@@ -14,7 +14,7 @@ class Mock {
       val sleepMu = Double.parse( args(1) );
       val sleepSigma = Double.parse( args(2) );
       val engine = new MockSearchEngine( numStaticTasks, 0, 0.25, 4, sleepMu, sleepSigma );
-      m.run( engine, 2000 );
+      m.run( engine, 2000, 5000 );
     }
     else if( args.size == 5 ) {
       val m = new Main();
@@ -24,7 +24,7 @@ class Mock {
       val psJson = args(3);
       val runJson = args(4);
       val engine = new MockSearchEngine( numStaticTasks, 0, 0.25, 4, sleepMu, sleepSigma );
-      m.restart( psJson, runJson, engine, 2000 );
+      m.restart( psJson, runJson, engine, 2000, 5000 );
     }
     else {
       Console.ERR.println("Usage: ./a.out <numStaticTasks> <sleepMu> <sleepSigma> [psJSON] [runJSON]");
