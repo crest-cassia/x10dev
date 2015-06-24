@@ -24,6 +24,10 @@ public class Run {
     return task;
   }
 
+  def unfinished(): Boolean {
+    return (startAt == -1);
+  }
+
   /*
   private def generateCommand( input: Simulator.InputParameters ): String {
     val cmd = Simulator.command( input, seed );

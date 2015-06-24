@@ -17,7 +17,11 @@ class JobProducer {
     m_tables = _tables;
     m_engine = _engine;
     m_taskQueue = new ArrayList[Task]();
-    enqueueInitialTasks();
+    if( m_tables.empty() ) {
+      enqueueInitialTasks();
+    } else {
+      enqueueUnfinishedTasks();
+    }
     m_lastSavedAt = m_timer.milliTime();
     m_saveInterval = _saveInterval;
     m_dumpFileIndex = 0;
@@ -25,6 +29,13 @@ class JobProducer {
 
   private def enqueueInitialTasks() {
     val tasks = m_engine.createInitialTask( m_tables, Simulator.searchRegion() );
+    for( task in tasks ) {
+      m_taskQueue.add( task );
+    }
+  }
+
+  private def enqueueUnfinishedTasks() {
+    val tasks = m_tables.createTasksForUnfinishedRuns();
     for( task in tasks ) {
       m_taskQueue.add( task );
     }
