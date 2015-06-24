@@ -34,7 +34,8 @@ public class ParameterSet( id: Long, point: Point{self.rank==Simulator.numParams
   def createRuns( table: Tables, numRuns: Long ): ArrayList[Run] {
     val a = new ArrayList[Run]();
     for( i in 1..numRuns ) {
-      val run = new Run( table.maxRunId, this, table.nextSeed() );
+      val run = new Run( table.maxRunId, this, table.maxRunId );
+      // use run_id as seed value
       table.maxRunId += 1;
       table.runsTable.put( run.id, run );
       runIds.add( run.id );

@@ -13,7 +13,7 @@ import x10.io.File;
 
 class Main {
 
-  def run( seed: Long, engine: SearchEngineI, saveInterval: Long ): void {
+  def run( engine: SearchEngineI, saveInterval: Long ): void {
     // val logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     // logger.setLevel(Level.INFO);   // set Level.ALL for debugging
     // val handlers:Rail[Handler] = Java.convert[Handler]( logger.getParent().getHandlers() );
@@ -25,7 +25,7 @@ class Main {
     val numBuffers = Place.numPlaces() / modBuf;
 
     val refJobProducer = new GlobalRef[JobProducer](
-      new JobProducer( new Tables(seed), engine, numBuffers, saveInterval )
+      new JobProducer( new Tables(), engine, numBuffers, saveInterval )
     );
 
     finish for( i in 0..((Place.numPlaces()-1)/modBuf) ) {
