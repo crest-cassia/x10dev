@@ -3,8 +3,8 @@ import x10.util.ArrayList;
 public class Run {
   public val id: Long;
   public var placeId: Long;
-  public var startAt: Long;
-  public var finishAt: Long;
+  public var startAt: Long = -1;
+  public var finishAt: Long = -1;
   val params: Simulator.InputParameters;
   val seed: Int;
   public var result: Simulator.OutputParameters;
