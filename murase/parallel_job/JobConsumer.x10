@@ -8,10 +8,15 @@ class JobConsumer {
 
   val m_refProducer: GlobalRef[JobProducer];
   val m_timer = new Timer();
+  var m_timeOut: Long = -1;
   // val m_logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
   def this( _refProcuer: GlobalRef[JobProducer] ) {
     m_refProducer = _refProcuer;
+  }
+
+  def setExpiration( timeOutMilliTime: Long ) {
+    m_timeOut = m_timer.milliTime() + timeOutMilliTime;
   }
 
   static struct RunResult(
@@ -35,6 +40,8 @@ class JobConsumer {
       val result = RunResult( runId, localResult, runPlace, startAt, finishAt );
 
       storeResult( result );
+
+      if( isExpired() ) { return; }
       val newTasks = getTasksFromProducer();
       for( newTask in newTasks ) {
         tasks.add( newTask );
@@ -61,5 +68,9 @@ class JobConsumer {
       return refProd().popTasks(1);
     };
     return tasks;
+  }
+
+  private def isExpired(): Boolean {
+    return ((m_timeOut > 0) && (m_timer.milliTime() > m_timeOut));
   }
 }

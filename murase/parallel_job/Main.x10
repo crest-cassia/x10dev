@@ -6,6 +6,7 @@ import x10.util.Pair;
 import x10.util.HashMap;
 import x10.util.ArrayList;
 import x10.io.File;
+import x10.util.Timer;
 // import x10.interop.Java;
 // import java.util.logging.Logger;
 // import java.util.logging.Level;
@@ -13,18 +14,18 @@ import x10.io.File;
 
 class Main {
 
-  def run( engine: SearchEngineI, saveInterval: Long ): void {
+  def run( engine: SearchEngineI, saveInterval: Long, timeOut: Long ): void {
     val table = new Tables();
-    execute( table, engine, saveInterval );
+    execute( table, engine, saveInterval, timeOut );
   }
 
-  def restart( psJson: String, runJson: String, engine: SearchEngineI, saveInterval: Long ) {
+  def restart( psJson: String, runJson: String, engine: SearchEngineI, saveInterval: Long, timeOut: Long ) {
     val table = new Tables();
     table.load( psJson, runJson );
-    execute( table, engine, saveInterval );
+    execute( table, engine, saveInterval, timeOut );
   }
 
-  private def execute( table: Tables, engine: SearchEngineI, saveInterval: Long) {
+  private def execute( table: Tables, engine: SearchEngineI, saveInterval: Long, timeOut: Long) {
     val refJobProducer = new GlobalRef[JobProducer](
       new JobProducer( table, engine, saveInterval )
     );
@@ -38,6 +39,7 @@ class Main {
           if( j == 0 ) { continue; }
           async at( Place(j) ) {
             val consumer = new JobConsumer( refJobProducer );
+            consumer.setExpiration( timeOut );
             consumer.run();
           }
         }
