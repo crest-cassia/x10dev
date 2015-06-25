@@ -25,6 +25,28 @@ def calc_fillting_rate(runs)
   filling_rate
 end
 
+def calc_domains(parameter_sets, runs)
+  num_params = parameter_sets.first["point"].size
+  param_domains = Array.new(num_params) do |i|
+    d = parameter_sets.map {|ps| ps["point"][i] }.minmax
+    {min: d[0], max: d[1]}
+  end
+
+  num_outputs = 1
+  output_domains = Array.new(num_outputs) do |i|
+    d = parameter_sets.map {|ps| ps["point"].inject(:+) }.minmax  # TODO: temporary implementation
+    {min: d[0], max: d[1]}
+  end
+
+  { numParams: num_params,
+    paramDomains: param_domains,
+    numOutputs: num_outputs,
+    outputDomains: output_domains
+  }
+end
+
+domains = calc_domains(parameter_sets, runs)
+
 $stderr.puts "filling_rate: #{calc_fillting_rate(runs)}"
 
 # example: /filter?x0=1&x1=2
@@ -58,25 +80,7 @@ end
 # }
 get '/domains' do
   content_type :json
-
-  num_params = parameter_sets.first["point"].size
-  param_domains = Array.new(num_params) do |i|
-    d = parameter_sets.map {|ps| ps["point"][i] }.minmax
-    {min: d[0], max: d[1]}
-  end
-
-  num_outputs = 1
-  output_domains = Array.new(num_outputs) do |i|
-    # d = parameter_sets.map {|ps| ps["results"][i] }.minmax
-    d = parameter_sets.map {|ps| ps["point"].inject(:+) }.minmax  # TODO: temporary implementation
-    {min: d[0], max: d[1]}
-  end
-
-  { numParams: num_params,
-    paramDomains: param_domains,
-    numOutputs: num_outputs,
-    outputDomains: output_domains
-  }.to_json
+  domains.to_json
 end
 
 get '/runs' do
