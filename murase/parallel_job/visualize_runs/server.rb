@@ -13,6 +13,9 @@ end
 runs = JSON.parse( File.open(ARGV[0]).read )
 parameter_sets = JSON.parse( File.open(ARGV[1]).read ) if ARGV[1]
 
+# TODO: tentative implementation
+parameter_sets.each {|ps| ps["result"] = ps["point"].inject(:+) }
+
 runs.select! {|run| run["startAt"] > 0 }
 min_start_at = runs.map {|run| run["startAt"] }.min
 runs.each {|run| run["startAt"] -= min_start_at; run["finishAt"] -= min_start_at }
@@ -46,6 +49,20 @@ def calc_domains(parameter_sets, runs)
   }
 end
 
+def calc_interpolation(target, point2result)
+  distance = lambda {|p1,p2|
+    Math.sqrt( p1.zip(p2).map {|x,y| (x-y)*(x-y) }.inject(:+) )
+  }
+
+  close_points = point2result.keys.sort_by {|point|
+    distance.call(point, target)
+  }
+  dr = close_points[0..1].map {|point| [ distance.call(point, target), point2result[point] ] }
+  d_sum = dr.map {|d,r| d }.inject(:+)
+  interpolated = dr.map {|d,r| (d/d_sum.to_f) * r }.inject(:+)
+  interpolated
+end
+
 domains = calc_domains(parameter_sets, runs)
 
 $stderr.puts "filling_rate: #{calc_fillting_rate(runs)}"
@@ -54,18 +71,40 @@ $stderr.puts "filling_rate: #{calc_fillting_rate(runs)}"
 #  => list of parameter sets whose point is [1,2,...]
 get '/filter' do
   content_type :json
-  selected = parameter_sets
+
+  target = Array.new(domains[:numParams])
   params.each_pair do |key,val|
     n = key[1..-1].to_i
 	  v = val.to_i
-	  selected = selected.select do |ps|
-      ps["point"][n] == v
-    end
+    target[n] = v
   end
+  selected = parameter_sets.select do |ps|
+    target.each_with_index.all? {|x,idx| x.nil? or ps["point"][idx] == x }
+  end
+  p selected
 
-  # TODO: tentative implementation
-  selected.each {|ps| ps["result"] = ps["point"].inject(:+) }
-  selected.to_json
+  # interpolation by two nearest points
+  calc_interpolation = lambda {
+    point2result = Hash.new
+    parameter_sets.map {|ps| point2result[ps["point"]] = ps["result"] }
+    idx = target.index(nil)
+    interpolated = (domains[:paramDomains][idx][:min]..domains[:paramDomains][idx][:max]).map do |x|
+      point = target.dup
+      point[idx] = x
+      found = selected.find {|ps| ps["point"] == point }
+      if found
+        found
+      else
+        result = calc_interpolation(point, point2result)
+        {id: -1, point: point, result: result, num_runs: 0}
+      end
+    end
+    interpolated
+  }
+  data = calc_interpolation.call()
+  p data
+
+  data.to_json
 end
 
 # /domains  =>
