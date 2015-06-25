@@ -180,19 +180,19 @@ class Selector {
 
 class Slider {
   private sliderDiv: JQuery;
-  private spinner: JQuery;
+  private fieldDiv: JQuery;
   private min: number;
   private max: number;
   constructor(parentElementId: string, id: string, min: number, max: number) {
     var parent = $(parentElementId).append(`<div id="${id}"></div>`);
+    var fieldId = `${id}-text`;
     var sliderId = `${id}-slider`;
-    var spinnerId = `${id}-spinner`;
     parent
-      .append(`<label for="${spinnerId}">${id}</label>`)
-      .append(`<input id="${spinnerId}"></select>`);
+      .append(`<label for="${fieldId}">${id}</label>`)
+      .append(`<input type="text" id="${fieldId}" disabled="disabled"></input>`);
     parent.append(`<div id="${sliderId}"></div>`);
     this.sliderDiv = $('#'+sliderId);
-    this.spinner = $('#'+spinnerId);
+    this.fieldDiv = $('#'+fieldId);
     this.max = max;
     this.min = min;
 
@@ -204,13 +204,7 @@ class Slider {
       step: 1,
       value: this.min
     }).slider("value", this.min);
-
-    this.spinner.spinner({
-      min: this.min,
-      max: this.max,
-      step: 1,
-      page: Math.ceil( (this.max - this.min) / 10),
-    }).spinner("value", this.min);
+    this.fieldDiv.val( this.sliderDiv.slider('value').toString() );
 
     this.setOnChange( (n:number) => {} );
   }
@@ -218,26 +212,17 @@ class Slider {
   public setOnChange( f:(sliderVal:number)=>void ) {
     var onSliderChange = (event, ui) => {
       var val = ui.value;
-      this.spinner.spinner("value", val);
-      f(val);
-    }
-    var onSpinnerChange = (event, ui) => {
-      var val = ui.value;
-      this.sliderDiv.slider("value", val);
+      this.fieldDiv.val(val);
       f(val);
     }
     this.sliderDiv.slider({
       change: onSliderChange,
       slide: onSliderChange
     });
-    this.spinner.spinner({
-      chagne: onSpinnerChange,
-      spin: onSpinnerChange
-    });
   }
   
   public getVal(): number {
-    return this.spinner.spinner("value");
+    return this.sliderDiv.slider('value');
   }
 }
 
