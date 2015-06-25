@@ -36,6 +36,8 @@ class LinePlot {
   private height: number;
   private xScale: d3.scale.Linear<number,number>;
   private yScale: d3.scale.Linear<number,number>;
+  private xAxis: d3.Selection<any>;
+  private yAxis: d3.Selection<any>;
   private domains: Domains;
   private xKey: number;
   private yKey: number;
@@ -52,6 +54,17 @@ class LinePlot {
       .attr("height", this.height + margin.top + margin.bottom)
       .append("g")
         .attr("transform", "translate("+margin.left+","+margin.top+")");
+    this.xAxis = this.svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + this.height + ")");
+    this.yAxis = this.svg.append("g")
+      .attr("class", "y axis");
+    this.yAxis.append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Result");
 
     this.domains = domains;
   }
@@ -71,21 +84,10 @@ class LinePlot {
     var yDomain = this.domains.outputDomains[this.yKey];
     this.yScale.domain([yDomain.min, yDomain.max]);
 
-    var xAxis = d3.svg.axis().scale(this.xScale).orient("bottom");
-    var yAxis = d3.svg.axis().scale(this.yScale).orient("left");
-    this.svg.append("g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + this.height + ")")
-      .call(xAxis);
-    this.svg.append("g")
-      .attr("class", "y axis")
-      .call(yAxis)
-    .append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("y", 6)
-      .attr("dy", ".71em")
-      .style("text-anchor", "end")
-      .text("Result");
+    var xAxisBuilder = d3.svg.axis().scale(this.xScale).orient("bottom");
+    var yAxisBuilder = d3.svg.axis().scale(this.yScale).orient("left");
+    this.xAxis.call(xAxisBuilder);
+    this.yAxis.call(yAxisBuilder);
   }
 
   public update( point: number[] ) {
@@ -118,7 +120,7 @@ class LinePlot {
     var tooltip = d3.select('span#tooltip');
     points
       .attr("class", "point")
-      .attr("cx", (d:ParameterSet) => { return this.xScale(d.point[2] ); })
+      .attr("cx", (d:ParameterSet) => { return this.xScale(d.point[this.xKey] ); })
       .attr("cy", (d:ParameterSet) => { return this.yScale(d.result); })
       .attr("r", 4)
       .style("opacity", .8)
@@ -244,11 +246,8 @@ document.body.onload = function() {
   var url = '/domains';
   d3.json(url, (error: any, domains: Domains) => {
     var plot = new LinePlot('#plot', domains);
-    plot.build(2, 0);
+    plot.build(0, 0);
     var select = new Selector('#select_x', 'xkey', ["0","1","2"]);
-    select.setOnChange( (selected:string) => {
-      console.log("changed");
-    });
     var sliders: Slider[] = [];
     for( var i=0; i < domains.numParams; i++) {
       var domain = domains.paramDomains[i];
@@ -263,7 +262,10 @@ document.body.onload = function() {
       }
       return point;
     }
-
+    select.setOnChange( (selected:string) => {
+      plot.build( Number(selected), 0 );
+      plot.update( slidersToPoint() );
+    });
     for( var i=0; i < sliders.length; i++ ) {
       sliders[i].setOnChange( (n:number) => { plot.update( slidersToPoint() ); } );
     }
