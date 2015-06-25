@@ -243,7 +243,8 @@ document.body.onload = function() {
   var url = '/domains';
   d3.json(url, (error: any, domains: Domains) => {
     var plot = new LinePlot('#plot', domains);
-    var select = new Selector('#select_x', 'xkey', ["0","1","2"]);
+    var xKeys = domains.paramDomains.map((v:Domain,idx:number) => { return idx.toString(); });
+    var select = new Selector('#select_x', 'xkey', xKeys);
     var sliders: Slider[] = [];
     for( var i=0; i < domains.numParams; i++) {
       var domain = domains.paramDomains[i];
