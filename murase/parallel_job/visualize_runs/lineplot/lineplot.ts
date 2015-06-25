@@ -152,6 +152,30 @@ class LinePlot {
   }
 }
 
+class Selector {
+  
+  private select: JQuery;
+  
+  constructor(parentElementId: string, id: string, options: string[]) {
+    var tags = `<select id="${id}">`;
+    options.forEach( (val:string,idx: number) => {
+      var option = `<option value="${val}">${val}</option>`;
+      tags += option;
+    });
+    tags += "</select>";
+    $(parentElementId).append(tags);
+    
+    this.select = $(`${parentElementId} select#${id}`);
+  }
+  
+  public setOnChange( f:(selected:string)=>void ) {
+    this.select.change( function() {
+      var selected = $(this).val();
+      f(selected);
+    });
+  }
+}
+
 class Slider {
   private sliderDiv: JQuery;
   private spinner: JQuery;
@@ -221,6 +245,10 @@ document.body.onload = function() {
   d3.json(url, (error: any, domains: Domains) => {
     var plot = new LinePlot('#plot', domains);
     plot.build(2, 0);
+    var select = new Selector('#select_x', 'xkey', ["0","1","2"]);
+    select.setOnChange( (selected:string) => {
+      console.log("changed");
+    });
     var sliders: Slider[] = [];
     for( var i=0; i < domains.numParams; i++) {
       var domain = domains.paramDomains[i];
