@@ -30,12 +30,12 @@ function getMinPoint(domains: Domains): number[] {
 }
 
 class LinePlot {
-  
-  private svg: D3.Selection;
+
+  private svg: d3.Selection<any>;
   private width: number;
   private height: number;
-  private xScale: D3.Scale.LinearScale;
-  private yScale: D3.Scale.LinearScale;
+  private xScale: d3.scale.Linear<number,number>;
+  private yScale: d3.scale.Linear<number,number>;
   private domains: Domains;
   private xKey: number;
   private yKey: number;
@@ -44,7 +44,6 @@ class LinePlot {
     var margin = {top: 20, right: 20, bottom: 30, left: 40};
     this.width = 960 - margin.left - margin.right,
     this.height = 600 - margin.top - margin.bottom;
-    
     this.xScale = d3.scale.linear().range([0,this.width]);
     this.yScale = d3.scale.linear().range([this.height,0]);
     
@@ -100,6 +99,7 @@ class LinePlot {
 
       var path = this.svg.select("path#dataline");
       path.datum(data);
+      
       this.drawLine(path);
     });
   }
@@ -114,7 +114,7 @@ class LinePlot {
     return url;
   }
 
-  private setCircleStyles( points: D3.Selection ) {
+  private setCircleStyles( points: d3.Selection<any> ) {
     var tooltip = d3.select('span#tooltip');
     points
       .attr("class", "point")
@@ -144,8 +144,8 @@ class LinePlot {
       });
   }
   
-  private drawLine( path: D3.Selection ) {
-      var line = d3.svg.line()
+  private drawLine( path: d3.Selection<any> ) {
+      var line = d3.svg.line<ParameterSet>()
         .x( (d:ParameterSet)=>{return this.xScale(d.point[2]);} )
         .y( (d:ParameterSet)=>{return this.yScale(d.result);} );
       path.attr("d", line);
