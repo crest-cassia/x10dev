@@ -176,6 +176,10 @@ class Selector {
       f(selected);
     });
   }
+  
+  public Trigger() {
+    this.select.trigger('change');
+  }
 }
 
 class Slider {
@@ -224,6 +228,14 @@ class Slider {
   public getVal(): number {
     return this.sliderDiv.slider('value');
   }
+  
+  public disable() {
+    this.sliderDiv.slider("disable");
+  }
+  
+  public enable() {
+    this.sliderDiv.slider("enable");
+  }
 }
 
 
@@ -231,7 +243,6 @@ document.body.onload = function() {
   var url = '/domains';
   d3.json(url, (error: any, domains: Domains) => {
     var plot = new LinePlot('#plot', domains);
-    plot.build(0, 0);
     var select = new Selector('#select_x', 'xkey', ["0","1","2"]);
     var sliders: Slider[] = [];
     for( var i=0; i < domains.numParams; i++) {
@@ -248,11 +259,18 @@ document.body.onload = function() {
       return point;
     }
     select.setOnChange( (selected:string) => {
-      plot.build( Number(selected), 0 );
+      var xKey = Number(selected);
+      for( var i=0; i < sliders.length; i++) {
+        if( i == xKey ) { sliders[i].disable(); }
+        else { sliders[i].enable(); }
+      }
+      plot.build( xKey, 0 );
       plot.update( slidersToPoint() );
     });
     for( var i=0; i < sliders.length; i++ ) {
       sliders[i].setOnChange( (n:number) => { plot.update( slidersToPoint() ); } );
     }
+
+    select.Trigger();
   });
 }
