@@ -29,6 +29,7 @@ class JobBuffer {
       val tasks = at( refProd ) {
         return refProd().popTasks();
       };
+      // if( here.id == 4 ) { Console.ERR.println(" got " + tasks.size() + " tasks from producer"); }
       atomic {
         for( task in tasks ) {
           m_taskQueue.add( task );
@@ -43,7 +44,7 @@ class JobBuffer {
     fillTaskQueueIfEmpty();
     atomic {
       val n = calcNumTasksToPop();
-      // Console.ERR.println("at " + here + " : " + n );
+      // if( here.id == 4 ) { Console.ERR.println("at " + here + " poping " + n + "tasks"); }
       for( i in 1..n ) {
         if( m_taskQueue.size() == 0 ) {
           break;
@@ -67,7 +68,7 @@ class JobBuffer {
       m_resultsBuffer.add( result );
       m_numRunning -= 1;
       if( hasEnoughResults() ) { // TODO: set parameter
-        // Console.ERR.println("saving at " + here);
+        // if( here.id == 4 ) { Console.ERR.println("saving " + m_resultsBuffer.size() + "results at " + here); }
         for( res in m_resultsBuffer ) {
           resultsToSave.add( res );
         }
