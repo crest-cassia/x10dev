@@ -18,7 +18,7 @@ parameter_sets.each {|ps| ps["result"] = ps["point"].inject(:+) }
 
 runs.select! {|run| run["startAt"] > 0 }
 min_start_at = runs.map {|run| run["startAt"] }.min
-runs.each {|run| run["startAt"] -= min_start_at; run["finishAt"] -= min_start_at }
+runs.each {|run| run["startAt"] = (run["startAt"] - min_start_at)/1000.0; run["finishAt"] = (run["finishAt"] - min_start_at)/1000.0 }
 
 def calc_fillting_rate(runs)
   min_start_at = runs.map {|run| run["startAt"] }.min
