@@ -20,8 +20,8 @@ class BoxPlot {
   
   constructor(elementId: string) {
     var margin = {top: 20, right: 20, bottom: 30, left: 40};
-    this.width = 1500 - margin.left - margin.right,
-    this.height = 2000 - margin.top - margin.bottom;
+    this.width = 3000 - margin.left - margin.right,
+    this.height = 5000 - margin.top - margin.bottom;
     
     this.xScale = d3.scale.ordinal().rangeRoundBands([0,this.width], .1, 1);
     this.yScale = d3.scale.linear().range([0,this.height]);
