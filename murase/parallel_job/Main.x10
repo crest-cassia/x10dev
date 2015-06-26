@@ -34,12 +34,12 @@ class Main {
 
     finish for( i in 0..((Place.numPlaces()-1)/modBuf) ) {
       async at( Place(i*modBuf) ) {
-        val buffer = new JobBuffer( refJobProducer );
+        val min = Runtime.hereLong();
+        val max = Math.min( min+modBuf, Place.numPlaces() );
+        val buffer = new JobBuffer( refJobProducer, (max-1-min) );
         buffer.getInitialTasks();
         val refBuffer = new GlobalRef[JobBuffer]( buffer );
 
-        val min = Runtime.hereLong();
-        val max = Math.min( min+modBuf, Place.numPlaces() );
         for( j in (min+1)..(max-1) ) {
           async at( Place(j) ) {
             val consumer = new JobConsumer( refBuffer );

@@ -12,9 +12,11 @@ class JobBuffer {
   val m_resultsBuffer = new ArrayList[JobConsumer.RunResult]();
   var m_numRunning: Long = 0;
   val m_freePlaces = new ArrayList[Place]();
+  val m_numConsumers: Long;  // number of consumers belonging to this buffer
 
-  def this( _refProducer: GlobalRef[JobProducer] ) {
+  def this( _refProducer: GlobalRef[JobProducer], _numConsumers: Long ) {
     m_refProducer = _refProducer;
+    m_numConsumers = _numConsumers;
   }
 
   public def getInitialTasks() {
@@ -37,10 +39,11 @@ class JobBuffer {
 
   def popTasks(): ArrayList[Task] {
     // m_logger.fine("Buffer#popTasks " + m_numRunning + "/" + m_taskQueue.size() + " tasks at " + here);
-    val n = 1;  // TODO: tune up number of return tasks
     val tasks = new ArrayList[Task]();
     fillTaskQueueIfEmpty();
     atomic {
+      val n = calcNumTasksToPop();
+      // Console.ERR.println("at " + here + " : " + n );
       for( i in 1..n ) {
         if( m_taskQueue.size() == 0 ) {
           break;
@@ -54,12 +57,17 @@ class JobBuffer {
     return tasks;
   }
 
+  private def calcNumTasksToPop(): Long {
+    return Math.ceil((m_taskQueue.size() as Double) / (2.0*m_numConsumers)) as Long;
+  }
+
   def saveResult( result: JobConsumer.RunResult ) {
     val resultsToSave: ArrayList[JobConsumer.RunResult] = new ArrayList[JobConsumer.RunResult]();
     atomic {
       m_resultsBuffer.add( result );
       m_numRunning -= 1;
-      if( m_resultsBuffer.size() >= 1 || m_numRunning == 0 ) { // TODO: set parameter
+      if( hasEnoughResults() ) { // TODO: set parameter
+        // Console.ERR.println("saving at " + here);
         for( res in m_resultsBuffer ) {
           resultsToSave.add( res );
         }
@@ -71,6 +79,11 @@ class JobBuffer {
     at( refProd ) {
       refProd().saveResults( resultsToSave );
     }
+  }
+
+  private def hasEnoughResults(): Boolean {
+    // return (m_resultsBuffer.size() >= 1 || m_numRunning == 0);
+    return (m_resultsBuffer.size() >= m_numRunning  + m_taskQueue.size() );
   }
 
   def registerFreePlace( freePlace: Place ) {

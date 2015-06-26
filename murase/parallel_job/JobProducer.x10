@@ -100,7 +100,8 @@ class JobProducer {
   public def popTasks(): ArrayList[Task] {
     atomic {
       val tasks = new ArrayList[Task]();
-      val n = 1; // calcNumTasksToPop();
+      val n = calcNumTasksToPop();
+      // Console.ERR.println("Producer : " + n );
       for( i in 1..n ) {
         if( m_taskQueue.size() == 0 ) break;
         val task = m_taskQueue.removeFirst();
@@ -110,11 +111,9 @@ class JobProducer {
     }
   }
 
-  /*
   private def calcNumTasksToPop(): Long {
     return Math.ceil((m_taskQueue.size() as Double) / (2.0*m_numBuffers)) as Long;
   }
-  */
 
   public def printJSON( psJson: String, runsJson: String ) {
     val f = new File(runsJson);
