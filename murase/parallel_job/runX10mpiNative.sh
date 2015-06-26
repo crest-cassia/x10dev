@@ -1,7 +1,7 @@
 #!/bin/sh
 #============ pjsub Options ============
 #PJM --rsc-list "node=96"
-#PJM --rsc-list "elapse=00:05:00"
+#PJM --rsc-list "elapse=00:04:00"
 #PJM --rsc-list "rscgrp=small"
 #PJM --mpi "proc=768"
 #PJM --stg-transfiles all
@@ -11,7 +11,7 @@
 #PJM -s
 
 #============ Shell Script ============
-#  ## #PJM --mpi "proc=12"
+# #PJM --mpi "proc=768"
 #  #PJM --stgin-dir "rank=* ./build %r:./"
 
 
@@ -24,5 +24,5 @@ export X10_NTHREADS=1
 # export X10RT_MPI_ENABLE_COLLECTIVES=true
 # export X10RT_MPI_FORCE_COLLECTIVES=false
 
-mpiexec ./a.out 4096 10.0 2.0 180
+mpiexec ./a.out 3840 10.0 2.0 240 96
 

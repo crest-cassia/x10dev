@@ -13,19 +13,19 @@ import x10.io.File;
 
 class Main {
 
-  def run( engine: SearchEngineI, saveInterval: Long, timeOut: Long ): void {
+  def run( engine: SearchEngineI, saveInterval: Long, timeOut: Long, numProcBerBuf: Long ): void {
     val table = new Tables();
-    execute( table, engine, saveInterval, timeOut );
+    execute( table, engine, saveInterval, timeOut, numProcBerBuf );
   }
 
-  def restart( psJson: String, runJson: String, engine: SearchEngineI, saveInterval: Long, timeOut: Long ) {
+  def restart( psJson: String, runJson: String, engine: SearchEngineI, saveInterval: Long, timeOut: Long, numProcBerBuf: Long ) {
     val table = new Tables();
     table.load( psJson, runJson );
-    execute( table, engine, saveInterval, timeOut );
+    execute( table, engine, saveInterval, timeOut, numProcBerBuf );
   }
 
-  private def execute( table: Tables, engine: SearchEngineI, saveInterval: Long, timeOut: Long) {
-    val modBuf = 4;
+  private def execute( table: Tables, engine: SearchEngineI, saveInterval: Long, timeOut: Long, numProcBerBuf: Long ) {
+    val modBuf = numProcBerBuf;
     val numBuffers = Place.numPlaces() / modBuf;
 
     val refJobProducer = new GlobalRef[JobProducer](
