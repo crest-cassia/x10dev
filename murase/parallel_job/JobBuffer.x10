@@ -1,5 +1,6 @@
 import x10.util.ArrayList;
 import x10.util.Timer;
+import x10.util.concurrent.AtomicBoolean;
 // import x10.interop.Java;
 // import org.json.simple.*;
 // import java.util.logging.Logger;
@@ -13,6 +14,7 @@ class JobBuffer {
   var m_numRunning: Long = 0;
   val m_freePlaces = new ArrayList[Place]();
   val m_numConsumers: Long;  // number of consumers belonging to this buffer
+  var m_isFillingQueue: AtomicBoolean = new AtomicBoolean(false);
 
   def this( _refProducer: GlobalRef[JobProducer], _numConsumers: Long ) {
     m_refProducer = _refProducer;
@@ -24,6 +26,7 @@ class JobBuffer {
   }
 
   private def fillTaskQueueIfEmpty(): void {
+    when( !m_isFillingQueue.get() ) { m_isFillingQueue.set(true); }
     if( m_taskQueue.size() == 0 ) {
       val refProd = m_refProducer;
       val tasks = at( refProd ) {
@@ -36,6 +39,7 @@ class JobBuffer {
         }
       }
     }
+    m_isFillingQueue.set(false);
   }
 
   def popTasks(): ArrayList[Task] {
