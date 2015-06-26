@@ -14,8 +14,8 @@ class JobBuffer {
   var m_numRunning: Long = 0;
   val m_freePlaces = new ArrayList[Place]();
   val m_numConsumers: Long;  // number of consumers belonging to this buffer
-  var m_isFillingQueue: AtomicBoolean = new AtomicBoolean(false);
-  var m_isRegisteringFreeBuffer: AtomicBoolean = new AtomicBoolean(false);
+  val m_isFillingQueue: AtomicBoolean = new AtomicBoolean(false);
+  val m_isRegisteringFreeBuffer: AtomicBoolean = new AtomicBoolean(false);
 
   def this( _refProducer: GlobalRef[JobProducer], _numConsumers: Long ) {
     m_refProducer = _refProducer;
