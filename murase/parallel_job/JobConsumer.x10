@@ -42,9 +42,11 @@ class JobConsumer {
       // m_logger.fine("Consumer#saveResult " + result.runId + " at " + here);
       if( isExpired() ) { return; }
 
-      val newTasks = getTasksFromBuffer();
-      for( newTask in newTasks ) {
-        tasks.add( newTask );
+      if( tasks.size() == 0 ) {
+        val newTasks = getTasksFromBuffer();
+        for( newTask in newTasks ) {
+          tasks.add( newTask );
+        }
       }
     }
 
