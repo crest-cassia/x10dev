@@ -1,12 +1,12 @@
 #!/bin/sh
 #============ pjsub Options ============
 #PJM --rsc-list "node=12"
-#PJM --rsc-list "elapse=00:01:00"
+#PJM --rsc-list "elapse=00:04:00"
 #PJM --rsc-list "rscgrp=small"
 #PJM --stg-transfiles all
 #PJM --mpi "use-rankdir"
 #PJM --stgin  "rank=* ./build/a.out %r:./"
-#PJM --stgout-dir "rank=* %r:./ %j"
+#PJM --stgout-dir "rank=0 %r:./ %j"
 #PJM -s
 
 #============ Shell Script ============
@@ -23,5 +23,5 @@ export X10_NTHREADS=8
 # export X10RT_MPI_ENABLE_COLLECTIVES=true
 # export X10RT_MPI_FORCE_COLLECTIVES=false
 
-mpiexec ./a.out 12345
+mpiexec ./a.out 60 10.0 2.0 180
 
