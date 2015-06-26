@@ -23,7 +23,6 @@ class JobProducer {
     } else {
       enqueueUnfinishedTasks();
     }
-    enqueueInitialTasks();
     m_freeBuffers = new ArrayList[GlobalRef[JobBuffer]]();
     m_numBuffers = _numBuffers;
     m_lastSavedAt = m_timer.milliTime();
