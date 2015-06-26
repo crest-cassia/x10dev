@@ -80,9 +80,11 @@ class JobBuffer {
       }
     }
 
-    val refProd = m_refProducer;
-    at( refProd ) {
-      refProd().saveResults( resultsToSave );
+    if( resultsToSave.size() > 0 ) {
+      val refProd = m_refProducer;
+      at( refProd ) {
+        refProd().saveResults( resultsToSave );
+      }
     }
   }
 
