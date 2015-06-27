@@ -14,9 +14,8 @@ class JobBuffer {
   var m_numRunning: Long = 0;
   val m_freePlaces = new ArrayList[Place]();
   val m_numConsumers: Long;  // number of consumers belonging to this buffer
-  val m_isFillingQueue: AtomicBoolean = new AtomicBoolean(false);
-  val m_isRegisteringFreeBuffer: AtomicBoolean = new AtomicBoolean(false);
-  val m_isLaunchingConsumer: AtomicBoolean = new AtomicBoolean(false);
+  val m_isLockQueue: AtomicBoolean = new AtomicBoolean(false);
+  val m_isLockFreePlaces: AtomicBoolean = new AtomicBoolean(false);
 
   def this( _refProducer: GlobalRef[JobProducer], _numConsumers: Long ) {
     m_refProducer = _refProducer;
@@ -24,11 +23,12 @@ class JobBuffer {
   }
 
   public def getInitialTasks() {
+    when( !m_isLockQueue.get() ) { m_isLockQueue.set(true); }
     fillTaskQueueIfEmpty();
+    m_isLockQueue.set(false);
   }
 
   private def fillTaskQueueIfEmpty(): void {
-    when( !m_isFillingQueue.get() ) { m_isFillingQueue.set(true); }
     if( m_taskQueue.size() == 0 ) {
       val refProd = m_refProducer;
       val tasks = at( refProd ) {
@@ -41,10 +41,10 @@ class JobBuffer {
         }
       }
     }
-    m_isFillingQueue.set(false);
   }
 
   def popTasks(): ArrayList[Task] {
+    when( !m_isLockQueue.get() ) { m_isLockQueue.set(true); }
     // m_logger.fine("Buffer#popTasks " + m_numRunning + "/" + m_taskQueue.size() + " tasks at " + here);
     val tasks = new ArrayList[Task]();
     fillTaskQueueIfEmpty();
@@ -60,6 +60,7 @@ class JobBuffer {
         m_numRunning += 1;
       }
     }
+    m_isLockQueue.set(false);
     // m_logger.fine("> Buffer#popTasks " + m_numRunning + "/" + m_taskQueue.size() + " tasks at " + here);
     return tasks;
   }
@@ -96,7 +97,7 @@ class JobBuffer {
   }
 
   def registerFreePlace( freePlace: Place ) {
-    when( !m_isRegisteringFreeBuffer.get() ) { m_isRegisteringFreeBuffer.set(true); }
+    when( !m_isLockFreePlaces.get() ) { m_isLockFreePlaces.set(true); }
     var registerToProducer: Boolean = false;
     atomic {
       if( m_freePlaces.isEmpty() ) {
@@ -113,18 +114,21 @@ class JobBuffer {
         refProd().registerFreeBuffer( refMe );
       }
     }
-    m_isRegisteringFreeBuffer.set(false);
+    m_isLockFreePlaces.set(false);
   }
 
   def wakeUp() {
     // m_logger.fine("Buffer#wakeUp " + m_freePlaces + " at " + here);
+    when( !m_isLockQueue.get() ) { m_isLockQueue.set(true); }
     fillTaskQueueIfEmpty();
+    m_isLockQueue.set(false);
     // m_logger.fine("Buffer#wakeUp -> fillTask : " + m_numRunning + "/" + m_taskQueue.size() + " tasks at " + here);
+    when( !m_isLockFreePlaces.get() ) { m_isLockFreePlaces.set(true); }
     launchConsumerAtFreePlace();
+    m_isLockFreePlaces.set(false);
   }
 
   private def launchConsumerAtFreePlace() {
-    when( !m_isLaunchingConsumer.get() ) { m_isLaunchingConsumer.set(true); }
     // if( taskQueue.size() == 0 ) { return; }
     // m_logger.fine("Buffer#launchConsumerAtFreePlace " + m_freePlaces + " at " + here );
     val freePlaces = new ArrayList[Place]();
@@ -142,7 +146,6 @@ class JobBuffer {
         consumer.run();
       }
     }
-    m_isLaunchingConsumer.set(false);
   }
 }
 
