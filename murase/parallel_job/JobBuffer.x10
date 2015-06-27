@@ -16,6 +16,7 @@ class JobBuffer {
   val m_numConsumers: Long;  // number of consumers belonging to this buffer
   val m_isFillingQueue: AtomicBoolean = new AtomicBoolean(false);
   val m_isRegisteringFreeBuffer: AtomicBoolean = new AtomicBoolean(false);
+  val m_isLaunchingConsumer: AtomicBoolean = new AtomicBoolean(false);
 
   def this( _refProducer: GlobalRef[JobProducer], _numConsumers: Long ) {
     m_refProducer = _refProducer;
@@ -123,6 +124,7 @@ class JobBuffer {
   }
 
   private def launchConsumerAtFreePlace() {
+    when( !m_isLaunchingConsumer.get() ) { m_isLaunchingConsumer.set(true); }
     // if( taskQueue.size() == 0 ) { return; }
     // m_logger.fine("Buffer#launchConsumerAtFreePlace " + m_freePlaces + " at " + here );
     val freePlaces = new ArrayList[Place]();
@@ -140,6 +142,7 @@ class JobBuffer {
         consumer.run();
       }
     }
+    m_isLaunchingConsumer.set(false);
   }
 }
 

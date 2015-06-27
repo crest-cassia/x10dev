@@ -1,6 +1,7 @@
 import x10.util.ArrayList;
 import x10.io.File;
 import x10.util.Timer;
+import x10.util.concurrent.AtomicBoolean;
 
 class JobProducer {
 
@@ -13,6 +14,7 @@ class JobProducer {
   var m_lastSavedAt: Long;
   val m_saveInterval: Long;
   var m_dumpFileIndex: Long;
+  val m_isNotifyingFreeBuffers: AtomicBoolean = new AtomicBoolean(false);
 
   def this( _tables: Tables, _engine: SearchEngineI, _numBuffers: Long, _saveInterval: Long ) {
     m_tables = _tables;
@@ -81,10 +83,11 @@ class JobProducer {
   }
 
   private def notifyFreeBuffer() {
+    when( !m_isNotifyingFreeBuffers.get() ) { m_isNotifyingFreeBuffers.set(true); }
     // `async at` must be called outside of atomic. Otherwise, you'll get a runtime exception.
     val refBuffers = new ArrayList[GlobalRef[JobBuffer]]();
     atomic {
-      if( m_taskQueue.size() == 0 ) { return; }
+      if( m_taskQueue.size() == 0 ) { m_isNotifyingFreeBuffers.set(false); return; }
       for( refBuf in m_freeBuffers ) {
         if( refBuffers.size() > m_taskQueue.size() ) { break; }
         refBuffers.add( refBuf );
@@ -95,6 +98,7 @@ class JobProducer {
         refBuf().wakeUp();
       }
     }
+    m_isNotifyingFreeBuffers.set(false);
   }
 
   public def popTasks(): ArrayList[Task] {
