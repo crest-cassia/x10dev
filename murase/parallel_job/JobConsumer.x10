@@ -1,18 +1,20 @@
 import x10.util.ArrayList;
 import x10.util.Timer;
-// import x10.interop.Java;
-// import org.json.simple.*;
-// import java.util.logging.Logger;
+import util.MyLogger;
 
 class JobConsumer {
 
   val m_refBuffer: GlobalRef[JobBuffer];
   val m_timer = new Timer();
   var m_timeOut: Long = -1;
-  // val m_logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+  val m_logger = new MyLogger();
 
   def this( _refBuffer: GlobalRef[JobBuffer] ) {
     m_refBuffer = _refBuffer;
+  }
+
+  private def d(s:String) {
+    if( here.id == 1 ) { m_logger.d(s); }
   }
 
   def setExpiration( timeOutMilliTime: Long ) {
@@ -28,7 +30,7 @@ class JobConsumer {
   ) {};
 
   def run() {
-    // m_logger.fine("Consumer#run " + here);
+    d("Consumer starting");
     val refBuf = m_refBuffer;
 
     val tasks = getTasksFromBuffer();
@@ -39,22 +41,25 @@ class JobConsumer {
       at( refBuf ) {
         refBuf().saveResult( result );
       }
-      // m_logger.fine("Consumer#saveResult " + result.runId + " at " + here);
       if( isExpired() ) { return; }
 
       if( tasks.size() == 0 ) {
+        d("Consumer task queue is empty. getting tasks");
         val newTasks = getTasksFromBuffer();
         for( newTask in newTasks ) {
           tasks.add( newTask );
         }
+        d("Consumer got tasks from buffer");
       }
     }
 
+    d("Consumer registering self as a free place");
     val place = here;
     at( refBuf ) {
       refBuf().registerFreePlace( place );
     }
-    // m_logger.fine("> Consumer#run " + here);
+    d("Consumer registered self as a free place");
+    d("Consumer finished");
   }
 
   private def runTask( task: Task ): RunResult {
