@@ -2,6 +2,7 @@ import x10.util.ArrayList;
 import x10.io.File;
 import x10.util.Timer;
 import x10.util.concurrent.AtomicBoolean;
+import util.MyLogger;
 
 class JobProducer {
 
@@ -14,6 +15,7 @@ class JobProducer {
   var m_lastSavedAt: Long;
   val m_saveInterval: Long;
   var m_dumpFileIndex: Long;
+  val m_logger: MyLogger = new MyLogger();
 
   def this( _tables: Tables, _engine: SearchEngineI, _numBuffers: Long, _saveInterval: Long ) {
     m_tables = _tables;
@@ -29,6 +31,10 @@ class JobProducer {
     m_lastSavedAt = m_timer.milliTime();
     m_saveInterval = _saveInterval;
     m_dumpFileIndex = 0;
+  }
+
+  private def d(s:String) {
+    m_logger.d(s);
   }
 
   private def enqueueInitialTasks() {
@@ -47,12 +53,15 @@ class JobProducer {
 
   public def registerFreeBuffer( refBuffer: GlobalRef[JobBuffer] ) {
     atomic {
+      d("Producer registering free buffer");
       m_freeBuffers.add( refBuffer );
+      d("Producer registered free buffer");
     }
   }
 
   public def saveResults( results: ArrayList[JobConsumer.RunResult] ) {
     atomic {
+      d("Producer saving " + results.size() + " results");
       for( res in results ) {
         val run = m_tables.runsTable.get( res.runId );
         run.storeResult( res.result, res.placeId, res.startAt, res.finishAt );
@@ -64,6 +73,7 @@ class JobProducer {
           }
         }
       }
+      d("Producer saved " + results.size() + " results");
       serializePeriodically();
     }
 
@@ -82,6 +92,7 @@ class JobProducer {
   }
 
   private def notifyFreeBuffer() {
+    d("Producer notifying free buffers");
     // `async at` must be called outside of atomic. Otherwise, you'll get a runtime exception.
     val refBuffers = new ArrayList[GlobalRef[JobBuffer]]();
     atomic {
@@ -95,18 +106,20 @@ class JobProducer {
         refBuf().wakeUp();
       }
     }
+    d("Producer notified free buffers");
   }
 
   public def popTasks(): ArrayList[Task] {
     atomic {
+      d("Producer popTasks is called");
       val tasks = new ArrayList[Task]();
       val n = calcNumTasksToPop();
-      // Console.ERR.println("Producer : " + n );
       for( i in 1..n ) {
         if( m_taskQueue.size() == 0 ) break;
         val task = m_taskQueue.removeFirst();
         tasks.add( task );
       }
+      d("Producer sending " + tasks.size() + " tasks to buffer");
       return tasks;
     }
   }

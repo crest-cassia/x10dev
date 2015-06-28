@@ -1,14 +1,12 @@
 import x10.util.ArrayList;
 import x10.util.Timer;
 import x10.util.concurrent.AtomicBoolean;
-// import x10.interop.Java;
-// import org.json.simple.*;
-// import java.util.logging.Logger;
+import util.MyLogger;
 
 class JobBuffer {
 
   val m_refProducer: GlobalRef[JobProducer];
-  // val m_logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+  val m_logger = new MyLogger();
   val m_taskQueue = new ArrayList[Task]();
   val m_resultsBuffer = new ArrayList[JobConsumer.RunResult]();
   var m_numRunning: Long = 0;
@@ -22,6 +20,10 @@ class JobBuffer {
     m_numConsumers = _numConsumers;
   }
 
+  private def d(s:String) {
+    if( here.id == 0 ) { m_logger.d(s); }
+  }
+
   public def getInitialTasks() {
     when( !m_isLockQueue.get() ) { m_isLockQueue.set(true); }
     fillTaskQueueIfEmpty();
@@ -30,12 +32,13 @@ class JobBuffer {
 
   private def fillTaskQueueIfEmpty(): void {
     if( m_taskQueue.size() == 0 ) {
+      d("Buffer getting tasks from producer");
       val refProd = m_refProducer;
       val tasks = at( refProd ) {
         return refProd().popTasks();
       };
-      // if( here.id == 4 ) { Console.ERR.println(" got " + tasks.size() + " tasks from producer"); }
       atomic {
+        d("Buffer got " + tasks.size() + " tasks from producer");
         for( task in tasks ) {
           m_taskQueue.add( task );
         }
@@ -45,12 +48,11 @@ class JobBuffer {
 
   def popTasks(): ArrayList[Task] {
     when( !m_isLockQueue.get() ) { m_isLockQueue.set(true); }
-    // m_logger.fine("Buffer#popTasks " + m_numRunning + "/" + m_taskQueue.size() + " tasks at " + here);
+    d("Buffer popTasks " + m_numRunning + "/" + m_taskQueue.size() );
     val tasks = new ArrayList[Task]();
     fillTaskQueueIfEmpty();
     atomic {
       val n = calcNumTasksToPop();
-      // if( here.id == 4 ) { Console.ERR.println("at " + here + " poping " + n + "tasks"); }
       for( i in 1..n ) {
         if( m_taskQueue.size() == 0 ) {
           break;
@@ -60,8 +62,8 @@ class JobBuffer {
         m_numRunning += 1;
       }
     }
+    d("Buffer sending " + tasks.size() + " tasks to consumer" );
     m_isLockQueue.set(false);
-    // m_logger.fine("> Buffer#popTasks " + m_numRunning + "/" + m_taskQueue.size() + " tasks at " + here);
     return tasks;
   }
 
@@ -72,10 +74,10 @@ class JobBuffer {
   def saveResult( result: JobConsumer.RunResult ) {
     val resultsToSave: ArrayList[JobConsumer.RunResult] = new ArrayList[JobConsumer.RunResult]();
     atomic {
+      d("Buffer saving result of task " + result.runId );
       m_resultsBuffer.add( result );
       m_numRunning -= 1;
       if( hasEnoughResults() ) { // TODO: set parameter
-        // if( here.id == 4 ) { Console.ERR.println("saving " + m_resultsBuffer.size() + "results at " + here); }
         for( res in m_resultsBuffer ) {
           resultsToSave.add( res );
         }
@@ -84,11 +86,14 @@ class JobBuffer {
     }
 
     if( resultsToSave.size() > 0 ) {
+      d("Buffer sending " + resultsToSave.size() + "results to Producer");
       val refProd = m_refProducer;
       at( refProd ) {
         refProd().saveResults( resultsToSave );
       }
+      d("Buffer sent " + resultsToSave.size() + "results to Producer");
     }
+    d("Buffer saved result of task " + result.runId);
   }
 
   private def hasEnoughResults(): Boolean {
@@ -98,39 +103,42 @@ class JobBuffer {
 
   def registerFreePlace( freePlace: Place ) {
     when( !m_isLockFreePlaces.get() ) { m_isLockFreePlaces.set(true); }
+    d("Buffer registering freePlace " + freePlace );
     var registerToProducer: Boolean = false;
     atomic {
       if( m_freePlaces.isEmpty() ) {
         registerToProducer = true;
       }
       m_freePlaces.add( freePlace );
-      // m_logger.fine("Buffer#registerFreePlace " + m_freePlaces + " at " + here );
     }
     if( registerToProducer ) {
-      // m_logger.fine("Buffer#registerFreeBuffer at " + here );
+      d("Buffer registering self as free buffer");
       val refMe = new GlobalRef[JobBuffer]( this );
       val refProd = m_refProducer;
       at( refProd ) {
         refProd().registerFreeBuffer( refMe );
       }
+      d("Buffer registered self as free buffer");
     }
+    d("Buffer registered freePlace " + freePlace );
     m_isLockFreePlaces.set(false);
   }
 
   def wakeUp() {
-    // m_logger.fine("Buffer#wakeUp " + m_freePlaces + " at " + here);
+    d("Buffer waking up");
     when( !m_isLockQueue.get() ) { m_isLockQueue.set(true); }
+    d("Buffer filling queue");
     fillTaskQueueIfEmpty();
+    d("Buffer filled queue");
     m_isLockQueue.set(false);
-    // m_logger.fine("Buffer#wakeUp -> fillTask : " + m_numRunning + "/" + m_taskQueue.size() + " tasks at " + here);
     when( !m_isLockFreePlaces.get() ) { m_isLockFreePlaces.set(true); }
+    d("Buffer launching consumers");
     launchConsumerAtFreePlace();
+    d("Buffer launched consumers");
     m_isLockFreePlaces.set(false);
   }
 
   private def launchConsumerAtFreePlace() {
-    // if( taskQueue.size() == 0 ) { return; }
-    // m_logger.fine("Buffer#launchConsumerAtFreePlace " + m_freePlaces + " at " + here );
     val freePlaces = new ArrayList[Place]();
     atomic {
       for( place in m_freePlaces ) {
@@ -140,7 +148,6 @@ class JobBuffer {
     }
     val refMe = new GlobalRef[JobBuffer]( this );
     for( place in freePlaces ) {
-      // m_logger.fine("Buffer#launchConsumerAtFreePlace : booting Consumer at " + place );
       async at( place ) {
         val consumer = new JobConsumer( refMe );
         consumer.run();
