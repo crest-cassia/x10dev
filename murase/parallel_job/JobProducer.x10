@@ -16,6 +16,9 @@ class JobProducer {
   val m_saveInterval: Long;
   var m_dumpFileIndex: Long;
   val m_logger: MyLogger = new MyLogger();
+  val m_isLockQueue: AtomicBoolean = new AtomicBoolean(false);
+  val m_isLockResults: AtomicBoolean = new AtomicBoolean(false);
+  val m_isLockBuffers: AtomicBoolean = new AtomicBoolean(false);
 
   def this( _tables: Tables, _engine: SearchEngineI, _numBuffers: Long, _saveInterval: Long ) {
     m_tables = _tables;
@@ -52,35 +55,44 @@ class JobProducer {
   }
 
   public def registerFreeBuffer( refBuffer: GlobalRef[JobBuffer] ) {
-    atomic {
+    when( !m_isLockBuffers.get() ) { m_isLockBuffers.set(true); }
       d("Producer registering free buffer");
       m_freeBuffers.add( refBuffer );
       d("Producer registered free buffer");
-    }
+    m_isLockBuffers.set(false);
   }
 
   public def saveResults( results: ArrayList[JobConsumer.RunResult] ) {
-    atomic {
+    when( !m_isLockResults.get() ) { m_isLockResults.set(true); }
+    var tasks: ArrayList[Task] = new ArrayList[Task]();
+
       d("Producer saving " + results.size() + " results");
       for( res in results ) {
         val run = m_tables.runsTable.get( res.runId );
         run.storeResult( res.result, res.placeId, res.startAt, res.finishAt );
         val ps = run.parameterSet( m_tables );
         if( ps.isFinished( m_tables ) ) {
-          val tasks = m_engine.onParameterSetFinished( m_tables, ps );
-          for( task in tasks ) {
-            m_taskQueue.add( task );
-          }
+          tasks = m_engine.onParameterSetFinished( m_tables, ps );
         }
       }
-      d("Producer saved " + results.size() + " results");
-      serializePeriodically();
-    }
+    m_isLockResults.set(false);
 
-    notifyFreeBuffer();
+    when( !m_isLockQueue.get() ) { m_isLockQueue.set(true); }
+      for( task in tasks ) {
+        m_taskQueue.add( task );
+      }
+    val qSize = m_taskQueue.size();
+    m_isLockQueue.set(false);
+
+    d("Producer saved " + results.size() + " results");
+    serializePeriodically();
+
+    when( !m_isLockBuffers.get() ) { m_isLockBuffers.set(true); }
+    notifyFreeBuffer(qSize);
+    m_isLockBuffers.set(false);
   }
 
-  private def serializePeriodically() {
+  private atomic def serializePeriodically() {
     val now = m_timer.milliTime();
     if( now - m_lastSavedAt > m_saveInterval ) {
       val psjson = "parameter_sets_" + m_dumpFileIndex + ".json";
@@ -91,16 +103,14 @@ class JobProducer {
     }
   }
 
-  private def notifyFreeBuffer() {
+  private def notifyFreeBuffer(numBuffersToLaunch: Long) {
     d("Producer notifying free buffers");
     // `async at` must be called outside of atomic. Otherwise, you'll get a runtime exception.
     val refBuffers = new ArrayList[GlobalRef[JobBuffer]]();
-    atomic {
-      while( m_freeBuffers.size () > 0 && refBuffers.size() < m_taskQueue.size() ) {
+      while( m_freeBuffers.size () > 0 && refBuffers.size() < numBuffersToLaunch ) {
         val freeBuf = m_freeBuffers.removeFirst();
         refBuffers.add( freeBuf );
       }
-    }
     for( refBuf in refBuffers ) {
       at( refBuf ) {
         refBuf().wakeUp();
@@ -110,7 +120,7 @@ class JobProducer {
   }
 
   public def popTasks(): ArrayList[Task] {
-    atomic {
+    when( !m_isLockQueue.get() ) { m_isLockQueue.set(true); }
       d("Producer popTasks is called");
       val tasks = new ArrayList[Task]();
       val n = calcNumTasksToPop();
@@ -120,8 +130,8 @@ class JobProducer {
         tasks.add( task );
       }
       d("Producer sending " + tasks.size() + " tasks to buffer");
+    m_isLockQueue.set(false);
       return tasks;
-    }
   }
 
   private def calcNumTasksToPop(): Long {
