@@ -97,7 +97,6 @@ class JobBuffer {
   }
 
   private def hasEnoughResults(): Boolean {
-    // return (m_resultsBuffer.size() >= 1 || m_numRunning == 0);
     return (m_resultsBuffer.size() >= m_numRunning  + m_taskQueue.size() );
   }
 

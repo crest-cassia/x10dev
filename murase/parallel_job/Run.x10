@@ -48,13 +48,6 @@ public class Run {
     return (startAt == -1);
   }
 
-  /*
-  private def generateCommand( input: Simulator.InputParameters ): String {
-    val cmd = Simulator.command( input, seed );
-    return cmd;
-  }
-  */
-
   def parameterSet( table: Tables ): ParameterSet {
     return table.psTable.get( parentPSId );
   }

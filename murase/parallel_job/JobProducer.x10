@@ -56,9 +56,9 @@ class JobProducer {
 
   public def registerFreeBuffer( refBuffer: GlobalRef[JobBuffer] ) {
     when( !m_isLockBuffers.get() ) { m_isLockBuffers.set(true); }
-      d("Producer registering free buffer");
-      m_freeBuffers.add( refBuffer );
-      d("Producer registered free buffer");
+    d("Producer registering free buffer");
+    m_freeBuffers.add( refBuffer );
+    d("Producer registered free buffer");
     m_isLockBuffers.set(false);
   }
 
@@ -66,21 +66,21 @@ class JobProducer {
     when( !m_isLockResults.get() ) { m_isLockResults.set(true); }
     var tasks: ArrayList[Task] = new ArrayList[Task]();
 
-      d("Producer saving " + results.size() + " results");
-      for( res in results ) {
-        val run = m_tables.runsTable.get( res.runId );
-        run.storeResult( res.result, res.placeId, res.startAt, res.finishAt );
-        val ps = run.parameterSet( m_tables );
-        if( ps.isFinished( m_tables ) ) {
-          tasks = m_engine.onParameterSetFinished( m_tables, ps );
-        }
+    d("Producer saving " + results.size() + " results");
+    for( res in results ) {
+      val run = m_tables.runsTable.get( res.runId );
+      run.storeResult( res.result, res.placeId, res.startAt, res.finishAt );
+      val ps = run.parameterSet( m_tables );
+      if( ps.isFinished( m_tables ) ) {
+        tasks = m_engine.onParameterSetFinished( m_tables, ps );
       }
+    }
     m_isLockResults.set(false);
 
     when( !m_isLockQueue.get() ) { m_isLockQueue.set(true); }
-      for( task in tasks ) {
-        m_taskQueue.add( task );
-      }
+    for( task in tasks ) {
+      m_taskQueue.add( task );
+    }
     val qSize = m_taskQueue.size();
     m_isLockQueue.set(false);
 
@@ -105,12 +105,12 @@ class JobProducer {
 
   private def notifyFreeBuffer(numBuffersToLaunch: Long) {
     d("Producer notifying free buffers");
-    // `async at` must be called outside of atomic. Otherwise, you'll get a runtime exception.
+
     val refBuffers = new ArrayList[GlobalRef[JobBuffer]]();
-      while( m_freeBuffers.size () > 0 && refBuffers.size() < numBuffersToLaunch ) {
-        val freeBuf = m_freeBuffers.removeFirst();
-        refBuffers.add( freeBuf );
-      }
+    while( m_freeBuffers.size () > 0 && refBuffers.size() < numBuffersToLaunch ) {
+      val freeBuf = m_freeBuffers.removeFirst();
+      refBuffers.add( freeBuf );
+    }
     for( refBuf in refBuffers ) {
       at( refBuf ) {
         refBuf().wakeUp();
@@ -121,17 +121,17 @@ class JobProducer {
 
   public def popTasks(): ArrayList[Task] {
     when( !m_isLockQueue.get() ) { m_isLockQueue.set(true); }
-      d("Producer popTasks is called");
-      val tasks = new ArrayList[Task]();
-      val n = calcNumTasksToPop();
-      for( i in 1..n ) {
-        if( m_taskQueue.size() == 0 ) break;
-        val task = m_taskQueue.removeFirst();
-        tasks.add( task );
-      }
-      d("Producer sending " + tasks.size() + " tasks to buffer");
+    d("Producer popTasks is called");
+    val tasks = new ArrayList[Task]();
+    val n = calcNumTasksToPop();
+    for( i in 1..n ) {
+      if( m_taskQueue.size() == 0 ) break;
+      val task = m_taskQueue.removeFirst();
+      tasks.add( task );
+    }
+    d("Producer sending " + tasks.size() + " tasks to buffer");
     m_isLockQueue.set(false);
-      return tasks;
+    return tasks;
   }
 
   private def calcNumTasksToPop(): Long {

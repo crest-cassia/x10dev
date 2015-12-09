@@ -1,21 +1,18 @@
 import x10.util.ArrayList;
 import x10.regionarray.Region;
-// import x10.interop.Java;
-// import java.util.logging.Logger;
 
 public class GridSearcher implements SearchEngineI {
 
   val boxes: ArrayList[Box];
   val targetNumRuns = 1;
   val expectedResultDiff = 0.1;
-  // val logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
   def this() {
     boxes = new ArrayList[Box]();
   }
 
-  def debug( o: Any ): void {
-    // logger.fine( o.toString() );
+  def d( o: Any ): void {
+    // TODO: IMPLEMENT ME
   }
 
   public def createInitialTask( table: Tables, searchRegion: Region{self.rank==Simulator.numParams} ): ArrayList[Task] {
@@ -34,7 +31,7 @@ public class GridSearcher implements SearchEngineI {
     val boxes = findBoxesFromPS( finishedPS );
     for( box in boxes ) {
       if( box.divided == false && box.isFinished( table ) == true ) {
-        // logger.fine("  dividing box " + box );
+        d("  dividing box " + box );
         val tasks = divideBox( table, box );
         appendTask( tasks );
       }
@@ -56,13 +53,13 @@ public class GridSearcher implements SearchEngineI {
     assert parameterSets.size() == 2;
     val r0 = parameterSets(0).averagedResult( table );
     val r1 = parameterSets(1).averagedResult( table );
-    debug( "  diffResults of " + parameterSets + " = " + Math.abs(r0-r1) );
+    d( "  diffResults of " + parameterSets + " = " + Math.abs(r0-r1) );
     return Math.abs( r0 - r1 );
   }
 
   // return true if box needs to be divided in the direction of axis
   private def needToDivide( table: Tables, box: Box, axis: Long ): Boolean {
-    if( box.region.projection( axis ).size() <= 2 ) { // undividable
+    if( box.region.projection( axis ).size() <= 2 ) {
       return false;
     }
 
@@ -81,7 +78,7 @@ public class GridSearcher implements SearchEngineI {
       }
     }
 
-    // logger.fine( "  resultDiff of Box(" + box + ") in " + axis + " direction: " + maxDiff );
+    d( "  resultDiff of Box(" + box + ") in " + axis + " direction: " + maxDiff );
 
     return maxDiff > expectedResultDiff;
   }
@@ -107,8 +104,6 @@ public class GridSearcher implements SearchEngineI {
   }
 
   private def divideBox( table: Tables, box: Box ): ArrayList[Task] {
-    // logger.fine( "  dividing : " + box );
-
     var boxesToBeDivided: ArrayList[Box] = new ArrayList[Box]();
     boxesToBeDivided.add( box );
 
@@ -116,7 +111,7 @@ public class GridSearcher implements SearchEngineI {
     for( axis in 0..(box.region.rank-1) ) {
       val bDivide = needToDivide( table, box, axis );
       if( bDivide ) {
-        // logger.fine( "  dividing in " + axis + " direction : " + boxesToBeDivided );
+        d( "  dividing in " + axis + " direction : " + boxesToBeDivided );
         newBoxes.clear();
         for( boxToBeDivided in boxesToBeDivided ) {
           val dividedBoxes = divideBoxIn( boxToBeDivided, axis );
@@ -126,7 +121,7 @@ public class GridSearcher implements SearchEngineI {
         boxesToBeDivided = newBoxes.clone();
       }
     }
-    // logger.fine( "  newBoxes: " + newBoxes );
+    d( "  newBoxes: " + newBoxes );
 
     val newTasks = new ArrayList[Task]();
     for( newBox in newBoxes ) {
@@ -139,7 +134,7 @@ public class GridSearcher implements SearchEngineI {
 
     box.divided = true;
 
-    // logger.fine( "newTasks : " + newTasks );
+    d( "newTasks : " + newTasks );
 
     return newTasks;
   }
