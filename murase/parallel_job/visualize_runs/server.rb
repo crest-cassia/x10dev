@@ -126,4 +126,5 @@ end
 get '/runs' do
   content_type :json
   runs.to_json
+  # runs.select{|run| run["placeId"] < 50}.to_json
 end
