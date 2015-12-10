@@ -1,12 +1,13 @@
+package caravan;
+
 import x10.regionarray.Region;
 import x10.io.File;
 import x10.util.Random;
 import util.JSON;
 
+public class Simulator {
 
-class Simulator {
-
-  static struct InputParameters( mu: Double, sigma: Double ) {
+  public static struct InputParameters( mu: Double, sigma: Double ) {
     public def toString(): String {
       return "{ \"mu\": " + mu + ", \"sigma\": " + sigma + " }";
     }
@@ -16,7 +17,7 @@ class Simulator {
     }
   }
 
-  static struct OutputParameters( duration: Double ) {
+  public static struct OutputParameters( duration: Double ) {
 
     static def loadJSON( json: JSON.Value ): OutputParameters {
       val duration = json("duration").toDouble();

@@ -1,7 +1,9 @@
+package caravan;
+
 import x10.io.File;
 import x10.util.Timer;
 
-struct Task( runId: Long, params: Simulator.InputParameters, seed: Long) {
+public struct Task( runId: Long, params: Simulator.InputParameters, seed: Long) {
 
   public def run(): Simulator.OutputParameters {
     val result = Simulator.run( params, seed );

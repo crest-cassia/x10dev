@@ -1,3 +1,5 @@
+package caravan;
+
 import x10.util.ArrayList;
 import x10.util.Pair;
 import util.JSON;
@@ -5,12 +7,12 @@ import util.JSON;
 public class ParameterSet( id: Long, point: Point{self.rank==Simulator.numParams} ) {
   public val runIds: ArrayList[Long] = new ArrayList[Long]();
 
-  def toString(): String {
+  public def toString(): String {
     val str = "{ id: " + id + ", point: " + point + ", params: " + Simulator.deregularize(point) + " }";
     return str;
   }
 
-  static def loadJSON( json: JSON.Value ): ParameterSet {
+  static public def loadJSON( json: JSON.Value ): ParameterSet {
     val id = json("id").toLong();
     val coordinates = new Rail[Long](Simulator.numParams);
     for( i in 0..(Simulator.numParams-1) ) {
@@ -20,7 +22,7 @@ public class ParameterSet( id: Long, point: Point{self.rank==Simulator.numParams
     return new ParameterSet( id, point );
   }
 
-  def toJson(): String {
+  public def toJson(): String {
     val str = "{ " +
                 "\"id\": " + id +
                 ", \"point\": " + point.toString() +
@@ -29,11 +31,11 @@ public class ParameterSet( id: Long, point: Point{self.rank==Simulator.numParams
     return str;
   }
 
-  def numRuns(): Long {
+  public def numRuns(): Long {
     return runIds.size();
   }
 
-  def runs( table: Tables ): ArrayList[Run] {
+  public def runs( table: Tables ): ArrayList[Run] {
     val a = new ArrayList[Run]();
     for( runId in runIds ) {
       val run = table.runsTable.get( runId );
@@ -42,7 +44,7 @@ public class ParameterSet( id: Long, point: Point{self.rank==Simulator.numParams
     return a;
   }
 
-  def createRuns( table: Tables, numRuns: Long ): ArrayList[Run] {
+  public def createRuns( table: Tables, numRuns: Long ): ArrayList[Run] {
     val a = new ArrayList[Run]();
     for( i in 1..numRuns ) {
       val run = new Run( table.maxRunId, this, table.maxRunId );
@@ -55,12 +57,12 @@ public class ParameterSet( id: Long, point: Point{self.rank==Simulator.numParams
     return a;
   }
 
-  def createRunsUpTo( table: Tables, targetNumRuns: Long ): ArrayList[Run] {
+  public def createRunsUpTo( table: Tables, targetNumRuns: Long ): ArrayList[Run] {
     val n = ( numRuns() < targetNumRuns ) ? ( targetNumRuns - numRuns() ) : 0;
     return createRuns( table, n );
   }
 
-  def isFinished( table: Tables ): Boolean {
+  public def isFinished( table: Tables ): Boolean {
     for( run in runs( table ) ) {
       if( run.finished == false ) {
         return false;
@@ -69,7 +71,7 @@ public class ParameterSet( id: Long, point: Point{self.rank==Simulator.numParams
     return true;
   }
 
-  def averagedResult( table: Tables ): Double {
+  public def averagedResult( table: Tables ): Double {
     var sum: Double = 0.0;
     val runs = runs( table );
     for( run in runs ) {
@@ -78,7 +80,7 @@ public class ParameterSet( id: Long, point: Point{self.rank==Simulator.numParams
     return sum / runs.size();
   }
 
-  def isSimilarToWithRespectTo( another: ParameterSet, axis: Long ): Boolean {
+  public def isSimilarToWithRespectTo( another: ParameterSet, axis: Long ): Boolean {
     val d = point - another.point;
     for( i in 0..(d.rank-1) ) {
       if( i != axis && d(i) != 0 ) {
@@ -88,11 +90,11 @@ public class ParameterSet( id: Long, point: Point{self.rank==Simulator.numParams
     return true;
   }
 
-  static def count( table: Tables ): Long {
+  static public def count( table: Tables ): Long {
     return table.psTable.size();
   }
 
-  static def countWhere( table: Tables , condition: (ParameterSet) => Boolean ): Long {
+  static public def countWhere( table: Tables , condition: (ParameterSet) => Boolean ): Long {
     var count: Long = 0;
     for( entry in table.psTable.entries() ) {
       val ps = entry.getValue();
@@ -103,7 +105,7 @@ public class ParameterSet( id: Long, point: Point{self.rank==Simulator.numParams
     return count;
   }
 
-  static def find( table: Tables, p: Point{self.rank==Simulator.numParams} ): ParameterSet {
+  static public def find( table: Tables, p: Point{self.rank==Simulator.numParams} ): ParameterSet {
     for( entry in table.psTable.entries() ) {
       val ps = entry.getValue();
       if( ps.point.equals( p ) ) {
@@ -113,7 +115,7 @@ public class ParameterSet( id: Long, point: Point{self.rank==Simulator.numParams
     return null;
   }
 
-  static def findOrCreateParameterSet( table: Tables, p: Point{self.rank==Simulator.numParams} ): ParameterSet {
+  static public def findOrCreateParameterSet( table: Tables, p: Point{self.rank==Simulator.numParams} ): ParameterSet {
     var ps: ParameterSet = find( table, p );
     if( ps == null ) {
       ps = new ParameterSet( table.maxPSId, p );

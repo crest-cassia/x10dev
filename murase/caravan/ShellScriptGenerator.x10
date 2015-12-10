@@ -1,3 +1,5 @@
+package caravan;
+
 import x10.io.Console;
 import x10.io.File;
 

@@ -1,3 +1,5 @@
+package caravan;
+
 import x10.io.Console;
 import x10.util.HashMap;
 import x10.glb.GLBParameters;
@@ -7,14 +9,14 @@ import x10.util.HashMap;
 import x10.util.ArrayList;
 import x10.io.File;
 
-class Main {
+public class Main {
 
-  def run( engine: SearchEngineI, saveInterval: Long, timeOut: Long, numProcBerBuf: Long ): void {
+  public def run( engine: SearchEngineI, saveInterval: Long, timeOut: Long, numProcBerBuf: Long ): void {
     val table = new Tables();
     execute( table, engine, saveInterval, timeOut, numProcBerBuf );
   }
 
-  def restart( psJson: String, runJson: String, engine: SearchEngineI, saveInterval: Long, timeOut: Long, numProcBerBuf: Long ) {
+  public def restart( psJson: String, runJson: String, engine: SearchEngineI, saveInterval: Long, timeOut: Long, numProcBerBuf: Long ) {
     val table = new Tables();
     table.load( psJson, runJson );
     execute( table, engine, saveInterval, timeOut, numProcBerBuf );

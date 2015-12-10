@@ -2,6 +2,13 @@ import x10.util.ArrayList;
 import x10.regionarray.Region;
 import x10.util.Random;
 
+import caravan.SearchEngineI;
+import caravan.Task;
+import caravan.Tables;
+import caravan.ParameterSet;
+import caravan.Run;
+import caravan.Simulator;
+
 public class MockSearchEngine implements SearchEngineI {
 
   val numStaticJobs: Long;
