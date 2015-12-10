@@ -6,14 +6,6 @@ import x10.compiler.NativeCPPInclude;
 import x10.compiler.NativeCPPCompilationUnit;
 
 @NativeCPPInclude("main.hpp")
-// @NativeCPPCompilationUnit("main.cpp")
-// 
-// @NativeCPPInclude("kumpula_2d_mobile_nd_ld_aging.hpp")
-// @NativeCPPCompilationUnit("kumpula_2d_mobile_nd_ld_aging.cpp")
-// @NativeCPPInclude("node_2d.hpp")
-// @NativeCPPCompilationUnit("node_2d.cpp")
-// @NativeCPPInclude("random.hpp")
-// @NativeCPPCompilationUnit("random.cpp")
 
 class Simulator {
 
@@ -42,8 +34,6 @@ class Simulator {
 
   static def run( params: InputParameters, seed: Long ): OutputParameters {
     val degree = runSimulator( params.p_ld, params.aging, seed );
-    // TODO: IMPLEMENT ME
-    // System.sleep(1000);
     return OutputParameters( degree );
   }
 

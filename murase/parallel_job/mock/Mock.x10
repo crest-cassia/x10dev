@@ -1,9 +1,5 @@
 import x10.util.ArrayList;
 import x10.io.File;
-// import x10.interop.Java;
-// import java.util.logging.Logger;
-// import java.util.logging.Level;
-// import java.util.logging.Handler;
 
 class Mock {
 
