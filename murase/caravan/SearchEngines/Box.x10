@@ -5,6 +5,8 @@ import x10.util.HashMap;
 import x10.util.ArrayList;
 import x10.regionarray.Region;
 
+import caravan.*;
+
 public class Box( region: Region{self.rank==Simulator.numParams} ) {
   public val psIds: ArrayList[Long] = new ArrayList[Long]();
   public var divided: Boolean = false;

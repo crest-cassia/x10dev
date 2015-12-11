@@ -2,13 +2,15 @@ package caravan.SearchEngines;
 import x10.util.ArrayList;
 import x10.regionarray.Region;
 
+import caravan.*;
+
 public class GridSearcher implements SearchEngineI {
 
   val boxes: ArrayList[Box];
   val targetNumRuns = 1;
   val expectedResultDiff = 0.1;
 
-  def this() {
+  public def this() {
     boxes = new ArrayList[Box]();
   }
 

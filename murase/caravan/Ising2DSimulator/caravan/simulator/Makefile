@@ -3,7 +3,7 @@ CPP=g++
 OPT=-O3 -Wall -DNDEBUG
 INCLUDE=
 LIBS=
-BUILD=../../build
+BUILD=../../../build
 ifeq ($(UNAME), Linux)
 endif
 ifeq ($(UNAME), Darwin)
