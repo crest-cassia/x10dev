@@ -1,13 +1,15 @@
+package caravan;
+
 import x10.regionarray.Region;
 import x10.io.File;
-
 import x10.compiler.Native;
 import x10.compiler.NativeCPPInclude;
 import x10.compiler.NativeCPPCompilationUnit;
+import util.JSON;
 
 @NativeCPPInclude("main.hpp")
 
-class Simulator {
+public class Simulator {
 
   static struct InputParameters( aging: Double, p_ld: Double ) {
     public def toString(): String {
@@ -20,6 +22,11 @@ class Simulator {
   }
 
   static struct OutputParameters( degree: Long ) {
+
+    static def loadJSON( json: JSON.Value ): OutputParameters {
+      val duration = json("degree").toLong();
+      return OutputParameters( duration );
+    }
 
     public def toString(): String {
       return "{ \"degree\": " + degree + " }";

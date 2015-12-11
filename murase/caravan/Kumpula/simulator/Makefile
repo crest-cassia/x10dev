@@ -3,7 +3,7 @@ CPP=g++
 OPT=-O3 -Wall -DNDEBUG -fopenmp
 INCLUDE=
 LIBS=
-BUILD=../build
+BUILD=../../build
 
 ifeq ($(UNAME), Linux)
 
@@ -18,7 +18,8 @@ ifeq ($(XSUB_TYPE), k)
 endif
 
 libkumpula.a: main.cpp kumpula_2d_mobile_nd_ld_aging.cpp node_2d.cpp random.cpp main.hpp kumpula_2d_mobile_nd_ld_aging.hpp node_2d.hpp random.hpp Makefile
-	$(CPP) $(OPT) $(INCLUDE) -c main.cpp kumpula_2d_mobile_nd_ld_aging.cpp node_2d.cpp random.cpp && ar rcs $(BUILD)/libkumpula.a main.o kumpula_2d_mobile_nd_ld_aging.o node_2d.o random.o
+	$(CPP) $(OPT) $(INCLUDE) -c main.cpp kumpula_2d_mobile_nd_ld_aging.cpp node_2d.cpp random.cpp
+	ar rcs $(BUILD)/libkumpula.a main.o kumpula_2d_mobile_nd_ld_aging.o node_2d.o random.o
 
 clean:
 	rm -f *.o $(BUILD)/libkumpula.a
