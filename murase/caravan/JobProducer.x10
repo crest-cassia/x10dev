@@ -4,7 +4,7 @@ import x10.util.ArrayList;
 import x10.io.File;
 import x10.util.Timer;
 import x10.util.concurrent.AtomicBoolean;
-import util.MyLogger;
+import caravan.util.MyLogger;
 
 class JobProducer {
 

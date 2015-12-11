@@ -1,4 +1,4 @@
-package util;
+package caravan.util;
 import x10.util.Timer;
 
 public class MyLogger {

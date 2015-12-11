@@ -3,7 +3,7 @@ package caravan;
 import x10.util.ArrayList;
 import x10.util.HashMap;
 import x10.io.File;
-import util.JSON;
+import caravan.util.JSON;
 
 public class Tables {
   public val runsTable: HashMap[Long,Run];

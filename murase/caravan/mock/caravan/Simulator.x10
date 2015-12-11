@@ -3,7 +3,7 @@ package caravan;
 import x10.regionarray.Region;
 import x10.io.File;
 import x10.util.Random;
-import util.JSON;
+import caravan.util.JSON;
 
 public class Simulator {
 

@@ -5,7 +5,7 @@ import x10.io.File;
 import x10.compiler.Native;
 import x10.compiler.NativeCPPInclude;
 import x10.compiler.NativeCPPCompilationUnit;
-import util.JSON;
+import caravan.util.JSON;
 
 @NativeCPPInclude("main.hpp")
 

@@ -2,7 +2,7 @@ package caravan;
 
 import x10.util.ArrayList;
 import x10.util.Pair;
-import util.JSON;
+import caravan.util.JSON;
 
 public class ParameterSet( id: Long, point: Point{self.rank==Simulator.numParams} ) {
   public val runIds: ArrayList[Long] = new ArrayList[Long]();
