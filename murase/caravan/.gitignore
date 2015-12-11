@@ -2,6 +2,7 @@ build/*.java
 build/*.class
 build/**/*.cc
 build/**/*.h
+build/**/*.hpp
 build/*.out
 build/*.a
 **/*.o
