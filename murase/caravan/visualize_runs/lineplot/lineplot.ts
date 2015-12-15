@@ -148,7 +148,7 @@ class LinePlot {
   
   private drawLine( path: d3.Selection<any> ) {
       var line = d3.svg.line<ParameterSet>()
-        .x( (d:ParameterSet)=>{return this.xScale(d.point[2]);} )
+        .x( (d:ParameterSet)=>{return this.xScale(d.point[this.xKey]);} )
         .y( (d:ParameterSet)=>{return this.yScale(d.result);} );
       path.attr("d", line);
   }
@@ -237,7 +237,6 @@ class Slider {
     this.sliderDiv.slider("enable");
   }
 }
-
 
 document.body.onload = function() {
   var url = '/domains';

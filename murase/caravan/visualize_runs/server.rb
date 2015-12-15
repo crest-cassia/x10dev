@@ -15,7 +15,6 @@ parameter_sets = JSON.parse( File.open(ARGV[1]).read ) if ARGV[1]
 
 # TODO: tentative implementation
 parameter_sets.each {|ps| ps["result"] = ps["point"].inject(:+) }
-
 runs.select! {|run| run["startAt"] > 0 }
 min_start_at = runs.map {|run| run["startAt"] }.min
 runs.each {|run| run["startAt"] = (run["startAt"] - min_start_at)/1000.0; run["finishAt"] = (run["finishAt"] - min_start_at)/1000.0 }
