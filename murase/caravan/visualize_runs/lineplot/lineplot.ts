@@ -158,16 +158,14 @@ class Selector {
   
   private select: JQuery;
   
-  constructor(parentElementId: string, id: string, options: string[]) {
-    var tags = `<select id="${id}">`;
+  constructor(selectElementSelector: string, options: string[]) {
+    var tags = "";
     options.forEach( (val:string,idx: number) => {
       var option = `<option value="${val}">${val}</option>`;
       tags += option;
     });
-    tags += "</select>";
-    $(parentElementId).append(tags);
-    
-    this.select = $(`${parentElementId} select#${id}`);
+    this.select = $(selectElementSelector)
+    this.select.append(tags);
   }
   
   public setOnChange( f:(selected:string)=>void ) {
@@ -243,7 +241,9 @@ document.body.onload = function() {
   d3.json(url, (error: any, domains: Domains) => {
     var plot = new LinePlot('#plot', domains);
     var xKeys = domains.paramDomains.map((v:Domain,idx:number) => { return idx.toString(); });
-    var select = new Selector('#select_x', 'xkey', xKeys);
+    var select_x = new Selector('#select_x #xkey', xKeys);
+    var select_series = new Selector('#select_series #series_key', xKeys);
+    
     var sliders: Slider[] = [];
     for( var i=0; i < domains.numParams; i++) {
       var domain = domains.paramDomains[i];
@@ -258,7 +258,7 @@ document.body.onload = function() {
       }
       return point;
     }
-    select.setOnChange( (selected:string) => {
+    select_x.setOnChange( (selected:string) => {
       var xKey = Number(selected);
       for( var i=0; i < sliders.length; i++) {
         if( i == xKey ) { sliders[i].disable(); }
@@ -267,10 +267,19 @@ document.body.onload = function() {
       plot.build( xKey, 0 );
       plot.update( slidersToPoint() );
     });
+    select_series.setOnChange( (selected:string) => {
+      var xKey = Number(selected);
+      for( var i=0; i < sliders.length; i++) {
+        if( i == xKey ) { sliders[i].disable(); }
+        else { sliders[i].enable(); }
+      }
+      plot.build( xKey, 0 );
+      plot.update( slidersToPoint() );
+    })
     for( var i=0; i < sliders.length; i++ ) {
       sliders[i].setOnChange( (n:number) => { plot.update( slidersToPoint() ); } );
     }
 
-    select.Trigger();
+    select_x.Trigger();
   });
 }
