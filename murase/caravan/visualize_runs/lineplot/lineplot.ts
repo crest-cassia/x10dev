@@ -21,14 +21,6 @@ interface Domains {
   outputDomains: Domain[]; // size: numOutputs
 }
 
-function getMinPoint(domains: Domains): number[] {
-  var minPoint = new Array( domains.numParams );
-  for( var i=0; i < domains.numParams; i++) {
-    minPoint[i] = domains.paramDomains[i].min;
-  }
-  return minPoint;
-}
-
 class LinePlot {
 
   private svg: d3.Selection<any>;
@@ -66,16 +58,15 @@ class LinePlot {
       .style("text-anchor", "end")
       .text("Result");
 
+    this.svg.append("path").attr("id", "dataline").attr("class", "dataline");
+
     this.domains = domains;
   }
 
   public build(xKey: number, yKey: number) {
     this.xKey = xKey;
     this.yKey = yKey;
-
     this.buildAxis();
-    var path = this.svg.append("path").attr("id", "dataline").attr("class", "dataline");
-    this.update( getMinPoint(this.domains) );
   }
   
   private buildAxis() {
@@ -168,15 +159,16 @@ class Selector {
     this.select.append(tags);
   }
   
-  public setOnChange( f:(selected:string)=>void ) {
-    this.select.change( function() {
-      var selected = $(this).val();
-      f(selected);
-    });
+  public setOnChange( f: ()=>void ) {
+    this.select.change(f);
   }
   
   public Trigger() {
     this.select.trigger('change');
+  }
+  
+  public getVal(): number {
+    return Number( this.select.val() );
   }
 }
 
@@ -236,50 +228,67 @@ class Slider {
   }
 }
 
-document.body.onload = function() {
-  var url = '/domains';
-  d3.json(url, (error: any, domains: Domains) => {
-    var plot = new LinePlot('#plot', domains);
-    var xKeys = domains.paramDomains.map((v:Domain,idx:number) => { return idx.toString(); });
-    var select_x = new Selector('#select_x #xkey', xKeys);
-    var select_series = new Selector('#select_series #series_key', xKeys);
+class Manager {
+  private select_x: Selector;
+  private select_series: Selector;
+  private sliders: Slider[];
+  private plot: LinePlot;
+  private domains: Domains; 
+  
+  constructor(domains: Domains) {
+    this.domains = domains;
+    var x_keys = domains.paramDomains.map((v:Domain,idx:number) => { return idx.toString(); });
     
-    var sliders: Slider[] = [];
+    this.plot = new LinePlot('#plot', domains);
+    this.select_x = new Selector('#select_x #xkey', x_keys);
+    this.select_x.setOnChange( this.rebuildAxis );
+    this.select_series = new Selector('#select_series #series_key', x_keys);
+    this.select_series.setOnChange( this.rebuildAxis );
+    this.sliders = [];
     for( var i=0; i < domains.numParams; i++) {
       var domain = domains.paramDomains[i];
       var slider = new Slider('#sliders', `x${i}`, domain.min, domain.max);
-      sliders.push( slider );
+      slider.setOnChange( this.redrawPlot );
+      this.sliders.push( slider );
     }
+    
+    this.rebuildAxis();
+    this.redrawPlot();
+  }
+  
+  private getMinPoint(domains: Domains): number[] {
+    var minPoint = new Array( domains.numParams );
+    for( var i=0; i < domains.numParams; i++) {
+      minPoint[i] = domains.paramDomains[i].min;
+    }
+    return minPoint;
+  }
+  
+  private getCurrentPoint(): number[] {
+    var point: number[] = new Array( this.sliders.length );
+    for( var i=0; i < this.sliders.length; i++ ) {
+        point[i] = this.sliders[i].getVal();
+      }
+    return point;
+  }
+  
+  private rebuildAxis = () => {
+    var x_key = this.select_x.getVal();
+    this.plot.build( x_key, 0 );
+    for( var i=0; i < this.sliders.length; i++) {
+      if( i == x_key ) { this.sliders[i].disable(); }
+      else { this.sliders[i].enable(); }
+    }
+  }
+  
+  private redrawPlot = () => {
+    this.plot.update( this.getCurrentPoint() );    
+  }
+}
 
-    var slidersToPoint = ():number[] => {
-      var point: number[] = new Array( sliders.length );
-      for( var i=0; i < sliders.length; i++ ) {
-        point[i] = sliders[i].getVal();
-      }
-      return point;
-    }
-    select_x.setOnChange( (selected:string) => {
-      var xKey = Number(selected);
-      for( var i=0; i < sliders.length; i++) {
-        if( i == xKey ) { sliders[i].disable(); }
-        else { sliders[i].enable(); }
-      }
-      plot.build( xKey, 0 );
-      plot.update( slidersToPoint() );
-    });
-    select_series.setOnChange( (selected:string) => {
-      var xKey = Number(selected);
-      for( var i=0; i < sliders.length; i++) {
-        if( i == xKey ) { sliders[i].disable(); }
-        else { sliders[i].enable(); }
-      }
-      plot.build( xKey, 0 );
-      plot.update( slidersToPoint() );
-    })
-    for( var i=0; i < sliders.length; i++ ) {
-      sliders[i].setOnChange( (n:number) => { plot.update( slidersToPoint() ); } );
-    }
-
-    select_x.Trigger();
+document.body.onload = function() {
+  var url = '/domains';
+  d3.json(url, (error: any, domains: Domains) => {
+    var manager = new Manager( domains );
   });
 }
