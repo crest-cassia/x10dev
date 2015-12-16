@@ -19,7 +19,7 @@ runs.select! {|run| run["startAt"] > 0 }
 min_start_at = runs.map {|run| run["startAt"] }.min
 runs.each {|run| run["startAt"] = (run["startAt"] - min_start_at)/1000.0; run["finishAt"] = (run["finishAt"] - min_start_at)/1000.0 }
 
-def calc_fillting_rate(runs)
+def calc_filling_rate(runs)
   min_start_at = runs.map {|run| run["startAt"] }.min
   max_finish_at = runs.map {|run| run["finishAt"] }.max
   num_places = runs.uniq {|run| run["placeId"] }.size
@@ -64,7 +64,7 @@ end
 
 domains = calc_domains(parameter_sets, runs)
 
-$stderr.puts "filling_rate: #{calc_fillting_rate(runs)}"
+$stderr.puts "filling_rate: #{calc_filling_rate(runs)}"
 
 # example: /filter?x0=1&x1=2
 #  => list of parameter sets whose point is [1,2,...]
