@@ -20,12 +20,12 @@ public class Simulator {
   public static struct OutputParameters( duration: Double ) {
 
     static def loadJSON( json: JSON.Value ): OutputParameters {
-      val duration = json("duration").toDouble();
+      val duration = json(0).toDouble();
       return OutputParameters( duration );
     }
 
     public def toString(): String {
-      return "{ \"duration\": " + duration + " }";
+      return "[" + duration + "]";
     }
 
     public def normalize(): Rail[Double]{self.size==numOutputs} {

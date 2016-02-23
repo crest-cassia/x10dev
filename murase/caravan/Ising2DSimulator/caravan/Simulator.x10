@@ -24,12 +24,12 @@ public class Simulator {
   static struct OutputParameters( orderParameter: Double ) {
 
     static def loadJSON( json: JSON.Value ): OutputParameters {
-      val duration = json("orderParameter").toDouble();
-      return OutputParameters( duration );
+      val op = json(0).toDouble();
+      return OutputParameters( op );
     }
 
     public def toString(): String {
-      return "{ \"orderParameter\": " + orderParameter + " }";
+      return "[" + orderParameter + "]";
     }
 
     public def normalize(): Rail[Double]{self.size==numOutputs} {

@@ -24,12 +24,12 @@ public class Simulator {
   static struct OutputParameters( degree: Long ) {
 
     static def loadJSON( json: JSON.Value ): OutputParameters {
-      val duration = json("degree").toLong();
-      return OutputParameters( duration );
+      val degree = json(0).toLong();
+      return OutputParameters( degree );
     }
 
     public def toString(): String {
-      return "{ \"degree\": " + degree + " }";
+      return "[" + degree + "]";
     }
 
     public def normalize(): Rail[Double]{self.size==numOutputs} {

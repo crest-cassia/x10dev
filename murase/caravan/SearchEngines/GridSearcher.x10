@@ -15,6 +15,7 @@ public class GridSearcher implements SearchEngineI {
   }
 
   def d( o: Any ): void {
+    Console.ERR.println(o);
     // TODO: IMPLEMENT ME
   }
 
