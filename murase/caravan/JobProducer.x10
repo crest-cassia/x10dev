@@ -74,7 +74,10 @@ class JobProducer {
       run.storeResult( res.result, res.placeId, res.startAt, res.finishAt );
       val ps = run.parameterSet( m_tables );
       if( ps.isFinished( m_tables ) ) {
-        tasks = m_engine.onParameterSetFinished( m_tables, ps );
+        val local_tasks = m_engine.onParameterSetFinished( m_tables, ps );
+        for( task in local_tasks ) {
+          tasks.add( task );
+        }
       }
     }
     m_isLockResults.set(false);

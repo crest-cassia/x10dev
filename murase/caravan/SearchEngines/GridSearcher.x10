@@ -40,6 +40,7 @@ public class GridSearcher implements SearchEngineI {
         appendTask( tasks );
       }
     }
+    d("  onPSFinished#newTasks: " + newTasks );
     return newTasks;
   }
 
