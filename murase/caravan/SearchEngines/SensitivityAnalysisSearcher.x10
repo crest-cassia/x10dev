@@ -21,7 +21,6 @@ public class SensitivityAnalysisSearcher implements SearchEngineI {
     val input = new File("model_input.txt");
     for( line in input.lines() ) {
       // Console.ERR.println( "line: " + line );
-      if( line.length() == 0n ) { break; }
       val a: Rail[String]{self.size==Simulator.numParams} = line.split(" ") as Rail[String]{self.size==Simulator.numParams};
       val c: Rail[Long]{self.size==Simulator.numParams} = new Rail[Long]( a.size );
       RailUtils.map( a, c, (s:String) => Double.parse(s) as Long );
