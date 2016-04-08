@@ -1,9 +1,0 @@
-{	'first': 1,
-	'second': 2,
-	'third': [1,2,'c'],
-	'4th': {'one': { 'more': b.c.c },
-	        'two': { 'more': a.c.c }},
-	nullobj: { },
-	1  : [],  spaces  : 'a a a'    ,   123   : 123
-}
-
