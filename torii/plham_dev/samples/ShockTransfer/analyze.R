@@ -1,7 +1,7 @@
 
 args = commandArgs(T)
 if (length(args) < 1) {
-	cat("Usage: Rscript analyze.R DATAFILE\n");
+	cat("Usage: Rscript plot.R DATAFILE\n");
 	quit()
 }
 
@@ -10,4 +10,4 @@ datafile = args[1]
 data = read.table(datafile)
 colnames(data) = c('session', 't', 'market.id', 'market.name', 'price', 'fundam', 'index')
 
-cat('{', '"divergence":', sum((data$fundam - data$price)[data$market.name == 'SpotMarket-2']), '}')
+cat('{', '"divergence":', sum((data$price - data$fundam)[data$market.name == 'SpotMarket-2']), '}')
