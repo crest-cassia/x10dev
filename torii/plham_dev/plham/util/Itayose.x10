@@ -19,6 +19,7 @@ public class Itayose {
 		val sellUpdates = new ArrayList[AgentUpdate]();
 		var lastBuyPrice:Double = 0.0;
 		var lastSellPrice:Double = 0.0;
+		var sumExchangeVolume:Long = 0;
 		while (market.getBestBuyPrice() >= market.getBestSellPrice()) {
 			val buyOrder = market.buyOrderBook.getBestOrder();
 			val sellOrder = market.sellOrderBook.getBestOrder();
@@ -26,6 +27,7 @@ public class Itayose {
 			lastBuyPrice = buyOrder.getPrice();
 			lastSellPrice = sellOrder.getPrice();
 			val exchangeVolume = Math.min(buyOrder.getVolume(), sellOrder.getVolume());
+			sumExchangeVolume += exchangeVolume;
 
 			buyOrder.updateVolume(-exchangeVolume);
 			sellOrder.updateVolume(-exchangeVolume);
@@ -77,6 +79,7 @@ public class Itayose {
 		val t = market.getTime();
 		market.executedOrdersCounts(t) += buyUpdates.size();
 		market.lastExecutedPrices(t) = exchangePrice;
+		market.sumExecutedVolumes(t) = market.sumExecutedVolumes(t) + sumExchangeVolume;
 
 		Console.OUT.println("# Itayose exchangePrice " + exchangePrice);
 

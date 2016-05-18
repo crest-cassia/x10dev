@@ -154,7 +154,8 @@ public class Agent {
 	 * @param assetVolumeDelta  how much changed
 	 */
 	public def orderExecuted(market:Market, orderId:Long, price:Double, cashAmountDelta:Double, assetVolumeDelta:Long) {
-		Console.OUT.println("#Agent#orderExecuted: " + ["agent:" + this.id, "market: " + market.id, "order:" + orderId, "price:" + price]);
+		Console.OUT.println("#Agent#orderExecuted: " + ["agent:" + this.id, "market:" + market.id, "order:" + orderId,
+			"price:" + price, "cashAmountDelta:" + cashAmountDelta, "assetVolumeDelta:" + assetVolumeDelta]);
 	}
 
 	/**

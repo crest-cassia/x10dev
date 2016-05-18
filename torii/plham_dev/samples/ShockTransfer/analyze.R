@@ -1,7 +1,7 @@
 
 args = commandArgs(T)
 if (length(args) < 1) {
-	cat("Usage: Rscript plot.R DATAFILE\n");
+	cat("Usage: Rscript analyze.R DATAFILE\n");
 	quit()
 }
 

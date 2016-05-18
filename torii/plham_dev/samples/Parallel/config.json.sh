@@ -9,6 +9,9 @@ if [ $# -lt 1 ]; then
 fi
 
 N=${1:-10}
+ITERATION_STEPS=${ITERATION_STEPS:-500}
+MAX_HIFREQ_ORDERS=${MAX_HIFREQ_ORDERS:-1}
+ARB_ORDER_THRESHOLD=${ARB_ORDER_THRESHOLD:-1.0}
 
 SPOTMARKETS=
 for i in $(seq 1 $N); do
@@ -29,12 +32,12 @@ cat <<EOH
 		"agents": [${FCNAGENTS}, "FCNAgents-I", "ArbitrageAgents"],
 		"sessions": [
 			{	"sessionName": 1,
-				"iterationSteps": 500,
+				"iterationSteps": ${ITERATION_STEPS},
 				"withOrderPlacement": true,
 				"withOrderExecution": true,
 				"withPrint": true,
 				"maxNormalOrders": 10000000000, "MEMO": "EVERYONE",
-				"maxHifreqOrders": 1,
+				"maxHifreqOrders": ${MAX_HIFREQ_ORDERS},
 				"events": ["FundamentalPriceShock"]
 			}
 		]
@@ -122,7 +125,7 @@ cat <<EOH
 		"cashAmount": 150000,    "NOTE":"total",
 
 		"orderVolume": 1,
-		"orderThresholdPrice": 1.0
+		"orderThresholdPrice": ${ARB_ORDER_THRESHOLD}
 	}
 }
 EOH

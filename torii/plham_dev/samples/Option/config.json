@@ -1,0 +1,81 @@
+{
+	"simulation": {
+		"markets": ["UnderlyingMarket", "OptionMarketCluster"],
+		"agents": ["FCNAgents", "OptionAgents"],
+		"sessions": [
+			{	"sessionName": 0,
+				"iterationSteps": 10,
+				"withOrderPlacement": true,
+				"withOrderExecution": false,
+				"withPrint": true
+			},
+			{	"sessionName": 1,
+				"iterationSteps": 500,
+				"withOrderPlacement": true,
+				"withOrderExecution": true,
+				"withPrint": true
+			}
+		]
+	},
+
+	"UnderlyingMarket": {
+		"class": "Market",
+		"tickSize": 0.00001,
+		"marketPrice": 300.0,
+		"outstandingShares": 25000
+	},
+
+	"CallOptionMarket": {
+		"extends": "UnderlyingMarket",
+		"class": "OptionMarket",
+		"kind": "Call",
+		"markets": ["UnderlyingMarket"],
+		"strikePrice": 300.0,
+		"maturity": 100
+	},
+
+	"PutOptionMarket": {
+		"extends": "UnderlyingMarket",
+		"class": "OptionMarket",
+		"kind": "Put",
+		"markets": ["UnderlyingMarket"],
+		"strikePrice": 300.0,
+		"maturity": 100
+	},
+
+	"OptionMarketCluster": {
+		"class": "OptionMarketCluster",
+		"markets": ["UnderlyingMarket"],
+		"strikePrices": [280, 290, 300, 310, 320],
+		"maturityTimes": [100, 200, 300],
+		"marketPrice": 300, "MEMO": "UNUSED",
+		"outstandingShares": 1
+	},
+
+	"FCNAgents": {
+		"class": "FCNAgent",
+		"numAgents": 100,
+
+		"MEMO": "Agent class",
+		"markets": ["UnderlyingMarket", "OptionMarketCluster"],
+		"assetVolume": 2,
+		"cashAmount": 10,
+
+		"MEMO": "FCNAgent class",
+		"fundamentalWeight": {"expon": [1.0]},
+		"chartWeight": {"expon": [0.0]},
+		"noiseWeight": {"expon": [1.0]},
+		"noiseScale": 0.001,
+		"timeWindowSize": [100, 200],
+		"orderMargin": [0.0, 0.1]
+	},
+
+	"OptionAgents": {
+		"class": "OptionAgent",
+		"numAgents": 10,
+
+		"underlyingMarket": "UnderlyingMarket",
+
+		"markets": ["UnderlyingMarket"]
+	}
+}
