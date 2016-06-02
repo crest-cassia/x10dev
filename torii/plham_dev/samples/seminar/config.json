@@ -35,9 +35,9 @@
 		"cashAmount": 10000,
 
 		"MEMO": "FCNAgent class",
-		"fundamentalWeight": {"expon": [%F%]},
-		"chartWeight": {"expon": [%C%]},
-		"noiseWeight": {"expon": [%N%]},
+		"fundamentalWeight": {"expon": [1]},
+		"chartWeight": {"expon": [1]},
+		"noiseWeight": {"expon": [1]},
 		"noiseScale": 0.001,
 		"timeWindowSize": [100, 500],
 		"orderMargin": [0.0, 0.1],
