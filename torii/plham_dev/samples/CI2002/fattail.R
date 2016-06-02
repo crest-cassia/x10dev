@@ -1,0 +1,28 @@
+
+args = commandArgs(T)
+if (length(args) < 2) {
+	cat("Usage: Rscript fattail.R DATAFILE OUTFILE.png\n");
+	quit()
+}
+
+datafile = args[1]
+pngfile = args[2]
+
+data = read.table(datafile)
+colnames(data) = c('session', 't', 'market.id', 'market.name', 'price', 'fundam')
+
+data = data[data$session == 1,]
+
+p = data$price
+p = tail(p, -10000)  # Remove initial
+p = rle(p)$values    # Remove unchanged
+r = diff(log(p), lag=1)
+
+rmax = max(abs(range(r)))
+x = c(seq(-rmax, rmax, by=sd(r)/2), rmax)
+h = hist(r, breaks=x, plot=F)
+g = dnorm(x, 0, sd(r))
+
+png(pngfile, width=640, height=480)
+plot(h$mids / sd(r), log(h$density), xlim=c(-10, 10), col='red', xlab='Return / sd(Return)', ylab='log(Density)')
+lines(x / sd(r), log(g))

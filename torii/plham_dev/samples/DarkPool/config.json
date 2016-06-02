@@ -51,6 +51,6 @@
 		"orderMargin": [0.0, 0.1],
 
 		"MEMO": "DarkPoolFCNAgent class",
-		"darkPoolChance": 0.9
+		"darkPoolChance": 0.3
 	}
 }
